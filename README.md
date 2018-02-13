@@ -28,7 +28,7 @@ Install
 -------
 ```
 # clone this repo
-git clone https://
+git clone https://github.com/ReinerNippes/nextcloud13.git
 
 # change to nextcloud directory
 cd nextcloud
@@ -51,10 +51,10 @@ All variables are defined in inventory.
 ```
 # 
 # Your domain name to get a letsencrypt certificate
-fqdn       = nc.nippes.it
+fqdn       = example.org
 
 # Your email adresse for letsencrypt
-cert_email = reiner@nippes.it
+cert_email = certbot@example.com
 
 # Your dns resolver (nginx reverse ip lookup)
 # e.g. your fritz.box ; default ist google dns server 8.8.8.8
@@ -84,5 +84,5 @@ next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 License
 -------
 
-GPL
+MIT
 
