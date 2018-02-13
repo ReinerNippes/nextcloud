@@ -11,12 +11,13 @@ Ansible Playbook to install
 
 In less than 20 minutes.
 
-All settings are recommentations from C. Rieger
+All settings are recommentations from C. Rieger.
 Visit his page for all details: https://www.c-rieger.de/nextcloud-13-installation-guide
 
 Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu machines.
 
-This playbook is yet not fully idempotent and will fail during the inital setup of Nextcloud when you run it twice. Will be fixed in a future release.
+This playbook is yet not fully funtcional yet. After a first run nextcloud is install and ready for setup through the web ui.
+But if your run the playbook twice nextcloud is also configured with the parameter in the inventory. This should be fixed in future.
 
 Requirements
 ------------
