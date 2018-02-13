@@ -1,0 +1,38 @@
+[nextcloud]
+localhost
+
+[nextcloud:vars]
+connection=local
+
+# 
+# Your domain name to get a letsencrypt certificate
+fqdn       = nc.example.org
+
+# Your email adresse for letsencrypt
+cert_email = nc@example.org
+
+# receive a certificate from from staging
+# uncomment if you want to use letsencrypt staging environment
+# cert_stage = '--staging'
+
+# Your dns resolver (nginx reverse ip lookup)
+# e.g. your fritz.box ; default ist google dns server 8.8.8.8
+nginx_resolver = '8.8.8.8'
+
+# Nextcloud varibales
+
+# data dir
+nc_datadir = /var/nc-data
+
+# admin user
+nc_admin   = 'admin'
+nc_passwd  = 'tOpSecrET2018'
+
+# database
+nc_db         = 'nextcloud'
+nc_db_user    = 'nextcloud'
+nc_db_passwd  = 'next12345'
+nc_db_prefix  = 'oc_'
+
+#Allways get the latest version of Nextcloud
+next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
