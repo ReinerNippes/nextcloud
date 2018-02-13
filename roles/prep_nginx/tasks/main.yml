@@ -1,0 +1,50 @@
+---
+# tasks file for prep_nginx
+
+- name: bring /etc/nginx/nginx.conf in place
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  notify: restart nginx
+
+- name: nextcloud nginx config
+  template:
+    src: nextcloud.conf.j2
+    dest: /etc/nginx/conf.d/nextcloud.conf
+  notify: restart nginx
+
+- name: nginx config for ssl
+  template:
+    src: ssl.conf.j2
+    dest: /etc/nginx/ssl.conf
+  notify: restart nginx
+
+- name: copy some nginx config file
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/nginx/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  with_items:
+    - header.conf
+    - optimization.conf
+    - php_optimization.conf
+    - proxy.conf
+  notify: restart nginx
+
+- name: copy letencrypt.conf
+  copy:
+    src: letsencrypt.conf
+    dest: /etc/nginx/conf.d/letsencrypt.conf
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  notify: restart nginx
+

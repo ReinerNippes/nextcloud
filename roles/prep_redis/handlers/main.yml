@@ -1,0 +1,7 @@
+---
+# handlers file for prep_redis
+
+- name: restart redis-server
+  systemd:
+    name: redis
+    state: restarted

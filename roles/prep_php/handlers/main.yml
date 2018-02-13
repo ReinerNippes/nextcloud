@@ -1,0 +1,7 @@
+---
+# handlers file for prep_php
+
+- name: restart php7.2-fpm
+  systemd:
+    name: php7.2-fpm
+    state: restarted

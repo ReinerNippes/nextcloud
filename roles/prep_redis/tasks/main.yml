@@ -1,0 +1,24 @@
+---
+# tasks file for prep_redis
+
+- name: configure redis
+  copy:
+    src: redis.conf
+    dest: /etc/redis/redis.conf
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  notify: restart redis-server
+  
+- name: add user www-data to group redis
+  user:
+   name: www-data
+   groups: redis
+
+- name: start and enable redis
+  systemd:
+    name: redis
+    state: started
+    enabled: true
+

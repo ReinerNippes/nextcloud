@@ -1,0 +1,36 @@
+---
+# tasks file for prep_mariadb
+
+- name: configure mariadb
+  copy:
+    src: my.cnf
+    dest: /etc/mysql/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart mariadb
+
+- name: remove anonymous user
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+
+- name: create nextcloud db
+  mysql_db:
+    name: "{{ nc_db }}"
+    collation: utf8mb4_general_ci
+    encoding: utf8mb4
+
+- name: create nextcloud user
+  mysql_user:
+    name:     "{{ nc_db_user }}"
+    password: "{{ nc_db_passwd }}"
+    priv:     "nextcloud.*:ALL"
+    state: present
+
+- name: start and enable mariadb
+  systemd:
+    name: mysql
+    state: started
+    enabled: true

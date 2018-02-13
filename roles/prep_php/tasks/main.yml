@@ -1,0 +1,23 @@
+---
+# tasks file for prep_php
+
+- name: configure php
+  copy:
+    src: "{{ item.file }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  with_items:
+    - { file: 'fpm.php.ini', dest: '/etc/php/7.2/fpm/php.ini' }
+    - { file: 'cli.php.ini', dest: '/etc/php/7.2/cli/php.ini' }
+    - { file: 'www.conf', dest: '/etc/php/7.2/fpm/pool.d/www.conf' }
+    - { file: 'php-fpm.conf', dest: '/etc/php/7.2/fpm/php-fpm.conf' }
+  notify: restart php7.2-fpm
+  
+- name: enable php-fpm
+  systemd:
+    name: php7.2-fpm
+    state: started
+    enabled: true

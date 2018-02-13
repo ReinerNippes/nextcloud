@@ -1,0 +1,47 @@
+---
+# tasks file for prep_nextcloud
+
+  - name: install nextcloud
+    unarchive: 
+      src: "{{ next_tgz }}"
+      dest: /var/www
+      remote_src: true
+      creates: /var/www/nextcloud/occ
+
+  - name: flush all handlers to restart server
+    meta: flush_handlers
+
+  - name: first setup nextcloud
+    shell: |
+      sudo -u www-data php occ  maintenance:install --database mysql --database-host localhost --database-name {{ nc_db }} --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} --database-pass {{ nc_db_passwd }} --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} --data-dir {{ nc_datadir }}
+    args:
+      chdir: /var/www/nextcloud/
+    notify:
+      - restart nginx
+      - restart mariadb
+      - restart php7.2-fpm
+      - restart redis-server
+
+  - name: second setup nextcloud
+    shell: |
+      sudo -u www-data php occ config:system:set overwrite.cli.url --value=https://{{ fqdn }}
+      sudo -u www-data php occ config:system:set trusted_domains 1 --value={{ fqdn }}
+      sudo -u www-data php occ config:system:set memcache.local --value=\\OC\\Memcache\\APCu
+      sudo -u www-data php occ config:system:set filelocking.enabled  --value=true
+      sudo -u www-data php occ config:system:set memcache.locking  --value=\\OC\\Memcache\\Redis
+      sudo -u www-data php occ config:system:set redis host --value=/var/run/redis/redis.sock
+      sudo -u www-data php occ config:system:set redis port --value=0
+      sudo -u www-data php occ config:system:set redis timeout --value=0.0
+    args:
+      chdir: /var/www/nextcloud/ 
+    notify: 
+      - restart nginx
+      - restart mariadb
+      - restart php7.2-fpm
+      - restart redis-server
+
+  - name: set permissions
+    script: permissions.sh
+    environment:
+      FQDN:       "{{ fqdn }}"
+      NC_DATADIR: "{{ nc_datadir }}"

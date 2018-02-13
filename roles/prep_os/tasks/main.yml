@@ -1,0 +1,68 @@
+---
+# tasks file for prep_os
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
+
+- name: create some folders
+  file:
+    name: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { path: '{{ nc_datadir }}', owner: 'www-data', group: 'www-data', mode: '0750' }
+    - { path: '/var/www', owner: 'www-data', group: 'www-data', mode: '0750' }
+    - { path: '/var/www/letsencrypt', owner: 'www-data', group: 'www-data', mode: '0750' }
+    - { path: '/upload_tmp', owner: 'www-data', group: 'www-data', mode: '0755' }
+    - { path: '/usr/local/tmp/sessions', owner: 'www-data', group: 'root', mode: '0755' }
+    - { path: '/usr/local/tmp/cache', owner: 'www-data', group: 'root', mode: '0755' }
+
+- name: mount tmp fs
+  mount:
+    src: "tmpfs"
+    path: "{{ item }}"
+    fstype: tmpfs
+    opts: "defaults,noatime,nosuid,nodev,noexec,mode=1777"
+    passno: 0
+    state: present
+  with_items:
+    - /tmp
+    - /var/tmp
+    - /usr/local/tmp/cache
+    - /usr/local/tmp/sessions
+
+- name: sysctl vm.overcommit_memory=1
+  sysctl: 
+    name: vm.overcommit_memory
+    value: 1
+    state: present
+    reload: true
+    sysctl_file: /etc/sysctl.conf
+
+- name: sysctl -w net.core.somaxconn=65535
+  sysctl:
+    name: net.core.somaxconn
+    value: 65535
+    state: present
+    reload: true
+    sysctl_file: /etc/sysctl.conf
+
+- name: configure /etc/rc.local
+  lineinfile:
+    name: /etc/rc.local
+    regexp: 'sysctl -w net.core.somaxconn=(.*)'
+    line: 'sysctl -w net.core.somaxconn=65535'
+    insertbefore: 'exit 0'
+  when: false
+
+
+- name: disable transparent hugepages
+  shell: "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+
+- name: configure /etc/rc.local
+  lineinfile:
+    name: /etc/rc.local
+    regexp: 'echo never > /sys/kernel/mm/transparent_hugepage/enabled'
+    line: 'echo never > /sys/kernel/mm/transparent_hugepage/enabled'
+    insertbefore: 'exit 0'  
