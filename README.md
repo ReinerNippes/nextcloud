@@ -51,10 +51,10 @@ All variables are defined in inventory.
 ```
 # 
 # Your domain name to get a letsencrypt certificate
-fqdn       = example.org
+fqdn       = nc.example.org
 
 # Your email adresse for letsencrypt
-cert_email = certbot@example.com
+cert_email = nc@example.com
 
 # Your dns resolver (nginx reverse ip lookup)
 # e.g. your fritz.box ; default ist google dns server 8.8.8.8
