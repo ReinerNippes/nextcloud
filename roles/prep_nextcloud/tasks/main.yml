@@ -8,6 +8,12 @@
       remote_src: true
       creates: /var/www/nextcloud/occ
 
+  - name: set permissions
+    script: permissions.sh
+    environment:
+      FQDN:       "{{ fqdn }}"
+      NC_DATADIR: "{{ nc_datadir }}"
+
   - name: flush all handlers to restart server
     meta: flush_handlers
 
@@ -40,8 +46,20 @@
       - restart php7.2-fpm
       - restart redis-server
 
-  - name: set permissions
-    script: permissions.sh
-    environment:
-      FQDN:       "{{ fqdn }}"
-      NC_DATADIR: "{{ nc_datadir }}"
+  - name: .user.ini settings
+    lineinfile:
+      name: /var/www/nextcloud/.user.ini
+      regexp: "{{ item.regexp }}"
+      line:   "{{ item.line }}"
+      state: present
+    with_items:
+      - { regexp: "upload_max_filesize=(.*)", line: "upload_max_filesize=10240M" }
+      - { regexp: "post_max_size=(.*)", line: "post_max_size=10240M" }
+      - { regexp: "output_buffering=(.*)", line: "output_buffering='Off'" }
+      
+  - name: nextcloud cronjob
+    cron:
+      name: yum autoupdate
+      minute: '*/15'
+      user: www-data
+      job: "php -f /var/www/nextcloud/cron.php > /dev/null 2>&1"
