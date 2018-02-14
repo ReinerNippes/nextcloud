@@ -16,9 +16,6 @@ Visit his page for all details: https://www.c-rieger.de/nextcloud-13-installatio
 
 Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu machines.
 
-This playbook is yet not fully funtcional yet. After a first run nextcloud is install and ready for setup through the web ui.
-But if your run the playbook twice nextcloud is also configured with the parameter in the inventory. This should be fixed in future.
-
 Requirements
 ------------
 
