@@ -72,4 +72,6 @@
     - php-imagick
     - php-smb
     - php-redis
+    - imagemagick 
+    - php-imagick
 

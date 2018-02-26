@@ -13,6 +13,5 @@
     - prep_nginx
     - prep_letsencrypt
     - prep_nextcloud
-
-  tasks:
+    - nc_fail2ban
 
