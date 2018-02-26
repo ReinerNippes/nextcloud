@@ -19,6 +19,20 @@ cert_email = nc@example.org
 # e.g. your fritz.box ; default ist google dns server 8.8.8.8
 nginx_resolver = '8.8.8.8'
 
+# Nextcloud mail setup
+nc_configure_mail = true
+nc_mail_from         = 
+nc_mail_smtpmode     = smtp
+nc_mail_smtpauthtype = LOGIN
+nc_mail_domain       =
+nc_mail_smtpname     =
+nc_mail_smtpsecure   = tls
+nc_mail_smtpauth     = 1
+nc_mail_smtphost     =
+nc_mail_smtpport     = 587
+nc_mail_smtpname     =
+nc_mail_smtppwd      = 
+
 # Nextcloud varibales
 
 # data dir
