@@ -19,32 +19,43 @@
 
   - name: first setup nextcloud
     shell: |
-      sudo -u www-data php occ  maintenance:install --database mysql --database-host localhost --database-name {{ nc_db }} --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} --database-pass {{ nc_db_passwd }} --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} --data-dir {{ nc_datadir }}
+      sudo -u www-data php occ  maintenance:install \
+      --database mysql --database-host localhost --database-name {{ nc_db }} \
+      --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} \
+      --database-pass {{ nc_db_passwd }} --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} \
+      --data-dir {{ nc_datadir }}
     args:
       chdir: /var/www/nextcloud/
-    notify:
-      - restart nginx
-      - restart mariadb
-      - restart php7.2-fpm
-      - restart redis-server
+      creates: /var/www/nextcloud/config/config.php
+    register: setup_nc
 
-  - name: second setup nextcloud
-    shell: |
-      sudo -u www-data php occ config:system:set overwrite.cli.url --value=https://{{ fqdn }}
-      sudo -u www-data php occ config:system:set trusted_domains 1 --value={{ fqdn }}
-      sudo -u www-data php occ config:system:set memcache.local --value=\\OC\\Memcache\\APCu
-      sudo -u www-data php occ config:system:set filelocking.enabled  --value=true
-      sudo -u www-data php occ config:system:set memcache.locking  --value=\\OC\\Memcache\\Redis
-      sudo -u www-data php occ config:system:set redis host --value=/var/run/redis/redis.sock
-      sudo -u www-data php occ config:system:set redis port --value=0
-      sudo -u www-data php occ config:system:set redis timeout --value=0.0
+  - debug: var=setup_nc verbosity=2
+  
+  - name: set nextcloud domain config.php values
+    shell: sudo -u www-data php occ config:system:set {{ item.key }} {{ item.value }}
     args:
-      chdir: /var/www/nextcloud/ 
-    notify: 
-      - restart nginx
-      - restart mariadb
-      - restart php7.2-fpm
-      - restart redis-server
+      chdir: /var/www/nextcloud/
+    with_items: "{{ nc_config }}"
+
+  - name: set nextcloud mail config.php values
+    shell: sudo -u www-data php occ config:system:set {{ item.key }} {{ item.value }}
+    args:
+      chdir: /var/www/nextcloud/
+    with_items: "{{ nc_mail_config }}"
+    when: nc_configure_mail
+
+  - name: set default config
+    shell: sudo -u www-data php occ config:import {{ role_path }}/defaults/config.json
+    args:
+      chdir: /var/www/nextcloud/
+    register: setup_nc
+
+  - debug: var=setup_nc verbosity=2
+
+  - name: enable cron as backup jobs
+    shell: sudo -u www-data php occ background:cron
+    args:
+      chdir: /var/www/nextcloud/
 
   - name: .user.ini settings
     lineinfile:
@@ -59,7 +70,8 @@
       
   - name: nextcloud cronjob
     cron:
-      name: yum autoupdate
+      name: nextcloud cronjob
       minute: '*/15'
       user: www-data
       job: "php -f /var/www/nextcloud/cron.php > /dev/null 2>&1"
+  

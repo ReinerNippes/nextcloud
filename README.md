@@ -11,10 +11,12 @@ Ansible Playbook to install
 
 In less than 20 minutes.
 
-All settings are recommentations from C. Rieger.
+All settings are recommentations from C. Rieger
 Visit his page for all details: https://www.c-rieger.de/nextcloud-13-installation-guide
 
 Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu machines.
+
+This playbook is yet not fully idempotent and will fail during the inital setup of Nextcloud when you run it twice. Will be fixed in a future release.
 
 Requirements
 ------------
@@ -26,10 +28,10 @@ Install
 -------
 ```
 # clone this repo
-git clone https://github.com/ReinerNippes/nextcloud13.git
+git clone https://github.com/ReinerNippes/nextcloud13
 
 # change to nextcloud directory
-cd nextcloud
+cd nextcloud13
 
 # install ansible and python-mysql
 sh ./install.sh
@@ -52,7 +54,11 @@ All variables are defined in inventory.
 fqdn       = nc.example.org
 
 # Your email adresse for letsencrypt
-cert_email = nc@example.com
+cert_email = nc@example.org
+
+# receive a certificate from from staging
+# uncomment if you want to use letsencrypt staging environment
+# cert_stage = '--staging'
 
 # Your dns resolver (nginx reverse ip lookup)
 # e.g. your fritz.box ; default ist google dns server 8.8.8.8
@@ -73,14 +79,22 @@ nc_db_user    = 'nextcloud'
 nc_db_passwd  = 'next12345'
 nc_db_prefix  = 'oc_'
 
+# Nextcloud mail setup
+nc_configure_mail = true
+nc_mail_from         =
+nc_mail_smtpmode     = smtp
+nc_mail_smtpauthtype = LOGIN
+nc_mail_domain       =
+nc_mail_smtpname     =
+nc_mail_smtpsecure   = tls
+nc_mail_smtpauth     = 1
+nc_mail_smtphost     =
+nc_mail_smtpport     = 587
+nc_mail_smtpname     =
+nc_mail_smtppwd      =
+
 #Allways get the latest version of Nextcloud
 next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
 ```
-
-
-License
--------
-
-MIT
 
