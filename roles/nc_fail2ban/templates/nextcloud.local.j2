@@ -1,0 +1,10 @@
+[nextcloud]
+backend = auto
+enabled = true
+port = 80,443
+protocol = tcp
+filter = nextcloud
+maxretry = 3
+bantime = 36000
+findtime = 36000
+logpath = {{ nc_datadir }}/nextcloud.log
