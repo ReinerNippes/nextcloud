@@ -1,27 +1,30 @@
 ---
 # tasks file for prep_letsencrypt
 
-  - name: create openssl dhparam (this may take a while)
-    shell: "openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096"
-    args:
-      creates: /etc/ssl/certs/dhparam.pem
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
 
-  - name: ensure nginx is restart nginx
-    systemd:
-      name: nginx
-      state: restarted
-      enabled: true
+- name: create openssl dhparam (this may take a while)
+  shell: "openssl dhparam -out /etc/ssl/certs/dhparam.pem {{ dhparam_numbits }}"
+  args:
+    creates: /etc/ssl/certs/dhparam.pem
 
-  - name: install letsencrypt certificates
-    shell: "certbot --authenticator webroot --webroot-path=/var/www/letsencrypt --installer nginx --email {{ cert_email }} --non-interactive --domain {{ fqdn }} --agree-tos {{ cert_stage|default('') }}"
-    args:
-      creates: /etc/letsencrypt/live/{{ fqdn }}/cert.pem
+- name: ensure nginx is restart nginx
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: true
 
-  - name: enable ssl
-    replace:
-      name: /etc/nginx/ssl.conf
-      regexp: '^#ssl'
-      replace: 'ssl'
-      backup: true
-    notify: 
-      - restart nginx
+- name: install letsencrypt certificates
+  shell: "certbot --authenticator webroot --webroot-path=/var/www/letsencrypt --installer nginx --email {{ cert_email }} --non-interactive --domain {{ fqdn }} --agree-tos {{ cert_stage|default('') }}"
+  args:
+    creates: /etc/letsencrypt/live/{{ fqdn }}/cert.pem
+
+- name: enable ssl
+  replace:
+    name: /etc/nginx/ssl.conf
+    regexp: '^#ssl'
+    replace: 'ssl'
+    backup: true
+  notify: 
+    - restart nginx

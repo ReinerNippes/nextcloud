@@ -1,6 +1,9 @@
 ---
 # tasks file for prep_php
 
+- name: os spefic path
+  include_tasks: "{{ ansible_distribution }}.yml"
+
 - name: configure php
   copy:
     src: "{{ item.file }}"
@@ -10,14 +13,13 @@
     mode: 0644
     force: true
   with_items:
-    - { file: 'fpm.php.ini', dest: '/etc/php/7.2/fpm/php.ini' }
-    - { file: 'cli.php.ini', dest: '/etc/php/7.2/cli/php.ini' }
-    - { file: 'www.conf', dest: '/etc/php/7.2/fpm/pool.d/www.conf' }
-    - { file: 'php-fpm.conf', dest: '/etc/php/7.2/fpm/php-fpm.conf' }
-  notify: restart php7.2-fpm
-  
+    - { file: '{{ ansible_distribution }}/fpm.php.ini',  dest: '{{ php_fpm_conf_dir[ansible_distribution] }}/php.ini' }
+    - { file: '{{ ansible_distribution }}/www.conf',     dest: '{{ php_www_conf_dir[ansible_distribution] }}/www.conf' }
+    - { file: '{{ ansible_distribution }}/php-fpm.conf', dest: '{{ php_fpm_conf_dir[ansible_distribution] }}/php-fpm.conf' }
+  notify: restart php-fpm
+
 - name: enable php-fpm
   systemd:
-    name: php7.2-fpm
+    name: "{{ php_service_name[ansible_distribution] }}"
     state: started
     enabled: true

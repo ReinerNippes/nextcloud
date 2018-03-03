@@ -6,22 +6,23 @@ Ansible Playbook to install
 * Nextcloud 13
 * nginx
 * PHP 7.2
-* MariaDB
+* MariaDB 10
 * redis
 
 In less than 20 minutes.
 
-All settings are recommentations from C. Rieger
+Most of Ubuntu settings are recommentations from C. Rieger
 Visit his page for all details: https://www.c-rieger.de/nextcloud-13-installation-guide
 
-Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu machines.
+Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu and CentOS machines.
 
 This playbook is yet not fully idempotent and will fail during the inital setup of Nextcloud when you run it twice. Will be fixed in a future release.
 
 Requirements
 ------------
 
-Ubuntu 16.04 
+Ubuntu 16.04 or CentOS 7
+
 Not yet tested with other versions and flavours of Linux.
 
 Install
@@ -34,7 +35,9 @@ git clone https://github.com/ReinerNippes/nextcloud13
 cd nextcloud13
 
 # install ansible and python-mysql
-sh ./install.sh
+sh ./install-ubuntu.sh 
+or
+sh ./install-centos7.sh
 
 # edit variables
 vim inventory

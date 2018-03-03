@@ -1,2 +1,11 @@
 ---
 # vars file for prep_redis
+
+redis_conf_path:
+  'CentOS': '/etc'
+  'Ubuntu': '/etc/redis'
+  
+web_user:
+  'CentOS': 'nginx'
+  'Ubuntu': 'www-data'
+  

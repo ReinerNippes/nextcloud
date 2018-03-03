@@ -1,0 +1,32 @@
+---
+# Ubuntu related OS tasks
+
+- name: add nginx key
+  apt_key:
+    url: https://nginx.org/keys/nginx_signing.key
+    state: present
+
+- name: add additional repos
+  apt_repository:
+    repo: 'deb http://nginx.org/packages/mainline/ubuntu/ {{ ansible_distribution_release }} nginx'
+    validate_certs: true
+    update_cache: true
+    state: present
+
+- name: remove standard nginx
+  apt:
+    name: "{{ item }}"
+    state: absent
+#    dpkg_options: 'allow-change-held-packages'
+  with_items:
+#    - nginx
+    - nginx-common
+    - nginx-full
+
+- name: install additional packages
+  apt:
+    name: "{{ item }}"
+    autoremove: true
+    state: latest
+  with_items:
+    - nginx

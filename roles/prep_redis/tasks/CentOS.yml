@@ -1,0 +1,9 @@
+---
+
+# CentOS related tasks
+
+- name: install needed packages
+  yum:
+    name: redis
+    state: latest
+    enablerepo: epel 

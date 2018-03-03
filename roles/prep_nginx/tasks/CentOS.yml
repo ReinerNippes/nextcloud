@@ -1,0 +1,29 @@
+---
+
+# CentOS related tasks
+#
+- name: add nginx yum repos
+  yum_repository:
+    name: nginx
+    description: NGINX YUM repo
+    baseurl: http://nginx.org/packages/mainline/centos/{{ ansible_distribution_major_version|int }}/$basearch/
+    gpgkey: https://nginx.org/keys/nginx_signing.key
+    gpgcheck: yes
+    enabled: 0
+
+- name: install needed packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+    enablerepo: nginx
+  with_items:
+    - nginx
+
+- name: open firewall ports 80/443
+  firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+  with_items:
+    - http
+    - https
