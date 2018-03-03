@@ -3,7 +3,7 @@
 
   - name: install nextcloud
     unarchive: 
-      src: "{{ next_tgz }}"
+      src: "{{ next_archive }}"
       dest: /var/www
       remote_src: true
       creates: /var/www/nextcloud/occ
@@ -13,13 +13,45 @@
     environment:
       FQDN:       "{{ fqdn }}"
       NC_DATADIR: "{{ nc_datadir }}"
+      WEB_USER:   "{{ web_user[ansible_distribution] }}"
+      WEB_GROUP:  "{{ web_group[ansible_distribution] }}"
+
+  - name: selinux targets
+    sefcontext:
+      target: "{{ item }}"
+      setype: httpd_sys_rw_content_t
+      state: present
+    with_items: 
+      - '{{ nc_datadir }}(/.)?'
+      - '/var/www/nextcloud/config(/.)?'
+      - '/var/www/nextcloud/apps(/.)?'
+      - '/var/www/nextcloud/assets(/.)?'
+      - '/var/www/nextcloud/.htaccess'
+      - '/var/www/nextcloud/.user.ini'
+    when: ansible_os_family == "RedHat"
+
+  - name: enable sendmail 
+    seboolean:
+      name: httpd_can_sendmail on
+      state: yes
+      persistent: yes
+    when: false # ansible_os_family == "RedHat"
+
+  - name: restorecon 
+    command: restorecon -Rv '/var/www/nextcloud/'
+    when: ansible_os_family == "RedHat"
+
+  # Disable SELinux
+  - selinux:
+      state: disabled
+    when: ansible_os_family == "RedHat"
 
   - name: flush all handlers to restart server
     meta: flush_handlers
 
   - name: first setup nextcloud
     shell: |
-      sudo -u www-data php occ  maintenance:install \
+      sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install \
       --database mysql --database-host localhost --database-name {{ nc_db }} \
       --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} \
       --database-pass {{ nc_db_passwd }} --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} \
@@ -32,20 +64,20 @@
   - debug: var=setup_nc verbosity=2
   
   - name: set nextcloud domain config.php values
-    shell: sudo -u www-data php occ config:system:set {{ item.key }} {{ item.value }}
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:system:set {{ item.key }} {{ item.value }}
     args:
       chdir: /var/www/nextcloud/
     with_items: "{{ nc_config }}"
 
   - name: set nextcloud mail config.php values
-    shell: sudo -u www-data php occ config:system:set {{ item.key }} {{ item.value }}
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:system:set {{ item.key }} {{ item.value }}
     args:
       chdir: /var/www/nextcloud/
     with_items: "{{ nc_mail_config }}"
     when: nc_configure_mail
 
   - name: set default config
-    shell: sudo -u www-data php occ config:import {{ role_path }}/defaults/config.json
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:import {{ role_path }}/defaults/config.json
     args:
       chdir: /var/www/nextcloud/
     register: setup_nc
@@ -53,7 +85,7 @@
   - debug: var=setup_nc verbosity=2
 
   - name: enable cron as backup jobs
-    shell: sudo -u www-data php occ background:cron
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ background:cron
     args:
       chdir: /var/www/nextcloud/
 
@@ -72,6 +104,6 @@
     cron:
       name: nextcloud cronjob
       minute: '*/15'
-      user: www-data
+      user: "{{ web_user[ansible_distribution] }}"
       job: "php -f /var/www/nextcloud/cron.php > /dev/null 2>&1"
   

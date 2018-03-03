@@ -1,6 +1,9 @@
 ---
 # tasks file for nc_fail2ban
 
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
+
 - name: configure fail2ban
   copy:
     src: nextcloud.conf

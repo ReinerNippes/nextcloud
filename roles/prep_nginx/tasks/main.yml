@@ -1,6 +1,24 @@
 ---
 # tasks file for prep_nginx
 
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
+
+- name: create some folders
+  file:
+    name: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { path: '{{ nc_datadir }}',        owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0750' }
+    - { path: '/var/www',                owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0750' }
+    - { path: '/var/www/letsencrypt',    owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0750' }
+    - { path: '/upload_tmp',             owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0755' }
+    - { path: '/usr/local/tmp/sessions', owner: '{{ web_user[ansible_distribution] }}', group: 'root',            mode: '0755' }
+    - { path: '/usr/local/tmp/cache',    owner: '{{ web_user[ansible_distribution] }}', group: 'root',            mode: '0755' }
+
 - name: bring /etc/nginx/nginx.conf in place
   template:
     src: nginx.conf.j2

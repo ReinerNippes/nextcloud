@@ -1,4 +1,4 @@
-user www-data;
+user {{ web_user[ansible_distribution] }};
 worker_processes auto;
 error_log /var/log/nginx/error.log warn;
 pid /var/run/nginx.pid;
@@ -11,7 +11,7 @@ events {
 http {
 		server_names_hash_bucket_size 64;
 		upstream php-handler {
-			server unix:/run/php/php7.2-fpm.sock;
+			server unix:{{ php_socket[ansible_distribution] }};
 		}
 		include /etc/nginx/mime.types;
 		include /etc/nginx/proxy.conf;

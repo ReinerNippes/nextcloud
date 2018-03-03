@@ -1,40 +1,6 @@
 ---
 # Ubuntu related OS tasks
 
-- name: add nginx key
-  apt_key:
-    url: https://nginx.org/keys/nginx_signing.key
-    state: present
-
-- name: Add an apt key by id from a keyserver
-  apt_key:
-    keyserver: keyserver.ubuntu.com
-    id: "{{ item }}"
-  with_items:
-    - 7BF576066ADA65728FC7E70A8C47BE8E75BCA694
-    - 14AA40EC0831756756D7F66C4F4EA0AAE5267A6C
-
-- name: add additional repos
-  apt_repository:
-    repo: "{{ item }}"
-    validate_certs: true
-    update_cache: true
-    state: present
-  with_items:
-    - 'deb http://nginx.org/packages/mainline/ubuntu/ {{ ansible_distribution_release }} nginx'
-    - 'deb http://ppa.launchpad.net/certbot/certbot/ubuntu {{ ansible_distribution_release }} main'
-    - 'deb http://ppa.launchpad.net/ondrej/php/ubuntu {{ ansible_distribution_release }} main'
-
-- name: remove standard nginx
-  apt:
-    name: "{{ item }}"
-    state: absent
-#    dpkg_options: 'allow-change-held-packages'
-  with_items:
-#    - nginx
-    - nginx-common
-    - nginx-full
-
 - name: apt dist-upgrade
   apt:
     upgrade: dist
@@ -43,35 +9,15 @@
 - name: install additional packages
   apt:
     name: "{{ item }}"
-    autoremove: true
     state: latest
   with_items:
     - zip
     - unzip
+    - bzip2
     - screen
     - curl
     - ffmpeg
+    - imagemagick 
     - libfile-fcntllock-perl
     - language-pack-en-base
-    - mariadb-server
-    - redis-server
     - software-properties-common
-    - python-certbot-nginx
-    - nginx
-    - php7.2-fpm
-    - php7.2-gd
-    - php7.2-mysql
-    - php7.2-curl
-    - php7.2-xml
-    - php7.2-zip
-    - php7.2-intl
-    - php7.2-mbstring
-    - php7.2-json
-    - php7.2-bz2
-    - php-apcu
-    - php-imagick
-    - php-smb
-    - php-redis
-    - imagemagick 
-    - php-imagick
-    - fail2ban
