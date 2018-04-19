@@ -1,0 +1,23 @@
+---
+# Ubuntu related OS tasks
+
+- name: apt dist-upgrade
+  apt:
+    upgrade: dist
+    autoremove: true
+
+- name: install additional packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - zip
+    - unzip
+    - bzip2
+    - screen
+    - curl
+    - ffmpeg
+    - imagemagick 
+    - libfile-fcntllock-perl
+    - software-properties-common
+    - apt-transport-https

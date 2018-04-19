@@ -27,3 +27,4 @@
   with_items:
     - http
     - https
+    - ssh

@@ -1,0 +1,20 @@
+---
+# Ubuntu related OS tasks
+
+- name: add additional repos
+  apt_repository:
+    repo: 'deb http://ftp.debian.org/{{ ansible_distribution|lower }} {{ ansible_distribution_release }}-backports main'
+    update_cache: true
+    state: present
+
+- name: install python-certbot-nginx packages
+  apt:
+    name: python-certbot-nginx
+    autoremove: true
+    default_release: "{{ ansible_distribution_release }}-backports"
+    state: latest
+
+- name: install needed pip packages
+  pip:
+    name: acme
+    state: latest

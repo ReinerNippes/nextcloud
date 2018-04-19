@@ -7,7 +7,7 @@
 - name: configure mariadb
   copy:
     src: my.cnf
-    dest: "{{ mariadb_conf_dir[ansible_distribution] }}/my.cnf"
+    dest: "{{ mariadb_conf_dir[ansible_distribution] }}"
     owner: root
     group: root
     mode: 0644
