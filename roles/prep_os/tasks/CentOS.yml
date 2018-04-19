@@ -37,3 +37,4 @@
     - perl-File-FcntlLock 
     - ImageMagick
     - postfix
+    - firewalld

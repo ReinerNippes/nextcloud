@@ -1,0 +1,36 @@
+---
+# Debian related OS tasks
+
+- name: add nginx key
+  apt_key:
+    url: https://nginx.org/keys/nginx_signing.key
+    state: present
+
+- name: add additional debian repos
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: true
+  with_items:
+    - 'deb http://nginx.org/packages/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} nginx'
+    - 'deb-src http://nginx.org/packages/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} nginx'
+  
+- name: remove standard nginx
+  apt:
+    name: "{{ item }}"
+    state: absent
+#    dpkg_options: 'allow-change-held-packages'
+  with_items:
+#    - nginx
+    - nginx-common
+    - nginx-full
+  when: false
+
+- name: install additional packages
+  apt:
+    name: "{{ item }}"
+    autoremove: true
+    allow_unauthenticated: true
+    state: latest
+  with_items:
+    - nginx

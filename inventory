@@ -49,4 +49,7 @@ nc_db_passwd  = 'next12345'
 nc_db_prefix  = 'oc_'
 
 #Allways get the latest version of Nextcloud
-next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
+next_archive   = https://download.nextcloud.com/server/releases/latest.tar.bz2
+
+# change dhparam numbits if generating takes to long
+#dhparam_numbits = 1024
