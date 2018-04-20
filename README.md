@@ -12,16 +12,16 @@ Ansible Playbook to install
 In less than 20 minutes.
 
 Most of Ubuntu settings are recommentations from C. Rieger
+
 Visit his page for all details: https://www.c-rieger.de/nextcloud-13-installation-guide
 
-Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu and CentOS machines.
+Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
 
-This playbook is yet not fully idempotent and will fail during the inital setup of Nextcloud when you run it twice. Will be fixed in a future release.
 
 Requirements
 ------------
 
-Ubuntu 16.04 or CentOS 7
+Ubuntu 16.04, CentOS 7 or Debian 9
 
 Not yet tested with other versions and flavours of Linux.
 
