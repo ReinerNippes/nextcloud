@@ -45,21 +45,16 @@
     reload: true
     sysctl_file: /etc/sysctl.conf
 
-- name: configure /etc/rc.local
-  lineinfile:
-    name: /etc/rc.local
-    regexp: 'sysctl -w net.core.somaxconn=(.*)'
-    line: 'sysctl -w net.core.somaxconn=65535'
-    insertbefore: 'exit 0'
-  when: false
+- name: disable transparent hugepages - copy service file
+  copy:
+    src: disable-transparent-hugepages
+    dest: /etc/init.d/disable-transparent-hugepages
+    owner: root
+    group: root
+    mode: 0755
 
-- name: disable transparent hugepages
-  shell: "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
- 
-- name: configure /etc/rc.local
-  lineinfile:
-    name: /etc/rc.local
-    regexp: 'echo never > /sys/kernel/mm/transparent_hugepage/enabled'
-    line: 'echo never > /sys/kernel/mm/transparent_hugepage/enabled'
-    insertbefore: 'exit 0'  
-  when: false
+- name: enable service disable-transparent-hugepages
+  service:
+    name: disable-transparent-hugepages
+    enabled: true
+    state: started
