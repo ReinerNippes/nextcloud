@@ -35,9 +35,7 @@ git clone https://github.com/ReinerNippes/nextcloud13
 cd nextcloud13
 
 # install ansible and python-mysql
-sh ./install-ubuntu.sh 
-or
-sh ./install-centos7.sh
+sh ./prepare_system.sh
 
 # edit variables
 vim inventory
