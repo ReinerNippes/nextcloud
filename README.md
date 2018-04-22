@@ -97,5 +97,13 @@ nc_mail_smtppwd      =
 #Allways get the latest version of Nextcloud
 next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
+# change dhparam numbits if generating takes to long
+#dhparam_numbits = 1024
+
 ```
 
+Known Problems
+--------------
+On CentOS the occ config:import of the nextcloud configuration is not working right now. 
+You have to edit the nextcloud/config/config.php manually. An example you may find here:
+https://www.c-rieger.de/nextcloud-installation-guide-advanced/#c08
