@@ -80,6 +80,13 @@
     - { owner: root,   group: nginx, name: /var/lib/php/wsdlcache }
     - { owner: root,   group: nginx, name: /var/lib/php/opcache }
 
+- name: replace opcache.max_accelerated_files=4000
+  lineinfile:
+    path: /etc/php.d/10-opcache.ini
+    regexp: '^opcache.max_accelerated_files=(.*)'
+    line:   'opcache.max_accelerated_files=10000'
+    backup: true
+  notify: restart php-fpm
 
 - name: alias php 
   copy:
