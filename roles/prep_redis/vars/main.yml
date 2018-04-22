@@ -4,8 +4,9 @@
 redis_conf_path:
   'CentOS': '/etc'
   'Ubuntu': '/etc/redis'
+  'Debian': '/etc/redis' 
   
 web_user:
   'CentOS': 'nginx'
   'Ubuntu': 'www-data'
-  
+  'Debian': 'www-data'

@@ -4,17 +4,28 @@
 - name: include os specific tasks
   include_tasks: "{{ ansible_distribution }}.yml"
 
+- name: create /usr/local/tmp/apc
+  file:
+    name: /usr/local/tmp/apc
+    state: directory
+
+- name: get uid of web_user
+  user:
+    name: "{{ web_user[ansible_distribution] }}"
+  register: web_user_id
+  
 - name: mount tmp fs
   mount:
     src: "tmpfs"
     path: "{{ item }}"
     fstype: tmpfs
-    opts: "defaults,noatime,nosuid,nodev,noexec,mode=1777"
+    opts: "defaults,uid={{ web_user_id.uid }},size=300M,noatime,nosuid,nodev,noexec,mode=1777"
     passno: 0
-    state: present
+    state: mounted
   with_items:
     - /tmp
     - /var/tmp
+    - /usr/local/tmp/apc
     - /usr/local/tmp/cache
     - /usr/local/tmp/sessions
 
@@ -34,20 +45,16 @@
     reload: true
     sysctl_file: /etc/sysctl.conf
 
-- name: configure /etc/rc.local
-  lineinfile:
-    name: /etc/rc.local
-    regexp: 'sysctl -w net.core.somaxconn=(.*)'
-    line: 'sysctl -w net.core.somaxconn=65535'
-    insertbefore: 'exit 0'
-  when: false
+- name: disable transparent hugepages - copy service file
+  copy:
+    src: disable-transparent-hugepages
+    dest: /etc/init.d/disable-transparent-hugepages
+    owner: root
+    group: root
+    mode: 0755
 
-- name: disable transparent hugepages
-  shell: "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
- 
-- name: configure /etc/rc.local
-  lineinfile:
-    name: /etc/rc.local
-    regexp: 'echo never > /sys/kernel/mm/transparent_hugepage/enabled'
-    line: 'echo never > /sys/kernel/mm/transparent_hugepage/enabled'
-    insertbefore: 'exit 0'  
+- name: enable service disable-transparent-hugepages
+  service:
+    name: disable-transparent-hugepages
+    enabled: true
+    state: started

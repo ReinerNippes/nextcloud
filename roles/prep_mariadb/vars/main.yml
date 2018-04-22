@@ -2,5 +2,7 @@
 # vars file for prep_mariadb
 
 mariadb_conf_dir:
-  "CentOS": /etc/my.cnf.d
-  "Ubuntu": /etc/mysql/conf.d
+  "CentOS": /etc/my.cnf.d/my.cnf
+  "Ubuntu": /etc/mysql/mariadb.conf.d/90-nextcloud.cnf
+  "Debian": /etc/mysql/mariadb.conf.d/90-nextcloud.cnf
+  
