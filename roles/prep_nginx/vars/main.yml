@@ -4,11 +4,14 @@
 web_user:
   'CentOS': 'nginx'
   'Ubuntu': 'www-data'
+  'Debian': 'www-data'
 
 web_group:
   'CentOS': 'nginx'
   'Ubuntu': 'www-data'
+  'Debian': 'www-data'
 
 php_socket:
   'CentOS': '/run/php-fpm/php7.2-fpm.sock'
   'Ubuntu': '/run/php/php7.2-fpm.sock'
+  'Debian': '/run/php/php7.2-fpm.sock'

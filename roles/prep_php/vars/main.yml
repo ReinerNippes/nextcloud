@@ -4,16 +4,19 @@
 php_service_name:
   "CentOS": php-fpm
   "Ubuntu": php7.2-fpm
+  'Debian': php7.2-fpm
 
 php_fpm_conf_dir:
   "CentOS": /etc
   "Ubuntu": /etc/php/7.2/fpm
+  'Debian': /etc/php/7.2/fpm
 
 php_cli_conf_dir:
   "CentOS": /etc
   "Ubuntu": /etc/php/7.2/cli
+  'Debian': /etc/php/7.2/cli
 
 php_www_conf_dir:
   "CentOS": /etc/php-fpm.d
   "Ubuntu": /etc/php/7.2/fpm/pool.d
-  
+  'Debian': /etc/php/7.2/fpm/pool.d
