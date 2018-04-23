@@ -76,11 +76,23 @@
     with_items: "{{ nc_mail_config }}"
     when: nc_configure_mail
 
+  - name: copy defaults/config.json to /tmp 
+    copy:
+      src: "{{ role_path }}/defaults/config.json"
+      dest: /tmp/nextcloud.config.json
+      owner: "{{ web_user[ansible_distribution] }}"
+      mode: 0600
+      
   - name: set default config
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:import {{ role_path }}/defaults/config.json
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:import /tmp/nextcloud.config.json
     args:
       chdir: /var/www/nextcloud/
     register: setup_nc
+
+  - name: copy defaults/config.json to /tmp 
+    file:
+      name: /tmp/nextcloud.config.json
+      state: absent
 
   - debug: var=setup_nc verbosity=2
 
