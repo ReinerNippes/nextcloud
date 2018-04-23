@@ -26,6 +26,11 @@
     gpgcheck: yes
     enabled: 1
 
+- name: update os
+  yum:
+    name: '*'
+    update_cache: true
+    state: latest
 
 - name: install needed packages
   yum:
