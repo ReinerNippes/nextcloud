@@ -51,5 +51,14 @@ nc_db_prefix  = 'oc_'
 #Allways get the latest version of Nextcloud
 next_archive   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
+# Backup
+backup_folder   = /var/nc-backup
+
+# with restic
+restic_password = pML83V8DgCrexv
+backup_day      = *
+backup_hour     = 4
+backup_minute   = 0
+
 # change dhparam numbits if generating takes to long
 #dhparam_numbits = 1024
