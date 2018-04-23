@@ -3,15 +3,16 @@ Nextcloud 13
 
 Ansible Playbook to install
 
-* Nextcloud 13
-* nginx
-* PHP 7.2
-* MariaDB 10
-* redis
+* Nextcloud 13 - https://nextcloud.com/
+* nginx - https://nginx.org/
+* PHP 7.2 - http://www.php.net/
+* MariaDB 10 - https://mariadb.org/
+* redis - https://redis.io/
+* restic backup - https://restic.readthedocs.io
 
 In less than 20 minutes.
 
-Most of Ubuntu settings are recommentations from C. Rieger
+Most of settings are recommentations from C. Rieger
 
 Visit his page for all details: https://www.c-rieger.de/nextcloud-13-installation-guide
 
@@ -42,9 +43,11 @@ vim inventory
 
 # run playbook
 ansible-playbook nextcloud.yml
+
 ```
 
-Log into your nextcloud web site
+Log into your nextcloud web site https://<fqdn> 
+User and password have been set according to the entries in the inventory.
 
 Role Variables
 --------------
@@ -97,13 +100,18 @@ nc_mail_smtppwd      =
 #Allways get the latest version of Nextcloud
 next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
+# Backup
+backup_folder   = /var/nc-backup
+
+# with restic
+restic_password = pML83V8DgCrexv
+backup_day      = *
+backup_hour     = 4
+backup_minute   = 0
+
 # change dhparam numbits if generating takes to long
 #dhparam_numbits = 1024
 
 ```
 
-Known Problems
---------------
-On CentOS the occ config:import of the nextcloud configuration is not working right now. 
-You have to edit the nextcloud/config/config.php manually. An example you may find here:
-https://www.c-rieger.de/nextcloud-installation-guide-advanced/#c08
+
