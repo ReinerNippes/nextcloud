@@ -11,6 +11,12 @@
     gpgcheck: yes
     enabled: 0
 
+- name: update os
+  yum:
+    name: '*'
+    update_cache: true
+    state: latest
+
 - name: install needed packages
   yum:
     name: "{{ item }}"

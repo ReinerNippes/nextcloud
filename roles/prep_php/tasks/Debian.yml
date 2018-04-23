@@ -14,6 +14,11 @@
     update_cache: true
     state: present
 
+- name: apt dist-upgrade
+  apt:
+    upgrade: dist
+    autoremove: true
+
 - name: install additional packages
   apt:
     name: "{{ item }}"

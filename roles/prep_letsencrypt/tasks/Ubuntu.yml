@@ -16,6 +16,11 @@
     update_cache: true
     state: present
 
+- name: apt dist-upgrade
+  apt:
+    upgrade: dist
+    autoremove: true
+
 - name: install python-certbot-nginx packages
   apt:
     name: python-certbot-nginx

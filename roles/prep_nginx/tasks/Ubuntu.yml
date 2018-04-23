@@ -23,6 +23,11 @@
     - nginx-common
     - nginx-full
 
+- name: apt dist-upgrade
+  apt:
+    upgrade: dist
+    autoremove: true
+
 - name: install additional packages
   apt:
     name: "{{ item }}"
