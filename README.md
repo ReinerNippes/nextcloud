@@ -46,7 +46,7 @@ ansible-playbook nextcloud.yml
 
 ```
 
-Log into your nextcloud web site https://<fqdn> 
+Log into your nextcloud web site https://\<fqdn\> 
 User and password have been set according to the entries in the inventory.
 
 Role Variables
