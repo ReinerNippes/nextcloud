@@ -1,0 +1,12 @@
+---
+# Some common variables used in more then roles
+ 
+web_user:
+  'CentOS': 'nginx'
+  'Ubuntu': 'www-data'
+  'Debian': 'www-data'
+
+web_group:
+  'CentOS': 'nginx'
+  'Ubuntu': 'www-data'
+  'Debian': 'www-data'
