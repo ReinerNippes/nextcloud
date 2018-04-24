@@ -45,7 +45,7 @@ prepare_amazon() {
 usage() { 
 	echo
 	echo "Linux distribution $ID not detected."
-	echo "Use: ID=[ubuntu|debian|centos] setup_ec2.sh"
+	echo "Use: ID=[ubuntu|debian|centos|amzn] setup_ec2.sh"
 	echo "Other distributions not yet supported."
 	echo
 }
