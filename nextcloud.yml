@@ -7,10 +7,11 @@
 
   roles:
     - prep_os
-    - prep_php
-    - prep_mariadb
+    - { role: restic_backup, when: backup_folder != '' }
     - prep_redis
     - prep_nginx
+    - prep_php
+    - prep_mariadb
     - prep_letsencrypt
     - prep_nextcloud
     - nc_fail2ban

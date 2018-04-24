@@ -1,0 +1,31 @@
+#!/bin/bash
+
+export RESTIC_REPOSITORY="{{ backup_folder }}"
+export RESTIC_PASSWORD="{{ restic_password }}"
+
+# abort entire script if any command fails
+set -e
+
+# Make sure nextcloud is enabled when we are done
+trap "sudo -u {{ web_user[ansible_distribution] }} php /var/www/nextcloud/occ maintenance:mode --off" EXIT
+
+# set nextcloud to maintenance mode
+sudo -u {{ web_user[ansible_distribution] }} php /var/www/nextcloud/occ maintenance:mode --on
+
+# backup the database
+mysqldump --single-transaction -h localhost -u {{ nc_db_user }} -p{{ nc_db_passwd }} {{ nc_db }} | {{ restic_install_path }}/restic backup --stdin --stdin-filename db_mysql_nextcloud.sql
+
+# backup the data dir
+{{ restic_install_path }}/restic backup /var/nc-data
+
+# backup the nextcloud dir
+{{ restic_install_path }}/restic backup /var/www/nextcloud
+
+# turn maintenance mode off
+sudo -u {{ web_user[ansible_distribution] }} php /var/www/nextcloud/occ maintenance:mode --off
+
+# delete trap
+trap "" EXIT
+
+# clean up backup dir
+{{ restic_install_path }}/restic forget --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --keep-yearly 75

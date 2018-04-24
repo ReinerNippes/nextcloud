@@ -1,0 +1,7 @@
+---
+# defaults file for restic_backup
+
+restic_repository: ''
+restic_password:   pML83V8DgCrexv
+
+restic_version: '0.8.3'
