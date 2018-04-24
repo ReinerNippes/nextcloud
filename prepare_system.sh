@@ -8,7 +8,7 @@ prepare_ubuntu() {
 	sudo apt update -y
 	sudo apt install ansible python-mysqldb mc vim git -y
 	echo
-	echo "Ubuntu Sytem ready for nextcloud." 
+	echo "Ubuntu Sytem ready for nextcloud installation." 
 	echo
 }
 
@@ -20,7 +20,7 @@ prepare_debian() {
 	sudo pip install setuptools -U
 	sudo pip install ansible -U
 	echo
-	echo "Debian Sytem ready for nextcloud."
+	echo "Debian Sytem ready for nextcloud installation."
 	echo
 }
 
@@ -29,13 +29,22 @@ prepare_centos() {
 	sudo yum install ansible git vim mc python-mysqldb -y
 	sudo yum update -y
 	echo
-	echo "CentOS Sytem ready for nextcloud."
+	echo "CentOS Sytem ready for nextcloud installation."
 	echo
+}
+
+prepare_amazon() {
+        sudo yum install epel-release -y
+        sudo yum --enablerepo epel install ansible git vim mc  mysql-devel -y
+        sudo yum --enablerepo epel update -y
+        echo
+        echo "Amazon Linux Sytem ready for nextcloud  installation."
+        echo
 }
 
 usage() { 
 	echo
-	echo "Linux distribution not detected."
+	echo "Linux distribution $ID not detected."
 	echo "Use: ID=[ubuntu|debian|centos] setup_ec2.sh"
 	echo "Other distributions not yet supported."
 	echo
@@ -57,6 +66,9 @@ case $ID in
 	'centos')
 		prepare_centos
 	;;
+        'amzn')
+                prepare_amazon
+        ;;
 	*)
 		usage
 	;;
