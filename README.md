@@ -4,7 +4,7 @@ Nextcloud 13
 Ansible Playbook to install
 
 * Nextcloud 13 - https://nextcloud.com/
-* nginx - https://nginx.org/
+* nginx 1.14 - https://nginx.org/
 * PHP 7.2 - http://www.php.net/
 * MariaDB 10 - https://mariadb.org/
 * redis - https://redis.io/
@@ -22,7 +22,7 @@ Warning: Your existing nginx setup will be over written. Up to now I tested this
 Requirements
 ------------
 
-Ubuntu 16.04, CentOS 7 or Debian 9
+Ubuntu 16.04, Ubuntu 18.04, CentOS 7 or Debian 9
 
 Not yet tested with other versions and flavours of Linux.
 
