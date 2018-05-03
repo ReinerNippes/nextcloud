@@ -89,7 +89,7 @@
       chdir: /var/www/nextcloud/
     register: setup_nc
 
-  - name: copy defaults/config.json to /tmp 
+  - name: remove /tmp/defaults/config.json
     file:
       name: /tmp/nextcloud.config.json
       state: absent
