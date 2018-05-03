@@ -40,7 +40,7 @@
     - php7.2-bz2
     - php-apcu
     - php-imagick
-    - php-smb
+    - php-smbclient
     - php-redis
     - php-imagick
 
