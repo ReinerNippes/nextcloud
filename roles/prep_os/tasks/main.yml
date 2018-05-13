@@ -4,10 +4,17 @@
 - name: include os specific tasks
   include_tasks: "{{ ansible_distribution }}.yml"
 
-- name: create /usr/local/tmp/apc
+- name: create some folders
   file:
-    name: /usr/local/tmp/apc
+    name: "{{ item.path }}"
     state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { path: '/usr/local/tmp/apc',      owner: '{{ web_user[ansible_distribution] }}', group: 'root', mode: '1777' }
+    - { path: '/usr/local/tmp/sessions', owner: '{{ web_user[ansible_distribution] }}', group: 'root', mode: '1777' }
+    - { path: '/usr/local/tmp/cache',    owner: '{{ web_user[ansible_distribution] }}', group: 'root', mode: '1777' }
 
 - name: get uid of web_user
   user:
@@ -19,12 +26,22 @@
     src: "tmpfs"
     path: "{{ item }}"
     fstype: tmpfs
-    opts: "defaults,uid={{ web_user_id.uid }},size=300M,noatime,nosuid,nodev,noexec,mode=1777"
+    opts: "defaults,noatime,nosuid,nodev,noexec,mode=1777"
     passno: 0
     state: mounted
   with_items:
     - /tmp
     - /var/tmp
+
+- name: mount tmp fs
+  mount:
+    src: "tmpfs"
+    path: "{{ item }}"
+    fstype: tmpfs
+    opts: "defaults,uid={{ web_user_id.uid }},size=300M,noatime,nosuid,nodev,noexec,mode=1777"
+    passno: 0
+    state: mounted
+  with_items:
     - /usr/local/tmp/apc
     - /usr/local/tmp/cache
     - /usr/local/tmp/sessions
