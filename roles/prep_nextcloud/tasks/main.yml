@@ -100,17 +100,6 @@
     shell: sudo -u {{ web_user[ansible_distribution] }} php occ background:cron
     args:
       chdir: /var/www/nextcloud/
-
-  - name: .user.ini settings
-    lineinfile:
-      name: /var/www/nextcloud/.user.ini
-      regexp: "{{ item.regexp }}"
-      line:   "{{ item.line }}"
-      state: present
-    with_items:
-      - { regexp: "upload_max_filesize=(.*)", line: "upload_max_filesize=10240M" }
-      - { regexp: "post_max_size=(.*)", line: "post_max_size=10240M" }
-      - { regexp: "output_buffering=(.*)", line: "output_buffering='Off'" }
       
   - name: nextcloud cronjob
     cron:
