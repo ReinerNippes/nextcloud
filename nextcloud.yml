@@ -7,12 +7,14 @@
 
   roles:
     - prep_os
-    - { role: restic_backup, when: backup_folder != '' }
+    - { role: restic_backup,    when: backup_folder != '' }
     - prep_redis
     - prep_nginx
     - prep_php
-    - prep_mariadb
-    - prep_letsencrypt
+    - { role: prep_mariadb,     when: nc_db_type == 'mysql' }
+    - { role: prep_postgres,    when: nc_db_type == 'pgsql' }
+    - { role: prep_letsencrypt, when: ssl_certificate_type  == 'letsencrypt' }
+    - { role: prep_selfssl,     when: ssl_certificate_type  == 'selfsigned' }
     - prep_nextcloud
+    - { role: prep_collabora,    when: install_collabora == 'true' }
     - nc_fail2ban
-
