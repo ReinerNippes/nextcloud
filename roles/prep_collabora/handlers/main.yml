@@ -1,0 +1,6 @@
+---
+# handlers file for prep_collabora
+  - name: restart nginx
+    systemd:
+      name: nginx
+      state: restarted

@@ -1,0 +1,41 @@
+---
+# tasks file for prep_collabora
+
+- name: pull collabora image
+  docker_image:
+    name: collabora/code
+    
+- name: configure nginx
+  blockinfile:
+    path: /etc/nginx/conf.d/nextcloud.conf 
+    block: |
+      location ^~ /loleaflet {
+      proxy_pass https://localhost:9980;
+      proxy_set_header Host $http_host;
+      }
+      location ^~ /hosting/discovery {
+      proxy_pass https://localhost:9980;
+      proxy_set_header Host $http_host;
+      }
+      location ^~ /lool {
+      proxy_pass https://localhost:9980;
+      proxy_set_header Host $http_host;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      }
+    marker: "# {mark} ANSIBLE MANAGED BLOCK collabra"
+    insertafter: client_max_body_size(.*)
+  notify: restart nginx
+
+- name: start a collabora container
+  docker_container:
+    name: collabra_online
+    image: collabora/code
+    state: started
+    restart_policy: always
+    tty: yes
+    ports:
+     - "127.0.0.1:9980:9980"
+    env:
+        domain: "{{ fqdn | regex_replace('\\.', '\\.') }}"
+    capabilities: MKNOD
