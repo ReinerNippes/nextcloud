@@ -1,0 +1,21 @@
+---
+# tasks file for prep_colabra
+
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
+
+- name: install python docker
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - pip
+    - docker
+
+- name: enable docker
+  systemd:
+    name:          docker
+    state:         started
+    enabled:       true
+    daemon_reload: yes
+  

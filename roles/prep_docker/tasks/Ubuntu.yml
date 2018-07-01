@@ -1,0 +1,45 @@
+---
+# Ubuntu related OS tasks
+
+- name: remove ubuntu repo docker
+  apt:
+    name: "{{ item }}"
+    state: absent
+  with_items: 
+    - docker
+    - docker-engine
+    - docker.io
+    
+- name: install needed packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - python-pip
+    - software-properties-common
+
+- name: add docker key
+  apt_key:
+    url: "{{ item }}"
+    state: present
+  with_items: 
+    - https://download.docker.com/linux/ubuntu/gpg
+
+- name: add additional docker repo
+  apt_repository:
+    repo: "{{ item }}"
+    validate_certs: true
+    update_cache: true
+    state: present
+  with_items:
+    - deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+
+- name: install docker
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - docker-ce
+ 
