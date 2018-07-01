@@ -4,11 +4,12 @@ Nextcloud 13
 Ansible Playbook to install
 
 * Nextcloud 13 - https://nextcloud.com/
-* nginx 1.14 - https://nginx.org/
+* nginx 1.15 - https://nginx.org/
 * PHP 7.2 - http://www.php.net/
-* MariaDB 10 - https://mariadb.org/
+* MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
 * redis - https://redis.io/
 * restic backup - https://restic.readthedocs.io
+* Collabora Online
 
 In less than 20 minutes.
 
@@ -35,6 +36,9 @@ git clone https://github.com/ReinerNippes/nextcloud13
 # change to nextcloud directory
 cd nextcloud13
 
+# if you want to use the devel branch
+git checkout devel
+
 # install ansible and python-mysql
 sh ./prepare_system.sh
 
@@ -53,7 +57,10 @@ Role Variables
 --------------
 All variables are defined in inventory.
 ```
-# 
+# Letsencrypt or selfsigned certificate
+ssl_certificate_type  = 'letsencrypt'
+#ssl_certificate_type = 'selfsigned'
+
 # Your domain name to get a letsencrypt certificate
 fqdn       = nc.example.org
 
@@ -78,6 +85,8 @@ nc_admin   = 'admin'
 nc_passwd  = 'tOpSecrET2018'
 
 # database
+nc_db_type          = 'mysql' # (MariaDB)
+#nc_db_type           = 'pgsql'  # (PostgreSQL)
 nc_db         = 'nextcloud'
 nc_db_user    = 'nextcloud'
 nc_db_passwd  = 'next12345'
@@ -109,9 +118,11 @@ backup_day      = *
 backup_hour     = 4
 backup_minute   = 0
 
+# Install Collabora Online
+install_collabora     = false|true
+
 # change dhparam numbits if generating takes to long
 #dhparam_numbits = 1024
-
 ```
 
 
