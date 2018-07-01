@@ -1,0 +1,94 @@
+---
+# tasks file for prep_postgres
+
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
+
+- name: install psycopg2
+  pip: 
+    name: "{{ item }}"
+    state: latest
+  become: true
+  with_items:
+    - psycopg2
+
+- name: docker pull postgres
+  docker_image:
+    name: "{{ postgres_image }}"
+
+- name: create postgres group
+  group:
+    name: postgres
+    gid: "{{ pg_group_id[ansible_distribution] }}"
+    
+- name: create postgres user
+  user:
+    name: postgres
+    uid: "{{ pg_user_id[ansible_distribution] }}"
+    group: postgres
+    system: true
+    home: /var/lib/postgresql
+    shell: /bin/bash
+    comment: PostgreSQL administrator
+    state: present
+    
+- name: create data directory
+  file:
+    name: "{{ pgdata }}"
+    owner: postgres
+    group: postgres
+    mode: 0750
+    state: directory
+
+- name: start postgres container
+  docker_container:
+    name: postgres
+    image: "{{ postgres_image }}"
+    state: started
+    restart_policy: always
+    user: postgres:postgres
+    tty: yes
+    ports:
+     - "127.0.0.1:5432:5432"
+    env:
+        POSTGRES_PASSWORD: "{{ postgres_password }}"
+        POSTGRES_USER:     "{{ postgres_user }}"
+        PGDATA:            "{{ pgdata }}"
+    volumes: 
+      - "{{ pgdata }}:{{ pgdata }}:rw"
+
+- name: wait for db to come up
+  wait_for:
+    delay: 3
+    path: /var/lib/postgresql/data/pgdata/global
+
+- name: create {{ nc_db }} db
+  postgresql_db:
+    name:           "{{ nc_db }}"
+    state:          present
+    encoding:       UTF-8
+    template:       template0
+    login_host:     localhost
+    login_user:     "{{ postgres_user }}"
+    login_password: "{{ postgres_password }}"
+
+- name: "Create {{ nc_db_user }} account"
+  postgresql_user:
+    encrypted:      yes
+    login_host:     localhost
+    login_user:     "{{ postgres_user }}"
+    login_password: "{{ postgres_password }}"
+    db:             "{{ nc_db }}"
+    name:           "{{ nc_db_user }}"
+    password:       "{{ nc_db_passwd }}"
+
+- name: "Grant all privileges on database {{ nc_db }} to {{ nc_db_user }}"
+  postgresql_privs:
+    login_host:     localhost
+    login_user:     "{{ postgres_user }}"
+    login_password: "{{ postgres_password }}"
+    db:             "postgres"
+    privs:          ALL
+    type:           database
+    obj:            "{{ nc_db }}"
+    role:           "{{ nc_db_user }}"

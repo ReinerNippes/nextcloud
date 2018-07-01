@@ -1,0 +1,7 @@
+---
+# defaults file for prep_postgres
+
+postgres_image:    postgres:alpine
+postgres_password: 9AaSZYB5uQw1xJEkTafI
+postgres_user:     postgres
+pgdata:            /var/lib/postgresql/data/pgdata
