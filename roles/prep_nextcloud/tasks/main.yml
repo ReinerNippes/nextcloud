@@ -49,10 +49,15 @@
   - name: flush all handlers to restart server
     meta: flush_handlers
 
+  - name: start nginx
+    systemd:
+      name: nginx
+      state: started
+
   - name: first setup nextcloud
     shell: |
       sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install \
-      --database mysql --database-host localhost --database-name {{ nc_db }} \
+      --database {{ nc_db_type }} --database-host localhost --database-name {{ nc_db }} \
       --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} \
       --database-pass {{ nc_db_passwd }} --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} \
       --data-dir {{ nc_datadir }}
@@ -89,7 +94,7 @@
       chdir: /var/www/nextcloud/
     register: setup_nc
 
-  - name: remove /tmp/defaults/config.json
+  - name: copy defaults/config.json to /tmp 
     file:
       name: /tmp/nextcloud.config.json
       state: absent
@@ -100,7 +105,18 @@
     shell: sudo -u {{ web_user[ansible_distribution] }} php occ background:cron
     args:
       chdir: /var/www/nextcloud/
-      
+
+  - name: upgrade nextcloud
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ upgrade
+    args:
+      chdir: /var/www/nextcloud/
+
+  - name: adjust app settings
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:{{ item.key }} {{ item.value }}
+    args:
+      chdir: /var/www/nextcloud/
+    with_items: "{{ nc_app_config }}"
+
   - name: nextcloud cronjob
     cron:
       name: nextcloud cronjob

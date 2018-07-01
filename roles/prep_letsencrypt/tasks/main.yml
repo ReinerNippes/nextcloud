@@ -9,22 +9,13 @@
   args:
     creates: /etc/ssl/certs/dhparam.pem
 
-- name: ensure nginx is restart nginx
+- name: ensure nginx is stopped nginx
   systemd:
     name: nginx
-    state: restarted
+    state: stopped
     enabled: true
 
 - name: install letsencrypt certificates
-  shell: "certbot --authenticator webroot --webroot-path=/var/www/letsencrypt --installer nginx --email {{ cert_email }} --non-interactive --domain {{ fqdn }} --agree-tos {{ cert_stage|default('') }}"
+  shell: "certbot certonly --standalone --installer nginx --email {{ cert_email }} --non-interactive --domain {{ fqdn }} --agree-tos {{ cert_stage|default('') }}"
   args:
     creates: /etc/letsencrypt/live/{{ fqdn }}/cert.pem
-
-- name: enable ssl
-  replace:
-    name: /etc/nginx/ssl.conf
-    regexp: '^#ssl'
-    replace: 'ssl'
-    backup: true
-  notify: 
-    - restart nginx
