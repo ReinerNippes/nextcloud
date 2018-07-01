@@ -17,3 +17,9 @@ nc_mail_config:
   - { key: "mail_smtpport",     value: "--value={{ nc_mail_smtpport }}" }
   - { key: "mail_smtpname",     value: "--value={{ nc_mail_smtpname }}" }
   - { key: "mail_smtppassword", value: "--value={{ nc_mail_smtppwd }}" }
+
+nc_app_config:
+  - { key: "disable", value: "survey_client" }
+  - { key: "disable", value: "firstrunwizard" }
+  - { key: "enable",  value: "admin_audit" }
+  - { key: "enable",  value: "files_pdfviewer" }
