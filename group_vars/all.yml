@@ -3,10 +3,24 @@
  
 web_user:
   'CentOS': 'nginx'
+  'Amazon': 'nginx'
   'Ubuntu': 'www-data'
   'Debian': 'www-data'
 
 web_group:
   'CentOS': 'nginx'
+  'Amazon': 'nginx'
   'Ubuntu': 'www-data'
   'Debian': 'www-data'
+
+pg_user_id:
+  'CentOS': '70'
+  'Amazon': '70'
+  'Ubuntu': '70'
+  'Debian': '70'
+
+pg_group_id:
+  'CentOS': '70'
+  'Amazon': '70'
+  'Ubuntu': '70'
+  'Debian': '70'
