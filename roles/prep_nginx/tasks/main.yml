@@ -3,6 +3,12 @@
 
 - name: include os specific tasks
   include_tasks: "{{ ansible_distribution }}.yml"
+  
+- name: stop and enable nginx
+  systemd:
+    name:    nginx
+    state:   stopped
+    enabled: true
 
 - name: create some folders
   file:
@@ -16,8 +22,6 @@
     - { path: '/var/www',                owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0750' }
     - { path: '/var/www/letsencrypt',    owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0750' }
     - { path: '/upload_tmp',             owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0755' }
-    - { path: '/usr/local/tmp/sessions', owner: '{{ web_user[ansible_distribution] }}', group: 'root',            mode: '0755' }
-    - { path: '/usr/local/tmp/cache',    owner: '{{ web_user[ansible_distribution] }}', group: 'root',            mode: '0755' }
 
 - name: bring /etc/nginx/nginx.conf in place
   template:
@@ -37,7 +41,7 @@
 
 - name: nginx config for ssl
   template:
-    src: ssl.conf.j2
+    src: ssl.conf.{{ ssl_certificate_type }}.j2
     dest: /etc/nginx/ssl.conf
   notify: restart nginx
 
