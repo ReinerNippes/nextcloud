@@ -49,6 +49,7 @@ nc_passwd  = 'tOpSecrET2018'
 nc_db_type          = 'mysql' # (MariaDB)
 #nc_db_type           = 'pgsql'  # (PostgreSQL)
 nc_db                = 'nextcloud'
+nc_db_host           = 'localhost'
 nc_db_user           = 'nextcloud'
 nc_db_passwd         = 'next12345'
 nc_db_prefix         = 'oc_'
