@@ -57,7 +57,7 @@
   - name: first setup nextcloud
     shell: |
       sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install \
-      --database {{ nc_db_type }} --database-host localhost --database-name {{ nc_db }} \
+      --database {{ nc_db_type }} --database-host {{ nc_db_host }} --database-name {{ nc_db }} \
       --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} \
       --database-pass {{ nc_db_passwd }} --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} \
       --data-dir {{ nc_datadir }}
