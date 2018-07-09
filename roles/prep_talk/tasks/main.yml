@@ -1,0 +1,44 @@
+---
+# tasks file for prep_talk
+
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
+
+- name: enable coturn
+  lineinfile:
+    path: /etc/default/coturn
+    regexp: '(.*)TURNSERVER_ENABLED=(.*)'
+    line:   'TURNSERVER_ENABLED=1'
+    backup: true
+  notify: restart coturn
+
+- name: bring /etc/turnserver.conf in place
+  template:
+    src:  turnserver.conf.j2
+    dest: /etc/turnserver.conf
+    owner: root
+    group: root
+    mode:  0644
+    force: true
+  notify:  restart coturn
+
+- name: install talk app
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install spreed
+  args:
+    chdir: /var/www/nextcloud/
+    creates: /var/www/nextcloud/apps/spreed
+
+- name: enable talk app
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:enable spreed
+  args:
+    chdir: /var/www/nextcloud/
+
+- name: set collabora wopi url
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set spreed stun_servers --value '["{{ fqdn }}:5349"]'
+  args:
+    chdir: /var/www/nextcloud/
+
+- name: set collabora wopi url
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set spreed turn_servers --value '[{"server":"{{ fqdn }}:5349","secret":"{{ talk_static_auth_secret }}","protocols":"udp,tcp"}]'
+  args:
+    chdir: /var/www/nextcloud/

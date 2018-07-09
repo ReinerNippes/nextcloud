@@ -1,0 +1,15 @@
+---
+# Debian related OS tasks
+
+- name: install coturn
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - coturn
+
+- name: enable coturn
+  systemd:
+    name: coturn
+    state: started
+    enabled: true
