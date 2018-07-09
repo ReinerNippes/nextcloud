@@ -1,10 +1,6 @@
 ---
 # tasks file for prep_collabora
 
-- name: pull collabora image
-  docker_image:
-    name: collabora/code
-    
 - name: configure nginx
   blockinfile:
     path: /etc/nginx/conf.d/nextcloud.conf 
@@ -27,11 +23,32 @@
     insertafter: client_max_body_size(.*)
   notify: restart nginx
 
+- name: install collabora app
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install richdocuments
+  args:
+    chdir: /var/www/nextcloud/
+    creates: /var/www/nextcloud/apps/richdocuments
+
+- name: enable collabora app
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:enable richdocuments
+  args:
+    chdir: /var/www/nextcloud/
+
+- name: set collabora wopi url
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set richdocuments wopi_url --value https://{{ fqdn }}:443
+  args:
+    chdir: /var/www/nextcloud/
+
+- name: pull collabora image
+  docker_image:
+    name: collabora/code
+    
 - name: start a collabora container
   docker_container:
     name: collabra_online
     image: collabora/code
     state: started
+    restart: yes
     restart_policy: always
     tty: yes
     ports:
@@ -39,3 +56,4 @@
     env:
         domain: "{{ fqdn | regex_replace('\\.', '\\.') }}"
     capabilities: MKNOD
+
