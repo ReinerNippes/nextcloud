@@ -16,5 +16,6 @@
     - { role: prep_letsencrypt, when: ssl_certificate_type  == 'letsencrypt' }
     - { role: prep_selfssl,     when: ssl_certificate_type  == 'selfsigned' }
     - prep_nextcloud
+    - { role: prep_talk,        when: talk_install == 'true' }
     - { role: prep_collabora,    when: install_collabora == 'true' }
     - nc_fail2ban
