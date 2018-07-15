@@ -15,7 +15,7 @@ In less than 20 minutes.
 
 Most of settings are recommentations from C. Rieger
 
-Visit his page for all details: https://www.c-rieger.de/nextcloud-13-installation-guide
+Visit his page for all details: https://www.c-rieger.de/nextcloud-13-nginx-installation-guide-for-ubuntu-18-04-lts/
 
 Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
 
