@@ -38,3 +38,4 @@
     - ImageMagick
     - postfix
     - firewalld
+    - facter
