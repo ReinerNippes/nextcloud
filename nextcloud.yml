@@ -6,6 +6,7 @@
   become: true
 
   roles:
+    - { role: prep_ufw,         when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu" }
     - prep_os
     - { role: restic_backup,    when: backup_folder != '' }
     - prep_redis
