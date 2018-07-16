@@ -21,18 +21,20 @@
       }
     marker: "# {mark} ANSIBLE MANAGED BLOCK collabra"
     insertafter: client_max_body_size(.*)
+  register: nginx_collabora_conf
 
-- name: restart nginx
+- name: reload nginx
   systemd:
     name: nginx
     state: reloaded
+  when: nginx_collabora_conf is changed
 
 - name: install collabora app
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install richdocuments
   args:
     chdir: /var/www/nextcloud/
     creates: /var/www/nextcloud/apps/richdocuments
-  notify: restart collabora container
+#  notify: restart collabora container
 
 - name: enable collabora app
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:enable richdocuments
@@ -43,7 +45,7 @@
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set richdocuments wopi_url --value https://{{ fqdn }}:443
   args:
     chdir: /var/www/nextcloud/
-  notify: restart collabora container
+#  notify: restart collabora container
 
 - name: pull collabora image
   docker_image:
