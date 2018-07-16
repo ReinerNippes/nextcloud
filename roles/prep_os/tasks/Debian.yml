@@ -21,3 +21,4 @@
     - libfile-fcntllock-perl
     - software-properties-common
     - apt-transport-https
+    - facter

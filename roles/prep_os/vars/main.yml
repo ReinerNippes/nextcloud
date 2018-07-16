@@ -1,7 +1,3 @@
 ---
 # vars file for prep_os
 
-web_user:
-  'CentOS': 'nginx'
-  'Ubuntu': 'www-data'
-  'Debian': 'www-data'
