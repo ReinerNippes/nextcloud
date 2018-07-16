@@ -54,6 +54,12 @@ nc_db_user           = 'nextcloud'
 nc_db_passwd         = 'next12345'
 nc_db_prefix         = 'oc_'
 
+# Install turn server for Nextcloud Talk
+talk_install         = true
+# Create your personal secret by issuing "openssl rand -hex 32"
+talk_static_auth_secret   = 60ca3ebe2242f79f0186bb2bf97f92b3c5411da22bf70e10d84d7b4824b706d7
+
+
 #Allways get the latest version of Nextcloud
 next_archive   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
@@ -67,7 +73,7 @@ backup_hour     = 4
 backup_minute   = 0
 
 # Install Collabora Online
-install_collabora     = false
+install_collabora     = true
 
 # change dhparam numbits if generating takes to long
 #dhparam_numbits = 1024
