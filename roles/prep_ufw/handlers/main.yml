@@ -1,0 +1,7 @@
+---
+# handlers file for prep_ufw
+
+- name: reload ufw
+  ufw:
+    state: reloaded
+  when: ufw_state == 'enabled'
