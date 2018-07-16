@@ -1,0 +1,21 @@
+---
+# Debian related OS tasks
+
+- name: add postgres repo key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: add postgresql to sources list
+  apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
+    validate_certs: true
+    update_cache: true
+    state: present
+
+- name: apt install postgresql-client with Update
+  apt:
+    name: postgresql-client
+    state: latest
+    update_cache: true
+    
