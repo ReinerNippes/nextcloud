@@ -24,6 +24,8 @@
     enablerepo: nginx
   with_items:
     - nginx
+    - python-firewall
+    - firewalld
 
 - name: open firewall ports 80/443
   firewalld:
