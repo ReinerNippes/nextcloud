@@ -4,10 +4,14 @@
 
 - name: install needed pip packages
   pip:
-    name: requests
+    name: "{{ item }}"
     state: latest
+  with_items:
+    - pyOpenSSL
+    - requests
+    - certbot-nginx 
 
-- name: install certbot
-  yum: 
-    name: certbot-nginx
-    state: latest
+#- name: install certbot
+#  yum: 
+#    name: certbot-nginx
+#    state: latest
