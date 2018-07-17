@@ -15,4 +15,4 @@
     state: latest
   with_items:
     - docker-ce
-    - python2-pip
+#    - python2-pip
