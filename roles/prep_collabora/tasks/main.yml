@@ -34,7 +34,7 @@
   args:
     chdir: /var/www/nextcloud/
     creates: /var/www/nextcloud/apps/richdocuments
-#  notify: restart collabora container
+  notify: restart collabora container
 
 - name: enable collabora app
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:enable richdocuments
@@ -45,7 +45,7 @@
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set richdocuments wopi_url --value https://{{ fqdn }}:443
   args:
     chdir: /var/www/nextcloud/
-#  notify: restart collabora container
+  notify: restart collabora container
 
 - name: pull collabora image
   docker_image:
@@ -53,7 +53,7 @@
     
 - name: start a collabora container
   docker_container:
-    name: collabra_online
+    name: collabora_online
     image: collabora/code
     state: started
     restart: yes
@@ -64,3 +64,4 @@
     env:
         domain: "{{ fqdn | regex_replace('\\.', '\\.') }}"
     capabilities: MKNOD
+  notify: restart collabora container
