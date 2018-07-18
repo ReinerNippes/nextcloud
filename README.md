@@ -10,6 +10,7 @@ Ansible Playbook to install
 * redis - https://redis.io/
 * restic backup - https://restic.readthedocs.io
 * Collabora Online
+* Nextcloud Talk
 
 In less than 20 minutes.
 
@@ -17,7 +18,7 @@ Most of settings are recommentations from C. Rieger
 
 Visit his page for all details: https://www.c-rieger.de/nextcloud-13-nginx-installation-guide-for-ubuntu-18-04-lts/
 
-Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
+Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
 
 
 Requirements
@@ -51,11 +52,12 @@ ansible-playbook nextcloud.yml
 ```
 
 Log into your nextcloud web site https://\<fqdn\> 
+
 User and password have been set according to the entries in the inventory.
 
 Role Variables
 --------------
-All variables are defined in inventory.
+All variables are defined in inventory file.
 ```
 # Letsencrypt or selfsigned certificate
 ssl_certificate_type  = 'letsencrypt'
@@ -85,9 +87,10 @@ nc_admin   = 'admin'
 nc_passwd  = 'tOpSecrET2018'
 
 # database
-nc_db_type          = 'mysql' # (MariaDB)
-#nc_db_type           = 'pgsql'  # (PostgreSQL)
+nc_db_type          = 'mysql'    # (MariaDB)
+#nc_db_type           = 'pgsql'  # (PostgreSQL docker container)
 nc_db         = 'nextcloud'
+nc_db_host           = 'localhost'
 nc_db_user    = 'nextcloud'
 nc_db_passwd  = 'next12345'
 nc_db_prefix  = 'oc_'
@@ -106,11 +109,17 @@ nc_mail_smtpport     = 587
 nc_mail_smtpname     =
 nc_mail_smtppwd      =
 
-#Allways get the latest version of Nextcloud
+# Allways get the latest version of Nextcloud
+# Change if you want to use another version
 next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
 # Backup
 backup_folder   = /var/nc-backup
+
+# Install turn server for Nextcloud Talk
+talk_install         = false|true
+# Create your personal secret by issuing "openssl rand -hex 32"
+talk_static_auth_secret   = 60ca3ebe2242f79f0186bb2bf97f92b3c5411da22bf70e10d84d7b4824b706d7
 
 # with restic
 restic_password = pML83V8DgCrexv
