@@ -32,6 +32,7 @@
     - unzip
     - bzip2
     - screen
+    - python2-pip
     - curl
     - wget
     - perl-File-FcntlLock 
@@ -39,3 +40,4 @@
     - postfix
     - firewalld
     - facter
+    - -python-requests
