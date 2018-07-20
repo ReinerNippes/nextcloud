@@ -50,5 +50,5 @@ runcmd:
   - # Insert a command to set a DynDNS record for this server here
   - # e.g. Strato DynDNS
   - # curl --silent --show-error --insecure --user [BENUTZERNAME]:[PASSWORT] https://dyndns.strato.com/nic/update?hostname=[HOSTNAME]
-  - HOME=/root ansible-pull --clean --force -d /root/nextcloud -i 'nextcloud' -U https://github.com/ReinerNippes/nextcloud13.git nextcloud.yml -e "dhparam_numbits=1024" -e "fqdn=nextcloud.domain.com"
+  - HOME=/root ansible-pull --clean --force -d /root/nextcloud -i 'nextcloud' --checkout devel -U https://github.com/ReinerNippes/nextcloud13.git nextcloud.yml -e "dhparam_numbits=1024" -e "fqdn=nextcloud.domain.com"
 
