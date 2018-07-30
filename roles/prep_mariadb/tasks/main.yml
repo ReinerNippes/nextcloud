@@ -35,5 +35,5 @@
   mysql_user:
     name:     "{{ nc_db_user }}"
     password: "{{ nc_db_passwd }}"
-    priv:     "nextcloud.*:ALL"
+    priv:     "{{ nc_db }}.*:ALL"
     state: present
