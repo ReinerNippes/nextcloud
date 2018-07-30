@@ -10,8 +10,3 @@
     - pyOpenSSL
     - requests
     - certbot-nginx 
-
-#- name: install certbot
-#  yum: 
-#    name: certbot-nginx
-#    state: latest
