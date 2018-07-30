@@ -4,24 +4,6 @@
 - name: include os specific tasks
   include_tasks: "{{ ansible_distribution }}.yml"
 
-- name: enable coturn
-  lineinfile:
-    path: /etc/default/coturn
-    regexp: '(.*)TURNSERVER_ENABLED=(.*)'
-    line:   'TURNSERVER_ENABLED=1'
-    backup: true
-  notify: restart coturn
-
-- name: bring /etc/turnserver.conf in place
-  template:
-    src:  turnserver.conf.j2
-    dest: /etc/turnserver.conf
-    owner: root
-    group: root
-    mode:  0644
-    force: true
-  notify:  restart coturn
-
 - name: install talk app
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install spreed
   args:
