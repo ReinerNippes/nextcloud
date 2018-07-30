@@ -40,4 +40,10 @@
     - postfix
     - firewalld
     - facter
-    - -python-requests
+    
+- name: remove unneeded packages
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - python-requests
