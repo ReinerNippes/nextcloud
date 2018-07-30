@@ -54,6 +54,11 @@
       name: nginx
       state: started
 
+  - name: restart redis
+    systemd:
+      name: redis
+      state: restarted
+
   - name: first setup nextcloud
     shell: |
       sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install \
