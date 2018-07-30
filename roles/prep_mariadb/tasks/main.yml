@@ -1,8 +1,13 @@
 ---
 # tasks file for prep_mariadb
 
-- name: include os specific tasks
-  include_tasks: "{{ ansible_distribution }}.yml"
+- name: create conf dir
+  file:
+    name: "{{ mariadb_conf_dir[ansible_distribution] | dirname }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
 
 - name: configure mariadb
   copy:
@@ -11,15 +16,10 @@
     owner: root
     group: root
     mode: 0644
-  register: my_cnf_install
   notify: restart mariadb
-#  when: false
 
-- name: start and enable MariaDB
-  systemd:
-    name: mysql
-    state: restart
-  when: my_cnf_install is changed
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
 
 - name: remove anonymous user
   mysql_user:
