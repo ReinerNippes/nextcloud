@@ -47,3 +47,10 @@
       - nginx-extras
   when: ansible_distribution_release == "bionic"
 
+- name: install needed packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - python-pip
+    - python-netaddr
