@@ -30,3 +30,11 @@
     name: mysql
     state: started
     enabled: true
+    
+- name: create log dir
+  file:
+    name: /var/log/mysql
+    owner: mysql
+    group: mysql
+    mode: 0750
+    state: directory
