@@ -9,4 +9,5 @@
   with_items:
     - pyOpenSSL
     - requests
+    - setuptools
     - certbot-nginx 
