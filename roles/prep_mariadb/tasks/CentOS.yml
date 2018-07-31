@@ -36,5 +36,13 @@
     name: /var/log/mysql
     owner: mysql
     group: mysql
-    mode: 0750
+    mode: 0755
+    state: directory
+
+- name: create socket dir
+  file:
+    name: /var/run/mysqld
+    owner: mysql
+    group: mysql
+    mode: 0755
     state: directory

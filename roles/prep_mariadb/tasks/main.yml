@@ -1,6 +1,9 @@
 ---
 # tasks file for prep_mariadb
 
+- name: include os specific tasks
+  include_tasks: "{{ ansible_distribution }}.yml"
+
 - name: create conf dir
   file:
     name: "{{ mariadb_conf_dir[ansible_distribution] | dirname }}"
@@ -18,29 +21,35 @@
     mode: 0644
   notify: restart mariadb
 
-- name: include os specific tasks
-  include_tasks: "{{ ansible_distribution }}.yml"
+- name: start and enable MariaDB
+  systemd:
+    name: mysql
+    state: restarted
 
 - name: remove anonymous user
   mysql_user:
     name: ''
     host_all: yes
     state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: remove test db
   mysql_db:
     name: test
     state: absent
-
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  
 - name: create nextcloud db
   mysql_db:
     name: "{{ nc_db }}"
     collation: utf8mb4_general_ci
     encoding: utf8mb4
-
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  
 - name: create nextcloud user
   mysql_user:
     name:     "{{ nc_db_user }}"
     password: "{{ nc_db_passwd }}"
     priv:     "{{ nc_db }}.*:ALL"
     state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
