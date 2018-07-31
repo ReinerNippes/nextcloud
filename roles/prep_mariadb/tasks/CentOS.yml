@@ -19,17 +19,23 @@
   with_items:
     - MariaDB-server
     - MariaDB-client
+  register: install_mariadb
 
 - name: install MySQLdb python package for database setup
   yum: 
     name: MySQL-python 
     state: present
 
-- name: start and enable MariaDB
+- name: enable MariaDB
   systemd:
     name: mysql
-    state: started
     enabled: true
+
+- name: stop if installed
+  systemd:
+    name: mysql
+    state: stopped
+  when: install_mariadb is changed
     
 - name: create log dir
   file:
