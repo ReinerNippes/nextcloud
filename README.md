@@ -110,25 +110,25 @@ nc_mail_smtpname     =
 nc_mail_smtppwd      =
 
 # Allways get the latest version of Nextcloud
-# Change if you want to use another version
-next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
-
-# Backup
-backup_folder   = /var/nc-backup
+next_archive   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
 # Install turn server for Nextcloud Talk
-talk_install         = false|true
+talk_install         = true
 # Create your personal secret by issuing "openssl rand -hex 32"
 talk_static_auth_secret   = 60ca3ebe2242f79f0186bb2bf97f92b3c5411da22bf70e10d84d7b4824b706d7
 
-# with restic
+# restic Backup
+# if backup_folder is empty restic won't be installed
+# more info about restic: https://restic.readthedocs.io/en/latest/
+backup_folder   = '' # e.g. /var/nc-backup
+
 restic_password = pML83V8DgCrexv
 backup_day      = *
 backup_hour     = 4
 backup_minute   = 0
 
 # Install Collabora Online
-install_collabora     = false|true
+install_collabora     = true
 
 # change dhparam numbits if generating takes to long
 #dhparam_numbits = 1024
