@@ -100,10 +100,11 @@ nc_mail_smtppwd      =
 #Allways get the latest version of Nextcloud
 next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
-# Backup
-backup_folder   = /var/nc-backup
+# restic Backup
+# if backup_folder is empty restic won't be installed
+# more info about restic: https://restic.readthedocs.io/en/latest/
+backup_folder   = '' # e.g. /var/nc-backup
 
-# with restic
 restic_password = pML83V8DgCrexv
 backup_day      = *
 backup_hour     = 4
