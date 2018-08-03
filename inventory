@@ -54,14 +54,13 @@ nc_db_user           = 'nextcloud'
 nc_db_passwd         = 'next12345'
 nc_db_prefix         = 'oc_'
 
+#Allways get the latest version of Nextcloud
+next_archive   = https://download.nextcloud.com/server/releases/latest.tar.bz2
+
 # Install turn server for Nextcloud Talk
 talk_install         = true
 # Create your personal secret by issuing "openssl rand -hex 32"
 talk_static_auth_secret   = 60ca3ebe2242f79f0186bb2bf97f92b3c5411da22bf70e10d84d7b4824b706d7
-
-
-#Allways get the latest version of Nextcloud
-next_archive   = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
 # restic Backup
 # if backup_folder is empty restic won't be installed
