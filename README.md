@@ -9,8 +9,10 @@ Ansible Playbook to install
 * MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
 * redis - https://redis.io/
 * restic backup - https://restic.readthedocs.io
-* Collabora Online
 * Nextcloud Talk
+* Collabora Online https://www.collaboraoffice.com/ 
+or
+* Onlyoffice https://www.onlyoffice.com
 
 In less than 20 minutes.
 
