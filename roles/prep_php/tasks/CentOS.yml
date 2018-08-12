@@ -40,7 +40,7 @@
     - php-cli
     - php-fpm
     - php-gd
-    - "{{ php_db_extension[nc_db_type] }}"
+    - "{% if nc_db_type == 'mysql' %}php-mysql{% elif nc_db_type == 'pqsql' %}php-pgsql{% endif %}"
     - php-curl
     - php-xml
     - php-zip
