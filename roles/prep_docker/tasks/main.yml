@@ -18,4 +18,10 @@
     state:         started
     enabled:       true
     daemon_reload: yes
-  
+
+- name: add to group docker
+  user:
+    name: '{{ ansible_env.SUDO_USER }}'
+    append: true
+    groups: docker
+  when: ansible_env.SUDO_USER != 'root'
