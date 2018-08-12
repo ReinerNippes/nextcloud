@@ -40,7 +40,7 @@
     - php-cli
     - php-fpm
     - php-gd
-    - php-mysql
+    - "{{ php_db_extension[nc_db_type] }}"
     - php-curl
     - php-xml
     - php-zip
