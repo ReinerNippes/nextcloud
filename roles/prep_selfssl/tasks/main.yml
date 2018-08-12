@@ -1,10 +1,18 @@
 ---
 # tasks file for prep_selfssl
 
+- name: ensure "{{ dhparam_path | dirname }}" exists
+  file:
+    name: "{{ dhparam_path | dirname }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
 - name: create openssl dhparam (this may take a while)
-  shell: "openssl dhparam -out /etc/ssl/certs/dhparam.pem {{ dhparam_numbits }}"
-  args:
-    creates: /etc/ssl/certs/dhparam.pem
+  openssl_dhparam:
+    path: "{{ dhparam_path }}"
+    size: "{{ dhparam_numbits | default(4096) }}"
 
 - name: create fake certificate directory
   file:

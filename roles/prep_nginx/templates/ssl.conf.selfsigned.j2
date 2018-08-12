@@ -1,6 +1,6 @@
 ssl_certificate /etc/nginx/certs/cert.pem;
 ssl_certificate_key /etc/nginx/certs/key.pem;
-ssl_dhparam /etc/ssl/certs/dhparam.pem;
+ssl_dhparam {{ dhparam_path }};
 ssl_session_timeout 1d;
 ssl_session_cache shared:SSL:50m;
 ssl_session_tickets off;
