@@ -34,13 +34,13 @@ Install
 # clone this repo
 git clone https://github.com/ReinerNippes/nextcloud13
 
-# change to nextcloud directory
+# change to nextcloud13 directory
 cd nextcloud13
 
 # if you want to use the devel branch
 git checkout devel
 
-# install ansible and python-mysql
+# install ansible and needed python modules
 sh ./prepare_system.sh
 
 # edit variables
@@ -80,24 +80,24 @@ nginx_resolver = '8.8.8.8'
 # Nextcloud varibales
 
 # data dir
-nc_datadir = /var/nc-data
+nc_datadir           = /var/nc-data
 
 # admin user
-nc_admin   = 'admin'
-nc_passwd  = 'tOpSecrET2018'
+nc_admin             = 'admin'
+nc_passwd            = 'tOpSecrET2018'
 
-# database
-nc_db_type          = 'mysql'    # (MariaDB)
-#nc_db_type           = 'pgsql'  # (PostgreSQL docker container)
-nc_db         = 'nextcloud'
+# database settings
+#nc_db_type          = 'mysql'        # (MariaDB)
+nc_db_type           = 'pgsql'        # (PostgreSQL)
 nc_db_host           = 'localhost'
-nc_db_user    = 'nextcloud'
-nc_db_passwd  = 'next12345'
-nc_db_prefix  = 'oc_'
+nc_db                = 'nextcloud'
+nc_db_user           = 'nextcloud'
+nc_db_passwd         = ''              # leave empty to generate random password
+nc_db_prefix         = 'oc_'
 
 # Nextcloud mail setup
-nc_configure_mail = true
-nc_mail_from         =
+nc_configure_mail    = false
+nc_mail_from         = 
 nc_mail_smtpmode     = smtp
 nc_mail_smtpauthtype = LOGIN
 nc_mail_domain       =
@@ -107,31 +107,37 @@ nc_mail_smtpauth     = 1
 nc_mail_smtphost     =
 nc_mail_smtpport     = 587
 nc_mail_smtpname     =
-nc_mail_smtppwd      =
-
-# Allways get the latest version of Nextcloud
-next_archive   = https://download.nextcloud.com/server/releases/latest.tar.bz2
+nc_mail_smtppwd      = 
 
 # Install turn server for Nextcloud Talk
 talk_install         = true
-# Create your personal secret by issuing "openssl rand -hex 32"
-talk_static_auth_secret   = 60ca3ebe2242f79f0186bb2bf97f92b3c5411da22bf70e10d84d7b4824b706d7
 
-# restic Backup
-# if backup_folder is empty restic won't be installed
+# Allways get the latest version of Nextcloud
+next_archive         = https://download.nextcloud.com/server/releases/latest.tar.bz2
+
+# Install restic backup tool if backup_folder is not empty
 # more info about restic: https://restic.readthedocs.io/en/latest/
-backup_folder   = '' # e.g. /var/nc-backup
+backup_folder        = '' # e.g. /var/nc-backup
+# crontab settings restic for restic
+backup_day           = *
+backup_hour          = 4
+backup_minute        = 0
 
-restic_password = pML83V8DgCrexv
-backup_day      = *
-backup_hour     = 4
-backup_minute   = 0
+# Install Collabra Online
+# more info about collabora office: https://www.collaboraoffice.com/
+install_collabora     = false
 
-# Install Collabora Online
-install_collabora     = true
+# Install Online Office
+# more info about onlyoffice office: https://www.onlyoffice.com
+install_onlyoffice    = true
 
+# 
 # change dhparam numbits if generating takes to long
 #dhparam_numbits = 1024
+
+# 
+# defaults path of your generated credentials (e.g. database, talk, onlyoffice)
+credential_store: /etc/nextcloud
 ```
 
 
