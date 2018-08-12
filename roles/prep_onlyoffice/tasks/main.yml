@@ -59,7 +59,7 @@
     env:
       JWT_ENABLED:          'true'
       JWT_SECRET:           "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
-      SSL_CERTIFICATE_PATH: /etc/letsencrypt/live/{{ fqdn }}/cert.pem
+      SSL_CERTIFICATE_PATH: /etc/letsencrypt/live/{{ fqdn }}/fullchain.pem
       SSL_KEY_PATH:         /etc/letsencrypt/live/{{ fqdn }}/privkey.pem
       SSL_DHPARAM_PATH:     '{{ dhparam_path }}'
     volumes:
