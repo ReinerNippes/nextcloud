@@ -22,20 +22,7 @@ cert_email = nc@example.org
 # e.g. your fritz.box ; default ist google dns server 8.8.8.8
 nginx_resolver = '8.8.8.8'
 
-# Nextcloud mail setup
-nc_configure_mail    = false
-nc_mail_from         = 
-nc_mail_smtpmode     = smtp
-nc_mail_smtpauthtype = LOGIN
-nc_mail_domain       =
-nc_mail_smtpname     =
-nc_mail_smtpsecure   = tls
-nc_mail_smtpauth     = 1
-nc_mail_smtphost     =
-nc_mail_smtpport     = 587
-nc_mail_smtpname     =
-nc_mail_smtppwd      = 
-
+#
 # Nextcloud varibales
 
 # data dir
@@ -54,24 +41,40 @@ nc_db_user           = 'nextcloud'
 nc_db_passwd         = ''              # leave empty to generate random password
 nc_db_prefix         = 'oc_'
 
+# Nextcloud mail setup
+nc_configure_mail    = false
+nc_mail_from         = 
+nc_mail_smtpmode     = smtp
+nc_mail_smtpauthtype = LOGIN
+nc_mail_domain       =
+nc_mail_smtpname     =
+nc_mail_smtpsecure   = tls
+nc_mail_smtpauth     = 1
+nc_mail_smtphost     =
+nc_mail_smtpport     = 587
+nc_mail_smtpname     =
+nc_mail_smtppwd      = 
+
 # Install turn server for Nextcloud Talk
 talk_install         = true
 
-#Allways get the latest version of Nextcloud
+# Allways get the latest version of Nextcloud
 next_archive         = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
 # Install restic backup tool if backup_folder is not empty
+# more info about restic: https://restic.readthedocs.io/en/latest/
 backup_folder        = '' # e.g. /var/nc-backup
-
 # crontab settings restic for restic
 backup_day           = *
 backup_hour          = 4
 backup_minute        = 0
 
 # Install Collabra Online
+# more info about collabora office: https://www.collaboraoffice.com/
 install_collabora     = false
 
 # Install Online Office
+# more info about onlyoffice office: https://www.onlyoffice.com
 install_onlyoffice    = true
 
 # 
