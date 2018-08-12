@@ -53,4 +53,5 @@ galaxy_info:
     #       Maximum 20 tags per role.
 
 dependencies: 
+  - prep_secrets
   - prep_docker

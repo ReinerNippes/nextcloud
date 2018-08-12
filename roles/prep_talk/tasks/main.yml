@@ -21,7 +21,7 @@
     chdir: /var/www/nextcloud/
 
 - name: set turn server
-  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set spreed turn_servers --value '[{"server":"{{ fqdn }}:5349","secret":"{{ talk_static_auth_secret }}","protocols":"udp,tcp"}]'
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set spreed turn_servers --value '[{"server":"{{ fqdn }}:5349","secret":"{{ lookup('password', '{{ credential_store }}/talk_secret chars=ascii_letters,digits length=32') | lower }}","protocols":"udp,tcp"}]'
   args:
     chdir: /var/www/nextcloud/
     
@@ -32,5 +32,4 @@
     ufw_applications: 
       - { name: TurnServer, rule: allow, from_ip: any }
   when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
-
 
