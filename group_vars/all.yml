@@ -24,3 +24,6 @@ pg_group_id:
   'Amazon': '70'
   'Ubuntu': '70'
   'Debian': '70'
+
+credential_store: /etc/nextcloud
+dhparam_path:     /etc/nextcloud/dhparam/dhparam.pem
