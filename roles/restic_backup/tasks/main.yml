@@ -38,8 +38,8 @@
 - name: initialize repository
   command: '{{ restic_install_path }}/restic init'
   environment:
-    RESTIC_REPOSITORY: '{{ backup_folder }}'
-    RESTIC_PASSWORD: '{{ restic_password }}'
+    RESTIC_REPOSITORY: "{{ backup_folder }}"
+    RESTIC_PASSWORD:   "{{ lookup('password', '{{ credential_store }}/restic_secret chars=ascii_letters,digits length=32') }}"
   no_log: True
   register: restic_init
   changed_when: "'created restic backend' in restic_init.stdout"

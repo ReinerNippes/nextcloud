@@ -1,0 +1,10 @@
+---
+# tasks file for prep_secrets
+
+- name: make sure {{ credential_store }} is available
+  file: 
+    name: '{{ credential_store }}'
+    owner: root
+    group: '{{ ansible_env.SUDO_USER }}'
+    mode:  0775
+    state: directory
