@@ -5,6 +5,6 @@
   file: 
     name: '{{ credential_store }}'
     owner: root
-    group: '{{ ansible_env.SUDO_USER }}'
+    group: "{{ ansible_env.SUDO_USER | default('root') }}"
     mode:  0775
     state: directory
