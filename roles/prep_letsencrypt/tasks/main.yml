@@ -8,7 +8,7 @@
   file:
     name:  "{{ dhparam_path | dirname }}"
     owner: root
-    group: '{{ ansible_env.SUDO_USER }}'
+    group: "{{ ansible_env.SUDO_USER | default('root') }}"
     mode:  0755
     state: directory
 
