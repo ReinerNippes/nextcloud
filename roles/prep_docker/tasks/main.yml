@@ -24,4 +24,4 @@
     name: '{{ ansible_env.SUDO_USER }}'
     append: true
     groups: docker
-  when: ansible_env.SUDO_USER != 'root'
+  when: ansible_env.SUDO_USER | default('root') != 'root'
