@@ -39,3 +39,6 @@
     state: latest
   with_items:
     - nginx
+    - python-pip
+    - python-netaddr
+    

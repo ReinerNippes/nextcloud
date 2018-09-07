@@ -1,0 +1,76 @@
+---
+# tasks file for prep_onlyoffice
+
+- name: configure nginx
+  blockinfile:
+    path: /etc/nginx/nginx.conf 
+    block: |
+      upstream onlyoffice-docker {
+            server 127.0.0.1:8443;
+      }
+    marker: "# {mark} ANSIBLE MANAGED BLOCK collabra"
+    insertafter: server_names_hash_bucket_size(.*)
+  register: nginx_collabora_conf
+
+- name: reload nginx
+  systemd:
+    name: nginx
+    state: reloaded
+  when: nginx_collabora_conf is changed
+
+- name: install onlyoffice app
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install onlyoffice
+  args:
+    chdir: /var/www/nextcloud/
+    creates: /var/www/nextcloud/apps/richdocuments
+  ignore_errors: true
+  
+- name: enable onlyoffice app
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:enable onlyoffice
+  args:
+    chdir: /var/www/nextcloud/
+  
+- name: set onlyoffice server url
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set onlyoffice DocumentServerUrl --value https://{{ fqdn }}:8443
+  args:
+    chdir: /var/www/nextcloud/
+
+- name: set onlyoffice server url
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set onlyoffice jwt_secret --value {{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}
+  args:
+    chdir: /var/www/nextcloud/
+
+
+- name: pull onlyoffice image
+  docker_image:
+    name: onlyoffice/documentserver
+    
+- name: start a onlyoffice container
+  docker_container:
+    name: onlyoffice
+    image: onlyoffice/documentserver
+    state: started
+    restart: yes
+    restart_policy: always
+    interactive: true
+    tty: yes
+    ports:
+     - "8443:443"
+    env:
+      JWT_ENABLED:          'true'
+      JWT_SECRET:           "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
+      SSL_CERTIFICATE_PATH: /etc/letsencrypt/live/{{ fqdn }}/fullchain.pem
+      SSL_KEY_PATH:         /etc/letsencrypt/live/{{ fqdn }}/privkey.pem
+      SSL_DHPARAM_PATH:     '{{ dhparam_path }}'
+    volumes:
+      - '/etc/letsencrypt:/etc/letsencrypt:ro'
+      - '{{ dhparam_path | dirname }}:{{ dhparam_path | dirname }}:ro'
+
+- name: open ufw firewall
+  include_role:
+    name: prep_ufw
+  vars:
+    ufw_rules: 
+      - { port: 8443, rule: allow }
+  when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
+

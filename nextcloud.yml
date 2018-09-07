@@ -6,13 +6,19 @@
   become: true
 
   roles:
+    - { role: prep_ufw,         when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu" }
     - prep_os
-    - { role: restic_backup, when: backup_folder != '' }
     - prep_redis
     - prep_nginx
     - prep_php
-    - prep_mariadb
-    - prep_letsencrypt
+    - { role: prep_mariadb,        when: (nc_db_type == 'mysql') and (nc_db_host == 'localhost') }
+    - { role: prep_postgres,       when: (nc_db_type == 'pgsql') and (nc_db_host == 'localhost') }
+    - { role: prep_letsencrypt,    when: ssl_certificate_type  == 'letsencrypt' }
+    - { role: prep_selfssl,        when: ssl_certificate_type  == 'selfsigned' }
+    - { role: restic_backup,       when: backup_folder != '' }
     - prep_nextcloud
+    - { role: prep_talk,           when: talk_install == 'true' }
+    - { role: prep_collabora,      when: install_collabora == 'true' }
+    - { role: prep_onlyoffice,     when: install_onlyoffice == 'true' }
     - nc_fail2ban
 
