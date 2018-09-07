@@ -36,7 +36,7 @@
       - nginx
   when: ansible_distribution_release == "xenial"
 
-- name: install from nginx repo (ubuntu xenail) 
+- name: install from nginx repo (ubuntu bionic) 
   block:
   - name: install additional packages
     apt:
