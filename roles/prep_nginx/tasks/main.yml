@@ -3,6 +3,12 @@
 
 - name: include os specific tasks
   include_tasks: "{{ ansible_distribution }}.yml"
+  
+- name: stop and enable nginx
+  systemd:
+    name:    nginx
+    state:   stopped
+    enabled: true
 
 - name: create some folders
   file:
@@ -17,6 +23,16 @@
     - { path: '/var/www/letsencrypt',    owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0750' }
     - { path: '/upload_tmp',             owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0755' }
 
+- name: install pip netaddress
+  pip:
+    name: netaddr
+    state: latest
+  when: false
+  
+- name: set netmask
+  set_fact: 
+    net_mask: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}"
+  
 - name: bring /etc/nginx/nginx.conf in place
   template:
     src: nginx.conf.j2
@@ -31,18 +47,19 @@
   template:
     src: nextcloud.conf.j2
     dest: /etc/nginx/conf.d/nextcloud.conf
+    force: no
   notify: restart nginx
 
 - name: nginx config for ssl
   template:
-    src: ssl.conf.j2
-    dest: /etc/nginx/ssl.conf
+    src: ssl.conf.{{ ssl_certificate_type }}.j2
+    dest: /etc/nginx/conf.d/ssl.conf
   notify: restart nginx
 
 - name: copy some nginx config file
   copy:
     src: "{{ item }}"
-    dest: "/etc/nginx/{{ item }}"
+    dest: "/etc/nginx/conf.d/{{ item }}"
     owner: root
     group: root
     mode: 0644

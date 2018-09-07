@@ -1,0 +1,54 @@
+#cloud-config
+
+#
+# Bootstrap Nextcloud
+# 
+# Edit ssh-authorized-keys: and runcmd: according to your needs
+# Insert this as cloud-config/user data at launch of your ec2, droplet, openstack server, etc. pp.
+# Login to your full configured NextCloud/Talk/Collabora-Server
+
+#
+# Create default system user (see below system_info: )
+#
+users:
+  - default
+#
+# Install the minimal set of programs to bootstrap ansible and nextcloud
+#
+packages:
+    - vim
+    - mc
+    - wget
+    - curl
+#
+# Update server already at launch time
+#
+package_upgrade: true
+#
+# Create default system user
+# Edit the name and ssh-authorized-keys according to your needs
+#
+system_info:
+  default_user:
+    name: ec2-user
+    uid: 1000
+    gecos: "cloud-init created default user"
+    lock_passwd: True
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    home: /home/ec2-user
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - 'ssh-rsa <your ssh pub key here>'
+#
+# Install and configure NextCloud in three steps
+# Put any changes to the settings in the ansible inventory file as extra variables to ansible-pull
+# e.g.: ansible-pull ... -e "next_archive=https://download.nextcloud.com/server/prereleases/nextcloud-13.0.5RC2.tar.bz2" -e "nc_passwd=your_secret"
+#
+runcmd:
+  - curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud13/prepare_system.sh | /bin/bash
+  - # 
+  - # Insert a command to set a DynDNS record for this server here
+  - # e.g. Strato DynDNS
+  - # curl --silent --show-error --insecure --user [BENUTZERNAME]:[PASSWORT] https://dyndns.strato.com/nic/update?hostname=[HOSTNAME]
+  - HOME=/root ansible-pull --clean --force -d /root/nextcloud -i 'nextcloud' --checkout devel -U https://github.com/ReinerNippes/nextcloud13.git nextcloud.yml -e "dhparam_numbits=1024" -e "fqdn=nextcloud.domain.com"
+

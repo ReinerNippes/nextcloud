@@ -1,0 +1,39 @@
+---
+# tasks file for prep_selfssl
+
+- name: ensure "{{ dhparam_path | dirname }}" exists
+  file:
+    name: "{{ dhparam_path | dirname }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
+- name: create openssl dhparam (this may take a while)
+  openssl_dhparam:
+    path: "{{ dhparam_path }}"
+    size: "{{ dhparam_numbits | default(4096) }}"
+
+- name: create fake certificate directory
+  file:
+    dest: /etc/nginx/certs
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
+- name: docker pull postgres
+  docker_image:
+    name: paulczar/omgwtfssl
+
+- name: create selfsigned certifcate (doocker)
+  docker_container:
+    name: omgwtfssl
+    image: paulczar/omgwtfssl
+    state: started
+    restart_policy: 'no'
+    env:
+      SSL_SUBJECT: "{{ fqdn }}"
+    volumes: 
+      - /etc/nginx/certs:/certs
+  notify: restart nginx

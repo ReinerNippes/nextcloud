@@ -27,7 +27,7 @@
   with_items:
     - php7.2-fpm
     - php7.2-gd
-    - php7.2-mysql
+    - "{{ php_db_extension[nc_db_type] }}"
     - php7.2-curl
     - php7.2-xml
     - php7.2-zip

@@ -4,6 +4,14 @@
 - name: include os specific tasks
   include_tasks: "{{ ansible_distribution }}.yml"
 
+- name: create conf dir
+  file:
+    name: "{{ mariadb_conf_dir[ansible_distribution] | dirname }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+
 - name: configure mariadb
   copy:
     src: my.cnf
@@ -12,24 +20,36 @@
     group: root
     mode: 0644
   notify: restart mariadb
-#  when: false
+
+- name: start and enable MariaDB
+  systemd:
+    name: mysql
+    state: restarted
 
 - name: remove anonymous user
   mysql_user:
     name: ''
     host_all: yes
     state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: remove test db
   mysql_db:
     name: test
     state: absent
-
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  
 - name: create nextcloud db
   mysql_db:
     name: "{{ nc_db }}"
     collation: utf8mb4_general_ci
     encoding: utf8mb4
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: generate db passwd if nc_db_passwd is empty
+  set_fact: 
+    nc_db_passwd: "{{ lookup('password', '{{ credential_store }}/database_secret chars=ascii_letters,digits length=32') }}"
+  when: nc_db_passwd == ''
 
 - name: create nextcloud user
   mysql_user:
@@ -37,3 +57,4 @@
     password: "{{ nc_db_passwd }}"
     priv:     "{{ nc_db }}.*:ALL"
     state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock

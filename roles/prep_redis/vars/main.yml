@@ -6,7 +6,3 @@ redis_conf_path:
   'Ubuntu': '/etc/redis'
   'Debian': '/etc/redis' 
   
-web_user:
-  'CentOS': 'nginx'
-  'Ubuntu': 'www-data'
-  'Debian': 'www-data'

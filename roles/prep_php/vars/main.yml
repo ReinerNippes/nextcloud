@@ -1,6 +1,10 @@
 ---
 # vars file for prep_php
 
+php_db_extension:
+  mysql: php7.2-mysql
+  pgsql: php7.2-pgsql
+
 php_service_name:
   "CentOS": php-fpm
   "Ubuntu": php7.2-fpm

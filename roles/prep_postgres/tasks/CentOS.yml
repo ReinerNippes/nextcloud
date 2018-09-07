@@ -1,0 +1,13 @@
+---
+# CentOS related OS tasks
+
+- name: add postgres repo
+  yum:
+    name: https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm
+    state: present
+
+- name: install postgres client
+  yum:
+    name: postgresql10
+    state: latest
+    

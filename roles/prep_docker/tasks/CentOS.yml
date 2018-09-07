@@ -1,0 +1,18 @@
+---
+# CentOS related OS tasks
+
+- name: add docker repo
+  get_url: 
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker.repo
+    owner: root
+    group: root
+    mode: 0644
+
+- name: install docker
+  yum: 
+    name: "{{ item }}" 
+    state: latest
+  with_items:
+    - docker-ce
+#    - python2-pip

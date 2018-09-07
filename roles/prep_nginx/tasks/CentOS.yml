@@ -24,6 +24,8 @@
     enablerepo: nginx
   with_items:
     - nginx
+    - python-pip
+    - python-netaddr
 
 - name: open firewall ports 80/443
   firewalld:
@@ -34,3 +36,4 @@
     - http
     - https
     - ssh
+  when: false

@@ -32,9 +32,18 @@
     - unzip
     - bzip2
     - screen
+    - python2-pip
     - curl
     - wget
     - perl-File-FcntlLock 
     - ImageMagick
     - postfix
     - firewalld
+    - facter
+    
+- name: remove unneeded packages
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - python-requests

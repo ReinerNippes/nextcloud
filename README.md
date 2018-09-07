@@ -4,19 +4,23 @@ Nextcloud 13
 Ansible Playbook to install
 
 * Nextcloud 13 - https://nextcloud.com/
-* nginx 1.14 - https://nginx.org/
+* nginx 1.15 - https://nginx.org/
 * PHP 7.2 - http://www.php.net/
-* MariaDB 10 - https://mariadb.org/
+* MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
 * redis - https://redis.io/
 * restic backup - https://restic.readthedocs.io
+* Nextcloud Talk
+* Collabora Online https://www.collaboraoffice.com/ 
+or
+* Onlyoffice https://www.onlyoffice.com
 
 In less than 20 minutes.
 
-Most of settings are recommentations from C. Rieger
+Most of the settings are recommentations from C. Rieger
 
 Visit his page for all details: https://www.c-rieger.de/nextcloud-13-nginx-installation-guide-for-ubuntu-18-04-lts/
 
-Warning: Your existing nginx setup will be over written. Up to now I tested this only on new AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
+Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
 
 
 Requirements
@@ -32,10 +36,13 @@ Install
 # clone this repo
 git clone https://github.com/ReinerNippes/nextcloud13
 
-# change to nextcloud directory
+# change to nextcloud13 directory
 cd nextcloud13
 
-# install ansible and python-mysql
+# if you want to use the devel branch
+git checkout devel
+
+# install ansible and needed python modules
 sh ./prepare_system.sh
 
 # edit variables
@@ -47,13 +54,18 @@ ansible-playbook nextcloud.yml
 ```
 
 Login to your nextcloud web site https://\<fqdn\> 
+
+
 User and password have been set according to the entries in the inventory.
 
 Role Variables
 --------------
-All variables are defined in inventory.
+All variables are defined in inventory file.
 ```
-# 
+# Letsencrypt or selfsigned certificate
+ssl_certificate_type  = 'letsencrypt'
+#ssl_certificate_type = 'selfsigned'
+
 # Your domain name to get a letsencrypt certificate
 fqdn       = nc.example.org
 
@@ -71,21 +83,24 @@ nginx_resolver = '8.8.8.8'
 # Nextcloud varibales
 
 # data dir
-nc_datadir = /var/nc-data
+nc_datadir           = /var/nc-data
 
 # admin user
-nc_admin   = 'admin'
-nc_passwd  = 'tOpSecrET2018'
+nc_admin             = 'admin'
+nc_passwd            = 'tOpSecrET2018'
 
-# database
-nc_db         = 'nextcloud'
-nc_db_user    = 'nextcloud'
-nc_db_passwd  = 'next12345'
-nc_db_prefix  = 'oc_'
+# database settings
+#nc_db_type          = 'mysql'        # (MariaDB)
+nc_db_type           = 'pgsql'        # (PostgreSQL)
+nc_db_host           = 'localhost'
+nc_db                = 'nextcloud'
+nc_db_user           = 'nextcloud'
+nc_db_passwd         = ''              # leave empty to generate random password
+nc_db_prefix         = 'oc_'
 
 # Nextcloud mail setup
-nc_configure_mail = true
-nc_mail_from         =
+nc_configure_mail    = false
+nc_mail_from         = 
 nc_mail_smtpmode     = smtp
 nc_mail_smtpauthtype = LOGIN
 nc_mail_domain       =
@@ -95,14 +110,35 @@ nc_mail_smtpauth     = 1
 nc_mail_smtphost     =
 nc_mail_smtpport     = 587
 nc_mail_smtpname     =
-nc_mail_smtppwd      =
+nc_mail_smtppwd      = 
 
-#Allways get the latest version of Nextcloud
-next_tgz   = https://download.nextcloud.com/server/releases/latest.tar.bz2
+# Install turn server for Nextcloud Talk
+talk_install         = true
 
+# Allways get the latest version of Nextcloud
+next_archive         = https://download.nextcloud.com/server/releases/latest.tar.bz2
+
+# Install restic backup tool if backup_folder is not empty
+# more info about restic: https://restic.readthedocs.io/en/latest/
+backup_folder        = '' # e.g. /var/nc-backup
+# crontab settings restic for restic
+backup_day           = *
+backup_hour          = 4
+backup_minute        = 0
+
+# Install Collabra Online
+# more info about collabora office: https://www.collaboraoffice.com/
+install_collabora     = false
+
+# Install Online Office
+# more info about onlyoffice office: https://www.onlyoffice.com
+install_onlyoffice    = true
+
+# 
 # change dhparam numbits if generating takes to long
 #dhparam_numbits = 1024
 
+# 
+# defaults path of your generated credentials (e.g. database, talk, onlyoffice)
+credential_store      = /etc/nextcloud
 ```
-
-
