@@ -53,7 +53,8 @@ ansible-playbook nextcloud.yml
 
 ```
 
-Log into your nextcloud web site https://\<fqdn\> 
+Login to your nextcloud web site https://\<fqdn\> 
+
 
 User and password have been set according to the entries in the inventory.
 
@@ -141,5 +142,3 @@ install_onlyoffice    = true
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)
 credential_store      = /etc/nextcloud
 ```
-
-
