@@ -6,7 +6,7 @@ prepare_ubuntu() {
 	sudo apt install software-properties-common -y
 	sudo apt-add-repository ppa:ansible/ansible -y
 	sudo apt update -y
-	sudo apt install ansible python-mysqldb mc vim git facters -y
+	sudo apt install ansible python-mysqldb mc vim git facter -y
 	echo
 	echo "Ubuntu Sytem ready for nextcloud." 
 	echo
