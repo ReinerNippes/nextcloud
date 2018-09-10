@@ -45,7 +45,7 @@ system_info:
 # e.g.: ansible-pull ... -e "next_archive=https://download.nextcloud.com/server/prereleases/nextcloud-13.0.5RC2.tar.bz2" -e "nc_passwd=your_secret"
 #
 runcmd:
-  - curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud13/prepare_system.sh | /bin/bash
+  - curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud13/master/prepare_system.sh | /bin/bash
   - # 
   - # Insert a command to set a DynDNS record for this server here
   - # e.g. Strato DynDNS
