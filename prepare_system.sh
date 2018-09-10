@@ -13,26 +13,24 @@ prepare_ubuntu() {
 }
 
 prepare_debian() { 
-	sudo apt install dirmngr mc vim git -y
+	sudo apt install dirmngr mc vim git facter -y
 	sudo apt update -y
 	sudo apt install python-mysqldb python-pip python3-pip facter -y
 	sudo pip install pip -U
 	sudo pip install setuptools -U
 	sudo pip install ansible -U
-	sudo pip install netaddr -U
 	echo
 	echo "Debian Sytem ready for nextcloud."
 	echo
 }
 
 prepare_raspbian() {
-	sudo apt install dirmngr mc vim git libffi-dev -y
+	sudo apt install dirmngr mc vim git libffi-dev facter -y
 	sudo apt dist-upgrade -y
 	sudo apt install python-mysqldb python-pip python3-pip facter -y
 	sudo pip install pip -U
 	sudo pip install setuptools -U
 	sudo pip install ansible -U
-	sudo pip install netaddr -U
 	echo
 	echo "Rasbpian System ready for nextcloud."
 	echo
