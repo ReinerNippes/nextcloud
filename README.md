@@ -1,9 +1,9 @@
-Nextcloud 13
+Nextcloud 14
 =========
 
 Ansible Playbook to install
 
-* Nextcloud 13 - https://nextcloud.com/
+* Nextcloud 14 - https://nextcloud.com/
 * nginx 1.15 - https://nginx.org/
 * PHP 7.2 - http://www.php.net/
 * MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
@@ -18,7 +18,7 @@ In less than 20 minutes.
 
 Most of the settings are recommentations from C. Rieger
 
-Visit his page for all details: https://www.c-rieger.de/nextcloud-13-nginx-installation-guide-for-ubuntu-18-04-lts/
+Visit his page for all details: https://www.c-rieger.de/
 
 Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
 
@@ -38,9 +38,6 @@ git clone https://github.com/ReinerNippes/nextcloud13
 
 # change to nextcloud13 directory
 cd nextcloud13
-
-# if you want to use the devel branch
-git checkout devel
 
 # install ansible and needed python modules
 sh ./prepare_system.sh
@@ -136,7 +133,7 @@ install_onlyoffice    = true
 
 # 
 # change dhparam numbits if generating takes to long
-#dhparam_numbits = 1024
+# dhparam_numbits = 1024
 
 # 
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)
