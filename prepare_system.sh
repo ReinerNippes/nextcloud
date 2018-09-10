@@ -6,7 +6,7 @@ prepare_ubuntu() {
 	sudo apt install software-properties-common -y
 	sudo apt-add-repository ppa:ansible/ansible -y
 	sudo apt update -y
-	sudo apt install ansible python-mysqldb mc vim git facter -y
+	sudo apt install ansible python-mysqldb python-netaddr mc vim git facter -y
 	echo
 	echo "Ubuntu Sytem ready for nextcloud." 
 	echo
@@ -15,7 +15,7 @@ prepare_ubuntu() {
 prepare_debian() { 
 	sudo apt install dirmngr mc vim git facter -y
 	sudo apt update -y
-	sudo apt install python-mysqldb python-pip python3-pip -y
+	sudo apt install python-mysqldb python-pip python3-pip facter -y
 	sudo pip install pip -U
 	sudo pip install setuptools -U
 	sudo pip install ansible -U
@@ -27,7 +27,7 @@ prepare_debian() {
 prepare_raspbian() {
 	sudo apt install dirmngr mc vim git libffi-dev facter -y
 	sudo apt dist-upgrade -y
-	sudo apt install python-mysqldb python-pip python3-pip -y
+	sudo apt install python-mysqldb python-pip python3-pip facter -y
 	sudo pip install pip -U
 	sudo pip install setuptools -U
 	sudo pip install ansible -U
@@ -38,7 +38,7 @@ prepare_raspbian() {
 
 prepare_centos() { 
 	sudo yum install epel-release -y
-	sudo yum install ansible git vim mc python-mysqldb facter -y
+	sudo yum install ansible git vim mc python-mysqldb python-netaddr facter -y
 	sudo yum update -y
 	echo
 	echo "CentOS Sytem ready for nextcloud."
