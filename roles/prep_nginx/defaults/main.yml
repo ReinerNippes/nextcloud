@@ -1,2 +1,4 @@
 ---
 # defaults file for prep_nginx
+
+fqdn: ''
