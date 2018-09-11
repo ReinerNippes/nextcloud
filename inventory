@@ -4,15 +4,18 @@ localhost
 [nextcloud:vars]
 connection=local
 
-# Letsencrypt or selfsigned certificate
-ssl_certificate_type  = 'letsencrypt'
-#ssl_certificate_type  = 'selfsigned'
+# selfsigned certificate as default
+ssl_certificate_type  = 'selfsigned'
 
-# Your domain name to get a letsencrypt certificate
-fqdn       = nc.example.org
+# Letsencrypt or selfsigned certificate
+# ssl_certificate_type  = 'letsencrypt'
+
+# Server domain name to get a certificate
+# Default is the fqdn of the machine 
+# fqdn       = nc.example.org
 
 # Your email adresse for letsencrypt
-cert_email = nc@example.org
+# cert_email = nc@example.org
 
 # receive a certificate from from staging
 # uncomment if you want to use letsencrypt staging environment
