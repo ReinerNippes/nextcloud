@@ -46,6 +46,7 @@
 - name: use ec2 public hostname if fqdn is not defined
   set_fact:
     fqdn: "{{ fqdn if ( fqdn != '' ) else  facter_ec2_metadata['public-hostname'] }}"
+  when: facter_ec2_metadata is defined
 
 - name: use ansible_fqdn if fqdn is not defined
   set_fact:
