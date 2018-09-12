@@ -35,6 +35,7 @@
     - php7.2-mbstring
     - php7.2-json
     - php7.2-bz2
+    - php7.2-ldap
     - php-apcu
     - php-imagick
     - php-smbclient
