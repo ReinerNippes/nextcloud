@@ -55,6 +55,7 @@
     - php-gmp
     - php-intl
     - php-imap
+    - php-ldap
     - php-opcache
     - php-mcrypt
     - php-mysqlnd
