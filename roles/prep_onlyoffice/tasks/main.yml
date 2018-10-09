@@ -22,7 +22,7 @@
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install onlyoffice
   args:
     chdir: /var/www/nextcloud/
-    creates: /var/www/nextcloud/apps/richdocuments
+    creates: /var/www/nextcloud/apps/onlyoffice
   ignore_errors: true
   
 - name: enable onlyoffice app
