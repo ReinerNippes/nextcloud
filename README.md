@@ -34,10 +34,10 @@ Install
 -------
 ```
 # clone this repo
-git clone https://github.com/ReinerNippes/nextcloud13
+git clone https://github.com/ReinerNippes/nextcloud
 
 # change to nextcloud13 directory
-cd nextcloud13
+cd nextcloud
 
 # install ansible and needed python modules
 sh ./prepare_system.sh
