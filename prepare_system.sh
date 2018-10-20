@@ -2,77 +2,86 @@
 #
 # Prepare system for nextcloud devel
 #
-prepare_ubuntu() { 
-	sudo apt install software-properties-common -y
-	sudo apt-add-repository ppa:ansible/ansible -y
-	sudo apt update -y
-	sudo apt install ansible python-mysqldb python-netaddr mc vim git facter -y
-	echo
-	echo "Ubuntu Sytem ready for nextcloud." 
-	echo
+prepare_ubuntu() {
+        $SUDO apt install software-properties-common -y
+        $SUDO apt-add-repository ppa:ansible/ansible -y
+        $SUDO apt update -y
+        $SUDO apt install ansible python-mysqldb python-netaddr mc vim git facter -y
+        echo
+        echo "Ubuntu Sytem ready for nextcloud."
+        echo
 }
 
-prepare_debian() { 
-	sudo apt install dirmngr mc vim git facter -y
-	sudo apt update -y
-	sudo apt install python-mysqldb python-pip python3-pip facter -y
-	sudo pip install pip -U
-	sudo pip install setuptools -U
-	sudo pip install ansible -U
-	echo
-	echo "Debian Sytem ready for nextcloud."
-	echo
+prepare_debian() {
+        $SUDO apt install dirmngr mc vim git facter -y
+        $SUDO apt update -y
+        $SUDO apt install python-mysqldb python-pip python3-pip facter -y
+        $SUDO pip install pip -U
+        $SUDO pip install setuptools -U
+        $SUDO pip install ansible -U
+        echo
+        echo "Debian Sytem ready for nextcloud."
+        echo
 }
 
 prepare_raspbian() {
-	sudo apt install dirmngr mc vim git libffi-dev facter -y
-	sudo apt dist-upgrade -y
-	sudo apt install python-mysqldb python-pip python3-pip facter -y
-	sudo pip install pip -U
-	sudo pip install setuptools -U
-	sudo pip install ansible -U
-	echo
-	echo "Rasbpian System ready for nextcloud."
-	echo
+        $SUDO apt install dirmngr mc vim git libffi-dev facter -y
+        $SUDO apt dist-upgrade -y
+        $SUDO apt install python-mysqldb python-pip python3-pip facter -y
+        $SUDO pip install pip -U
+        $SUDO pip install setuptools -U
+        $SUDO pip install ansible -U
+        echo
+        echo "Rasbpian System ready for nextcloud."
+        echo
 }
 
-prepare_centos() { 
-	sudo yum install epel-release -y
-	sudo yum install ansible git vim mc python-mysqldb python-netaddr facter -y
-	sudo yum update -y
-	echo
-	echo "CentOS Sytem ready for nextcloud."
-	echo
+prepare_centos() {
+        $SUDO yum install epel-release -y
+        $SUDO yum install ansible git vim mc python-mysqldb python-netaddr facter -y
+        $SUDO yum update -y
+        echo
+        echo "CentOS Sytem ready for nextcloud."
+        echo
 }
 
-usage() { 
-	echo
-	echo "Linux distribution not detected."
-	echo "Use: IB=[Ubuntu|Debian|CentOS|raspbian] setup_ec2.sh"
-	echo "Other distributions not yet supported."
-	echo
+usage() {
+        echo
+        echo "Linux distribution not detected."
+        echo "Use: IB=[Ubuntu|Debian|CentOS|raspbian] setup_ec2.sh"
+        echo "Other distributions not yet supported."
+        echo
 }
 
-if [  -f /etc/os-release ]; then 
-	. /etc/os-release
+# get infos about linux distro
+if [  -f /etc/os-release ]; then
+        . /etc/os-release
 elif [ -f /etc/debian_version ]; then
-	$ID=debian
+        $ID=debian
 fi
-	
+
+# root or not
+if [[ $EUID -ne 0 ]]; then
+  $SUDO=sudo
+else
+  $SUDO=''
+fi
+
+
 case $ID in
-	'ubuntu')
-		prepare_ubuntu
-	;;
-	'debian')
-		prepare_debian
-	;;
+        'ubuntu')
+                prepare_ubuntu
+        ;;
+        'debian')
+                prepare_debian
+        ;;
         'raspbian')
                 prepare_raspbian
         ;;
-	'centos')
-		prepare_centos
-	;;
-	*)
-		usage
-	;;
+        'centos')
+                prepare_centos
+        ;;
+        *)
+                usage
+        ;;
 esac
