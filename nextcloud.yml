@@ -1,6 +1,6 @@
 ---
 
-- name: install nextcloud 13
+- name: install nextcloud
   hosts: nextcloud
   connection: local
   become: true
