@@ -1,5 +1,9 @@
 listening-port=3478
+{% if ssl_certificate_type is defined %}
 tls-listening-port=5349
+{% else %}
+no-tls
+{% endif %}
 fingerprint
 lt-cred-mech
 use-auth-secret
@@ -8,8 +12,17 @@ realm={{ fqdn }}
 total-quota=100
 bps-capacity=0
 stale-nonce
+{% if ssl_certificate_type is defined %}
+{% if ssl_certificate_type  == 'letsencrypt' %}
 cert=/etc/letsencrypt/live/{{ fqdn }}/fullchain.pem
 pkey=/etc/letsencrypt/live/{{ fqdn }}/privkey.pem
+{% endif %}
+{% if ssl_certificate_type  == 'selfsigned' %}
+cert=/etc/nginx/certs/cert.pem
+pkey=/etc/nginx/certs/key.pem;
+{% endif %}
 cipher-list="ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AES:RSA+3DES:!ADH:!AECDH:!MD5"
+{% endif %}
 no-loopback-peers
 no-multicast-peers
+
