@@ -18,6 +18,10 @@
     group: root
     mode:  0644
     force: true
-  notify:  restart coturn
+  notify:  restart turnserver
 
-    
+- name: enable turnserver
+  systemd:
+    name: turnserver
+    state: started
+    enabled: true    
