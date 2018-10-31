@@ -17,7 +17,11 @@
     - docker-ce
 #    - python2-pip
 
-
+- name: enable docker
+  systemd:
+    name: docker
+    daemon_reload: yes
+    enabled: yes
 
 - name: fix docker backend for collabora
   lineinfile:
