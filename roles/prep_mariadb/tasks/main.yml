@@ -31,20 +31,20 @@
     name: ''
     host_all: yes
     state: absent
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_unix_socket: /var/lib/mysql/mysql.sock
 
 - name: remove test db
   mysql_db:
     name: test
     state: absent
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_unix_socket: /var/lib/mysql/mysql.sock
   
 - name: create nextcloud db
   mysql_db:
     name: "{{ nc_db }}"
     collation: utf8mb4_general_ci
     encoding: utf8mb4
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_unix_socket: /var/lib/mysql/mysql.sock
 
 - name: generate db passwd if nc_db_passwd is empty
   set_fact: 
@@ -57,4 +57,4 @@
     password: "{{ nc_db_passwd }}"
     priv:     "{{ nc_db }}.*:ALL"
     state: present
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_unix_socket: /var/lib/mysql/mysql.sock
