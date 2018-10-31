@@ -19,7 +19,7 @@ pkey=/etc/letsencrypt/live/{{ fqdn }}/privkey.pem
 {% endif %}
 {% if ssl_certificate_type  == 'selfsigned' %}
 cert=/etc/nginx/certs/cert.pem
-pkey=/etc/nginx/certs/key.pem;
+pkey=/etc/nginx/certs/key.pem
 {% endif %}
 cipher-list="ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AES:RSA+3DES:!ADH:!AECDH:!MD5"
 {% endif %}
