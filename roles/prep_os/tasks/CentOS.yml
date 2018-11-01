@@ -4,6 +4,7 @@
 # Disable SELinux
 - selinux:
     state: permissive
+    policy: targeted
   when: ansible_os_family == "RedHat"
 
 - name: add epel repo
