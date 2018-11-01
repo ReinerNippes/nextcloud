@@ -4,15 +4,16 @@ localhost
 [nextcloud:vars]
 connection=local
 
+# Server domain name
+# Default is the fqdn of the machine 
+# fqdn       = nc.example.org
+
 # selfsigned certificate as default
 ssl_certificate_type  = 'selfsigned'
 
 # Letsencrypt or selfsigned certificate
 # ssl_certificate_type  = 'letsencrypt'
 
-# Server domain name to get a certificate
-# Default is the fqdn of the machine 
-# fqdn       = nc.example.org
 
 # Your email adresse for letsencrypt
 # cert_email = nc@example.org
