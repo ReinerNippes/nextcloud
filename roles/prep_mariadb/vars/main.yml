@@ -7,6 +7,6 @@ mariadb_conf_dir:
   "Debian": /etc/mysql/mariadb.conf.d/90-nextcloud.cnf
 
 mariadb_sock_dir:
-  "CentOS": /var/lib/mysqld
+  "CentOS": /var/lib/mysql
   "Ubuntu": /var/run/mysqld
   "Debian": /var/run/mysqld
