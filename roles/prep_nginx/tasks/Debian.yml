@@ -33,12 +33,10 @@
 
 - name: install additional packages
   apt:
-    name: "{{ item }}"
-    autoremove: true
-    allow_unauthenticated: true
-    state: latest
-  with_items:
+    name:
     - nginx
     - python-pip
     - python-netaddr
-    
+    autoremove: true
+    allow_unauthenticated: true
+    state: latest
