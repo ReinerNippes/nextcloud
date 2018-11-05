@@ -8,17 +8,16 @@
 
 - name: install additional packages
   apt:
-    name: "{{ item }}"
+    name:
+      - zip
+      - unzip
+      - bzip2
+      - screen
+      - curl
+      - ffmpeg
+      - imagemagick 
+      - libfile-fcntllock-perl
+      - language-pack-en-base
+      - software-properties-common
+      - facter
     state: latest
-  with_items:
-    - zip
-    - unzip
-    - bzip2
-    - screen
-    - curl
-    - ffmpeg
-    - imagemagick 
-    - libfile-fcntllock-perl
-    - language-pack-en-base
-    - software-properties-common
-    - facter
