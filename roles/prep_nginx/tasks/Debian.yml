@@ -14,17 +14,6 @@
   with_items:
     - 'deb http://nginx.org/packages/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} nginx'
     - 'deb-src http://nginx.org/packages/{{ ansible_distribution|lower }}/ {{ ansible_distribution_release }} nginx'
-  
-- name: remove standard nginx
-  apt:
-    name: "{{ item }}"
-    state: absent
-#    dpkg_options: 'allow-change-held-packages'
-  with_items:
-#    - nginx
-    - nginx-common
-    - nginx-full
-  when: false
 
 - name: apt dist-upgrade
   apt:

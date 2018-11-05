@@ -4,10 +4,9 @@
 
 - name: install needed pip packages
   pip:
-    name: "{{ item }}"
+    name:
+      - pyOpenSSL
+      - requests
+      - setuptools
+      - certbot-nginx 
     state: latest
-  with_items:
-    - pyOpenSSL
-    - requests
-    - setuptools
-    - certbot-nginx 
