@@ -13,12 +13,11 @@
 
 - name: install MariaDB
   yum: 
-    name: "{{ item }}" 
+    name:
+      - MariaDB-server
+      - MariaDB-client
     enablerepo: mariadb 
     state: latest
-  with_items:
-    - MariaDB-server
-    - MariaDB-client
   register: install_mariadb
 
 - name: install MySQLdb python package for database setup

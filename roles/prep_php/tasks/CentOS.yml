@@ -34,34 +34,33 @@
 
 - name: install needed packages
   yum:
-    name: "{{ item }}"
+    name:
+      - php-cli
+      - php-fpm
+      - php-gd
+      - "{% if nc_db_type == 'mysql' %}php-mysql{% elif nc_db_type == 'pgsql' %}php-pgsql{% endif %}"
+      - php-curl
+      - php-xml
+      - php-zip
+      - php-intl
+      - php-mbstring
+      - php-json
+      - php-bz2
+      - php-smbclient
+      - php-redis
+      - php-pecl-imagick
+      - php-common
+      - php-gmp
+      - php-intl
+      - php-imap
+      - php-ldap
+      - php-opcache
+      - php-mcrypt
+      - php-mysqlnd
+      - php-pear
+      - php-pdo
+      - php-pecl-apcu
     state: latest
-  with_items:
-    - php-cli
-    - php-fpm
-    - php-gd
-    - "{% if nc_db_type == 'mysql' %}php-mysql{% elif nc_db_type == 'pgsql' %}php-pgsql{% endif %}"
-    - php-curl
-    - php-xml
-    - php-zip
-    - php-intl
-    - php-mbstring
-    - php-json
-    - php-bz2
-    - php-smbclient
-    - php-redis
-    - php-pecl-imagick
-    - php-common
-    - php-gmp
-    - php-intl
-    - php-imap
-    - php-ldap
-    - php-opcache
-    - php-mcrypt
-    - php-mysqlnd
-    - php-pear
-    - php-pdo
-    - php-pecl-apcu
 
 - name: configure php
   copy:

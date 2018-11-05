@@ -25,26 +25,23 @@
 
 - name: install needed packages
   yum:
-    name: "{{ item }}"
+    name:
+      - zip
+      - unzip
+      - bzip2
+      - screen
+      - python2-pip
+      - curl
+      - wget
+      - perl-File-FcntlLock 
+      - ImageMagick
+      - postfix
+      - firewalld
+      - facter
     state: latest
     enablerepo: epel 
-  with_items:
-    - zip
-    - unzip
-    - bzip2
-    - screen
-    - python2-pip
-    - curl
-    - wget
-    - perl-File-FcntlLock 
-    - ImageMagick
-    - postfix
-    - firewalld
-    - facter
-    
+
 - name: remove unneeded packages
   yum:
-    name: "{{ item }}"
+    name: python-requests
     state: absent
-  with_items:
-    - python-requests
