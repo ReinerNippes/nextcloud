@@ -56,6 +56,7 @@
     tty: yes
     ports:
      - "8443:443"
+     - "8080:80"
     env:
       JWT_ENABLED:          'true'
       JWT_SECRET:           "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
@@ -73,4 +74,15 @@
     ufw_rules: 
       - { port: 8443, rule: allow }
   when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
+
+- name: open firewalld
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - 8443/tcp
+    - 8080/tcp
+  when: ansible_os_family == "Redhat" 
 

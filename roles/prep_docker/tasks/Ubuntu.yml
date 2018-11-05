@@ -3,22 +3,20 @@
 
 - name: remove ubuntu repo docker
   apt:
-    name: "{{ item }}"
+    name:
+      - docker
+      - docker-engine
+      - docker.io
     state: absent
-  with_items: 
-    - docker
-    - docker-engine
-    - docker.io
-    
+
 - name: install needed packages
   apt:
-    name: "{{ item }}"
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - python-pip
+      - software-properties-common
     state: latest
-  with_items:
-    - apt-transport-https
-    - ca-certificates
-    - python-pip
-    - software-properties-common
 
 - name: add docker key
   apt_key:
@@ -38,8 +36,6 @@
 
 - name: install docker
   apt:
-    name: "{{ item }}"
+    name: docker-ce
     state: latest
-  with_items:
-    - docker-ce
  

@@ -17,11 +17,11 @@
   
   - name: remove standard nginx
     apt:
-      name: "{{ item }}"
+      name:
+        - nginx-common
+        - nginx-full
       state: absent
-    with_items:
-      - nginx-common
-      - nginx-full
+
   - name: apt dist-upgrade
     apt:
       upgrade: dist
@@ -29,28 +29,23 @@
   
   - name: install additional packages
     apt:
-      name: "{{ item }}"
+      name: nginx
       autoremove: true
       state: latest
-    with_items:
-      - nginx
   when: ansible_distribution_release == "xenial"
 
 - name: install from nginx repo (ubuntu bionic) 
   block:
   - name: install additional packages
     apt:
-      name: "{{ item }}"
+      name: nginx-extras
       autoremove: true
       state: latest
-    with_items:
-      - nginx-extras
   when: ansible_distribution_release == "bionic"
 
 - name: install needed packages
   apt:
-    name: "{{ item }}"
+    name:
+      - python-pip
+      - python-netaddr
     state: latest
-  with_items:
-    - python-pip
-    - python-netaddr

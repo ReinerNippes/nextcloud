@@ -43,7 +43,8 @@
 
   # Disable SELinux
   - selinux:
-      state: disabled
+      state: permissive
+      policy: targeted
     when: ansible_os_family == "RedHat"
 
   - name: flush all handlers to restart server
