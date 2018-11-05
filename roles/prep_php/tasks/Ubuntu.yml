@@ -23,25 +23,24 @@
 
 - name: install additional packages
   apt:
-    name: "{{ item }}"
+    name:
+      - php7.2-fpm
+      - php7.2-gd
+      - "{{ php_db_extension[nc_db_type] }}"
+      - php7.2-curl
+      - php7.2-xml
+      - php7.2-zip
+      - php7.2-intl
+      - php7.2-mbstring
+      - php7.2-json
+      - php7.2-bz2
+      - php7.2-ldap
+      - php-apcu
+      - php-imagick
+      - php-smbclient
+      - php-redis
     autoremove: true
     state: latest
-  with_items:
-    - php7.2-fpm
-    - php7.2-gd
-    - "{{ php_db_extension[nc_db_type] }}"
-    - php7.2-curl
-    - php7.2-xml
-    - php7.2-zip
-    - php7.2-intl
-    - php7.2-mbstring
-    - php7.2-json
-    - php7.2-bz2
-    - php7.2-ldap
-    - php-apcu
-    - php-imagick
-    - php-smbclient
-    - php-redis
 
 - name: configure php
   copy:

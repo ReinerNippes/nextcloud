@@ -19,13 +19,13 @@
 
 - name: install needed packages
   yum:
-    name: "{{ item }}"
+    name:
+      - nginx
+      - python-pip
+      - python-netaddr
+      - firewalld
     state: latest
     enablerepo: nginx
-  with_items:
-    - nginx
-    - python-pip
-    - python-netaddr
 
 - name: open firewall ports 80/443
   firewalld:
