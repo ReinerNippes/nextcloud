@@ -25,6 +25,7 @@
   yum: 
     name: MySQL-python 
     state: present
+  when: false
 
 - name: enable MariaDB
   systemd:
@@ -44,7 +45,8 @@
     group: mysql
     mode: 0755
     state: directory
-
+  when: false
+  
 - name: create socket dir
   file:
     name: /var/run/mysqld
@@ -52,3 +54,4 @@
     group: mysql
     mode: 0755
     state: directory
+  when: false

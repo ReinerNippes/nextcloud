@@ -4,6 +4,12 @@
 - name: include os specific tasks
   include_tasks: "{{ ansible_distribution }}.yml"
 
+- name: install PyMySQL
+  pip: 
+    name: PyMySQL
+    state: latest
+  become: true
+
 - name: create conf dir
   file:
     name: "{{ mariadb_conf_dir[ansible_distribution] | dirname }}"
@@ -13,8 +19,8 @@
     state: directory
 
 - name: configure mariadb
-  copy:
-    src: my.cnf
+  template:
+    src: my.cnf.j2
     dest: "{{ mariadb_conf_dir[ansible_distribution] }}"
     owner: root
     group: root
@@ -31,20 +37,20 @@
     name: ''
     host_all: yes
     state: absent
-    login_unix_socket: /var/lib/mysql/mysql.sock
+    login_unix_socket: "{{ mariadb_sock_dir[ansible_distribution] }}/mysqld.sock"
 
 - name: remove test db
   mysql_db:
     name: test
     state: absent
-    login_unix_socket: /var/lib/mysql/mysql.sock
+    login_unix_socket: "{{ mariadb_sock_dir[ansible_distribution] }}/mysqld.sock"
   
 - name: create nextcloud db
   mysql_db:
     name: "{{ nc_db }}"
     collation: utf8mb4_general_ci
     encoding: utf8mb4
-    login_unix_socket: /var/lib/mysql/mysql.sock
+    login_unix_socket: "{{ mariadb_sock_dir[ansible_distribution] }}/mysqld.sock"
 
 - name: generate db passwd if nc_db_passwd is empty
   set_fact: 
@@ -57,4 +63,4 @@
     password: "{{ nc_db_passwd }}"
     priv:     "{{ nc_db }}.*:ALL"
     state: present
-    login_unix_socket: /var/lib/mysql/mysql.sock
+    login_unix_socket: "{{ mariadb_sock_dir[ansible_distribution] }}/mysqld.sock"
