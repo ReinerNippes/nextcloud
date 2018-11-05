@@ -6,11 +6,9 @@
 
 - name: install psycopg2
   pip: 
-    name: "{{ item }}"
+    name: psycopg2
     state: latest
   become: true
-  with_items:
-    - psycopg2
 
 - name: docker pull postgres
   docker_image:

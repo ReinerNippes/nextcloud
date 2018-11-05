@@ -6,3 +6,9 @@
   systemd:
     name: coturn
     state: restarted
+
+- name: restart turnserver
+  listen: restart turnserver
+  systemd:
+    name: turnserver
+    state: restarted

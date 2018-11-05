@@ -16,3 +16,25 @@
   with_items:
     - docker-ce
 #    - python2-pip
+
+- name: enable docker
+  systemd:
+    name: docker
+    daemon_reload: yes
+    enabled: yes
+
+- name: fix docker backend for collabora
+  lineinfile:
+    path: /etc/systemd/system/multi-user.target.wants/docker.service
+    regexp: '^ExecStart='
+    line: 'ExecStart=/usr/bin/dockerd --storage-driver=devicemapper'
+  register: systemdchanged
+
+# force restart of docker rightaway
+- name: restart docker
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: restarted
+  when: systemdchanged.changed
+

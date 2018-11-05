@@ -3,10 +3,8 @@
 
 - name: install coturn
   apt:
-    name: "{{ item }}"
+    name: coturn
     state: latest
-  with_items:
-    - coturn
 
 - name: enable coturn at boot
   lineinfile:
