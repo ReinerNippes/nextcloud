@@ -63,8 +63,6 @@ fi
 # root or not
 if [[ $EUID -ne 0 ]]; then
   $SUDO=sudo
-else
-  $SUDO=''
 fi
 
 
