@@ -34,7 +34,7 @@ nc_datadir           = /var/nc-data
 
 # admin user
 nc_admin             = 'admin'
-nc_passwd            = 'tOpSecrET2018'
+nc_passwd            = ''             # leave empty to generate random password
 
 # database settings
 #nc_db_type          = 'mysql'        # (MariaDB)
@@ -42,7 +42,7 @@ nc_db_type           = 'pgsql'        # (PostgreSQL)
 nc_db_host           = 'localhost'
 nc_db                = 'nextcloud'
 nc_db_user           = 'nextcloud'
-nc_db_passwd         = ''              # leave empty to generate random password
+nc_db_passwd         = ''             # leave empty to generate random password
 nc_db_prefix         = 'oc_'
 
 # Nextcloud mail setup
