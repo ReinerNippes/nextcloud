@@ -1,6 +1,11 @@
 ---
 # tasks file for prep_nextcloud
 
+  - name: generate admin passwd if nextcloud_passwd is empty
+    set_fact:
+      nc_passwd: "{{ lookup('password', '{{ credential_store }}/nextcloud_admin_secret chars=ascii_letters,digits length=32') }}"
+    when: nc_passwd == ''
+
   - name: install nextcloud
     unarchive: 
       src: "{{ next_archive }}"
