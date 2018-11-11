@@ -15,7 +15,8 @@
       - screen
       - curl
       - ffmpeg
-      - imagemagick 
+      - imagemagick
+      - ghostscript
       - libfile-fcntllock-perl
       - software-properties-common
       - apt-transport-https
