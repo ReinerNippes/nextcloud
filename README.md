@@ -84,7 +84,7 @@ nc_datadir           = /var/nc-data
 
 # admin user
 nc_admin             = 'admin'
-nc_passwd            = 'tOpSecrET2018'
+nc_passwd            = ''              # leave empty to generate random password
 
 # database settings
 #nc_db_type          = 'mysql'        # (MariaDB)
