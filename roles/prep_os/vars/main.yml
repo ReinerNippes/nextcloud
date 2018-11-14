@@ -1,3 +1,7 @@
 ---
 # vars file for prep_os
 
+imagemagick_xml_path:
+  CentOS: /etc/ImageMagick/policy.xml
+  Ubuntu: /etc/ImageMagick-6/policy.xml
+  Debian: /etc/ImageMagick-6/policy.xml
