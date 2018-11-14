@@ -84,7 +84,7 @@
     
 - name: change ImageMagick settings
   lineinfile:
-    path: /etc/ImageMagick-6/policy.xml
+    path:   '{{ imagemagick_xml_path[ansible_distribution] }}'
     line:   '  <policy domain="coder" rights="read|write" pattern="{{ item }}" />'
     regexp: '(.*)<policy domain="coder" rights="(.*)" pattern="{{ item }}" />(.*)'
     insertbefore: '</policymap>'
