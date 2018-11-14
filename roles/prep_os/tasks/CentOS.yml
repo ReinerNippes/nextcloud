@@ -39,6 +39,7 @@
       - postfix
       - firewalld
       - facter
+      - policycoreutils-python
     state: latest
     enablerepo: epel 
 
