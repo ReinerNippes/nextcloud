@@ -10,3 +10,4 @@
       - setuptools
       - certbot-nginx 
     state: latest
+    extra_args: --ignore-installed
