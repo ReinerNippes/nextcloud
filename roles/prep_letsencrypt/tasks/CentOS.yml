@@ -3,8 +3,10 @@
 # CentOS related tasks
 
 - name: install needed pip packages
-  yum:
-    name: 
-      - certbot
-      - python2-certbot-nginx
+  pip:
+    name:
+      - pyOpenSSL
+      - requests
+      - setuptools
+      - certbot-nginx 
     state: latest
