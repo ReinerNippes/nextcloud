@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Prepare system for nextcloud devel
+# Prepare system for nextcloud
 #
 prepare_ubuntu() {
         $SUDO apt install software-properties-common -y
