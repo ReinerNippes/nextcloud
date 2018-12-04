@@ -62,9 +62,10 @@ fi
 
 # root or not
 if [[ $EUID -ne 0 ]]; then
-  $SUDO=sudo
+  SUDO='sudo -H'
+else
+  SUDO=''
 fi
-
 
 case $ID in
         'ubuntu')
