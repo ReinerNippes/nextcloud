@@ -3,9 +3,9 @@ Nextcloud 14
 
 Ansible Playbook to install
 
-* Nextcloud 14 - https://nextcloud.com/
+* Nextcloud 15 - https://nextcloud.com/
 * nginx 1.15 - https://nginx.org/
-* PHP 7.2 - http://www.php.net/
+* PHP 7.3 - http://www.php.net/
 * MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
 * redis - https://redis.io/
 * restic backup - https://restic.readthedocs.io
