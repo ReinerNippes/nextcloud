@@ -1,5 +1,7 @@
 ---
 # Some common variables used in more then roles
+
+php_version: '7.3'
  
 web_user:
   'CentOS': 'nginx'

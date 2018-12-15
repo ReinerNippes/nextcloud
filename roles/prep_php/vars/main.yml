@@ -2,25 +2,25 @@
 # vars file for prep_php
 
 php_db_extension:
-  mysql: php7.2-mysql
-  pgsql: php7.2-pgsql
+  mysql: php{{ php_version }}-mysql
+  pgsql: php{{ php_version }}-pgsql
 
 php_service_name:
   "CentOS": php-fpm
-  "Ubuntu": php7.2-fpm
-  'Debian': php7.2-fpm
+  "Ubuntu": php{{ php_version }}-fpm
+  'Debian': php{{ php_version }}-fpm
 
 php_fpm_conf_dir:
   "CentOS": /etc
-  "Ubuntu": /etc/php/7.2/fpm
-  'Debian': /etc/php/7.2/fpm
+  "Ubuntu": /etc/php/{{ php_version }}/fpm
+  'Debian': /etc/php/{{ php_version }}/fpm
 
 php_cli_conf_dir:
   "CentOS": /etc
-  "Ubuntu": /etc/php/7.2/cli
-  'Debian': /etc/php/7.2/cli
+  "Ubuntu": /etc/php/{{ php_version }}/cli
+  'Debian': /etc/php/{{ php_version }}/cli
 
 php_www_conf_dir:
   "CentOS": /etc/php-fpm.d
-  "Ubuntu": /etc/php/7.2/fpm/pool.d
-  'Debian': /etc/php/7.2/fpm/pool.d
+  "Ubuntu": /etc/php/{{ php_version }}/fpm/pool.d
+  'Debian': /etc/php/{{ php_version }}/fpm/pool.d

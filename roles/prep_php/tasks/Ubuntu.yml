@@ -24,17 +24,17 @@
 - name: install additional packages
   apt:
     name:
-      - php7.2-fpm
-      - php7.2-gd
+      - php{{ php_version }}-fpm
+      - php{{ php_version }}-gd
       - "{{ php_db_extension[nc_db_type] }}"
-      - php7.2-curl
-      - php7.2-xml
-      - php7.2-zip
-      - php7.2-intl
-      - php7.2-mbstring
-      - php7.2-json
-      - php7.2-bz2
-      - php7.2-ldap
+      - php{{ php_version }}-curl
+      - php{{ php_version }}-xml
+      - php{{ php_version }}-zip
+      - php{{ php_version }}-intl
+      - php{{ php_version }}-mbstring
+      - php{{ php_version }}-json
+      - php{{ php_version }}-bz2
+      - php{{ php_version }}-ldap
       - php-apcu
       - php-imagick
       - php-smbclient
@@ -56,7 +56,7 @@
 
 - name: configure php postgres module
   copy:
-    dest: /etc/php/7.2/mods-available/pgsql.ini
+    dest: /etc/php/{{ php_version }}/mods-available/pgsql.ini
     content: |
       # configuration for PHP PostgreSQL module
       extension=pgsql.so
@@ -76,7 +76,7 @@
 
 - name: configure php mysql module
   copy:
-    dest: /etc/php/7.2/mods-available/pdo_mysql.ini
+    dest: /etc/php/{{ php_version }}/mods-available/pdo_mysql.ini
     content: |
       # configuration for PHP MySQL module
       extension=pdo_mysql.so
