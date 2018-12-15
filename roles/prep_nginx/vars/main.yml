@@ -2,6 +2,6 @@
 # vars file for prep_nginx
 
 php_socket:
-  'CentOS': '/run/php-fpm/php7.2-fpm.sock'
-  'Ubuntu': '/run/php/php7.2-fpm.sock'
-  'Debian': '/run/php/php7.2-fpm.sock'
+  'CentOS': '/run/php-fpm/php{{ php_version }}-fpm.sock'
+  'Ubuntu': '/run/php/php{{ php_version }}-fpm.sock'
+  'Debian': '/run/php/php{{ php_version }}-fpm.sock'
