@@ -1,4 +1,4 @@
-Nextcloud 14
+Nextcloud 15
 =========
 
 Ansible Playbook to install
@@ -38,6 +38,9 @@ git clone https://github.com/ReinerNippes/nextcloud
 
 # change to nextcloud13 directory
 cd nextcloud
+
+# checkout php7.3 branch
+git checkout php73
 
 # install ansible and needed python modules
 sh ./prepare_system.sh
