@@ -1,9 +1,9 @@
-Nextcloud 14
+Nextcloud 15
 =========
 
 Ansible Playbook to install
 
-* Nextcloud 14 - https://nextcloud.com/
+* Nextcloud 15 - https://nextcloud.com/
 * nginx 1.15 - https://nginx.org/
 * PHP 7.2 - http://www.php.net/
 * MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
@@ -40,7 +40,7 @@ git clone https://github.com/ReinerNippes/nextcloud
 cd nextcloud
 
 # install ansible and needed python modules
-sh ./prepare_system.sh
+./prepare_system.sh
 
 # edit variables
 vim inventory
