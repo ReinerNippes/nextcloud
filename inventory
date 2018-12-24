@@ -18,7 +18,7 @@ ssl_certificate_type  = 'selfsigned'
 # Your email adresse for letsencrypt
 # cert_email = nc@example.org
 
-# receive a certificate from from staging
+# receive a certificate from staging
 # uncomment if you want to use letsencrypt staging environment
 # cert_stage = '--staging'
 
