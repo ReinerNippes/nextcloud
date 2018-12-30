@@ -59,6 +59,9 @@ nc_mail_smtpport     = 587
 nc_mail_smtpname     =
 nc_mail_smtppwd      = 
 
+# php Version
+php_version          = '7.2'
+
 # Install turn server for Nextcloud Talk
 talk_install         = false
 

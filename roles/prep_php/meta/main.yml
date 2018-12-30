@@ -1,6 +1,6 @@
 galaxy_info:
   author: Reiner Nippes
-  description: Basic setup of php 7.2 for nextcloud 
+  description: Basic setup of php 7.x for nextcloud 
   company: nippes.it
 
   # If the issue tracker for your role is not on github, uncomment the
