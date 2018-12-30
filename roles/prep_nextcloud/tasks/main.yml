@@ -116,7 +116,12 @@
     shell: sudo -u {{ web_user[ansible_distribution] }} php occ background:cron
     args:
       chdir: /var/www/nextcloud/
-
+      
+  - name: convert filecache bigint
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ db:convert-filecache-bigint
+    args:
+      chdir: /var/www/nextcloud/
+      
   - name: upgrade nextcloud
     shell: sudo -u {{ web_user[ansible_distribution] }} php occ upgrade
     args:

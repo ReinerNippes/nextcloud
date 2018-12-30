@@ -1,9 +1,9 @@
 ---
-- name: add php72 repo
+- name: add php{{ php_version | replace(".","") }} repo
   yum_repository:
-    name: remi-php72
-    description: Remi's PHP 7.2 RPM repository for Enterprise Linux {{ ansible_distribution_major_version|int }} - $basearch
-    mirrorlist: https://rpms.remirepo.net/enterprise/{{ ansible_distribution_major_version|int }}/php72/httpsmirror
+    name: remi-php{{ php_version | replace(".","") }}
+    description: Remi's PHP {{ php_version | replace(".","") }} RPM repository for Enterprise Linux {{ ansible_distribution_major_version|int }} - $basearch
+    mirrorlist: https://rpms.remirepo.net/enterprise/{{ ansible_distribution_major_version|int }}/php{{ php_version | replace(".","") }}/httpsmirror
     gpgkey: http://rpms.remirepo.net/RPM-GPG-KEY-remi
     gpgcheck: yes
     enabled: 1
