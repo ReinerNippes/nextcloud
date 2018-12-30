@@ -5,7 +5,7 @@ Ansible Playbook to install
 
 * Nextcloud 15 - https://nextcloud.com/
 * nginx 1.15 - https://nginx.org/
-* PHP 7.3 - http://www.php.net/
+* PHP 7.x - http://www.php.net/
 * MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
 * redis - https://redis.io/
 * restic backup - https://restic.readthedocs.io
@@ -39,11 +39,8 @@ git clone https://github.com/ReinerNippes/nextcloud
 # change to nextcloud13 directory
 cd nextcloud
 
-# checkout php7.3 branch
-git checkout php73
-
 # install ansible and needed python modules
-sh ./prepare_system.sh
+./prepare_system.sh
 
 # edit variables
 vim inventory
@@ -56,23 +53,27 @@ ansible-playbook nextcloud.yml
 Login to your nextcloud web site https://\<fqdn\> 
 
 
-User and password have been set according to the entries in the inventory.
+Users and passwords have been set according to the entries in the inventory if defiend there. Otherwise the admin password will be displayed at the end of playbook. Additional you can find the credential_store = /etc/nextcloud 
 
 Role Variables
 --------------
 All variables are defined in inventory file.
 ```
-# Letsencrypt or selfsigned certificate
-ssl_certificate_type  = 'letsencrypt'
-#ssl_certificate_type = 'selfsigned'
+# Server domain name
+# Default is the fqdn of the machine 
+# fqdn       = nc.example.org
 
-# Your domain name to get a letsencrypt certificate
-fqdn       = nc.example.org
+# selfsigned certificate as default
+ssl_certificate_type  = 'selfsigned'
+
+# Letsencrypt or selfsigned certificate
+# ssl_certificate_type  = 'letsencrypt'
+
 
 # Your email adresse for letsencrypt
-cert_email = nc@example.org
+# cert_email = nc@example.org
 
-# receive a certificate from from staging
+# receive a certificate from staging
 # uncomment if you want to use letsencrypt staging environment
 # cert_stage = '--staging'
 
@@ -80,6 +81,7 @@ cert_email = nc@example.org
 # e.g. your fritz.box ; default ist google dns server 8.8.8.8
 nginx_resolver = '8.8.8.8'
 
+#
 # Nextcloud varibales
 
 # data dir
@@ -87,7 +89,7 @@ nc_datadir           = /var/nc-data
 
 # admin user
 nc_admin             = 'admin'
-nc_passwd            = ''              # leave empty to generate random password
+nc_passwd            = ''             # leave empty to generate random password
 
 # database settings
 #nc_db_type          = 'mysql'        # (MariaDB)
@@ -95,7 +97,7 @@ nc_db_type           = 'pgsql'        # (PostgreSQL)
 nc_db_host           = 'localhost'
 nc_db                = 'nextcloud'
 nc_db_user           = 'nextcloud'
-nc_db_passwd         = ''              # leave empty to generate random password
+nc_db_passwd         = ''             # leave empty to generate random password
 nc_db_prefix         = 'oc_'
 
 # Nextcloud mail setup
@@ -112,8 +114,11 @@ nc_mail_smtpport     = 587
 nc_mail_smtpname     =
 nc_mail_smtppwd      = 
 
+# php Version
+php_version          = '7.2'
+
 # Install turn server for Nextcloud Talk
-talk_install         = true
+talk_install         = false
 
 # Allways get the latest version of Nextcloud
 next_archive         = https://download.nextcloud.com/server/releases/latest.tar.bz2
@@ -132,11 +137,11 @@ install_collabora     = false
 
 # Install Online Office
 # more info about onlyoffice office: https://www.onlyoffice.com
-install_onlyoffice    = true
+install_onlyoffice    = false
 
 # 
 # change dhparam numbits if generating takes to long
-# dhparam_numbits = 1024
+#dhparam_numbits = 1024
 
 # 
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)

@@ -59,8 +59,11 @@ nc_mail_smtpport     = 587
 nc_mail_smtpname     =
 nc_mail_smtppwd      = 
 
+# php Version
+php_version          = '7.2'
+
 # Install turn server for Nextcloud Talk
-talk_install         = true
+talk_install         = false
 
 # Allways get the latest version of Nextcloud
 next_archive         = https://download.nextcloud.com/server/releases/latest.tar.bz2
@@ -79,7 +82,7 @@ install_collabora     = false
 
 # Install Online Office
 # more info about onlyoffice office: https://www.onlyoffice.com
-install_onlyoffice    = true
+install_onlyoffice    = false
 
 # 
 # change dhparam numbits if generating takes to long
