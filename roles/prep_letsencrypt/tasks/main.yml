@@ -27,3 +27,12 @@
   shell: "certbot certonly --standalone --installer nginx --email {{ cert_email }} --non-interactive --domain {{ fqdn }} --agree-tos {{ cert_stage|default('') }}"
   args:
     creates: /etc/letsencrypt/live/{{ fqdn }}/cert.pem
+
+- name: 'Add cron job for certbot renewal (if configured).'
+  cron:
+    name: Certbot automatic renewal.
+    job: "certbot --standalone --noninteractive --agree-tos --email {{ cert_email|default('info@example.com') }} -d {{ fqdn|default('example.com') }} renew --quiet --no-self-upgrade --pre-hook 'systemctl stop nginx' --post-hook 'systemctl start nginx'"
+    minute: "0"
+    hour: "3"
+    user: "root"
+    when: {{ cert_stage|default('') }} == ''
