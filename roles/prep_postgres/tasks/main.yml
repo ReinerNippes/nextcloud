@@ -38,6 +38,14 @@
     mode: 0700
     state: directory
 
+- name: create data directory
+  file:
+    name: /var/run/postgresql
+    owner: postgres
+    group: postgres
+    mode: 0777
+    state: directory
+
 - name: start postgres container
   docker_container:
     name: postgres
@@ -46,14 +54,13 @@
     restart_policy: always
     user: postgres:postgres
     tty: yes
-    ports:
-     - "127.0.0.1:5432:5432"
     env:
         POSTGRES_PASSWORD: "{{ lookup('password', '{{ credential_store }}/postgres_secret chars=ascii_letters,digits length=32') }}"
         POSTGRES_USER:     "{{ postgres_user }}"
         PGDATA:            "{{ pgdata }}"
     volumes: 
       - "{{ pgdata }}:{{ pgdata }}:rw"
+      - /var/run/postgresql:/var/run/postgresql:rw
 
 - name: wait for db to come up
   wait_for:
@@ -66,8 +73,8 @@
     state:          present
     encoding:       UTF-8
     template:       template0
-    login_host:     localhost
-    login_user:     "{{ postgres_user }}"
+    login_host:     '{{ nc_db_host }}'
+    login_user:     '{{ postgres_user }}'
     login_password: "{{ lookup('password', '{{ credential_store }}/postgres_secret chars=ascii_letters,digits length=32') }}"
 
 - name: generate db passwd if nc_db_passwd is empty
@@ -78,7 +85,7 @@
 - name: "Create {{ nc_db_user }} account"
   postgresql_user:
     encrypted:      yes
-    login_host:     localhost
+    login_host:     '{{ nc_db_host }}'
     login_user:     "{{ postgres_user }}"
     login_password: "{{ lookup('password', '{{ credential_store }}/postgres_secret chars=ascii_letters,digits length=32') }}"
     db:             "{{ nc_db }}"
@@ -87,7 +94,7 @@
 
 - name: "Grant all privileges on database {{ nc_db }} to {{ nc_db_user }}"
   postgresql_privs:
-    login_host:     localhost
+    login_host:     '{{ nc_db_host }}'
     login_user:     "{{ postgres_user }}"
     login_password: "{{ lookup('password', '{{ credential_store }}/postgres_secret chars=ascii_letters,digits length=32') }}"
     db:             "postgres"
