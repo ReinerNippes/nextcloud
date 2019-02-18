@@ -1,8 +1,7 @@
 [nextcloud]
-localhost
+localhost ansible_connection=local
 
 [nextcloud:vars]
-connection=local
 
 # Server domain name
 # Default is the fqdn of the machine 
