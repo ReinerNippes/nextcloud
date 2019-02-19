@@ -23,7 +23,7 @@ ssl_certificate_type  = 'selfsigned'
 
 # Your dns resolver (nginx reverse ip lookup)
 # e.g. your fritz.box ; default is ccc 213.73.91.35 (germany) - 216.87.84.211 OpenNIC (usa)
-nginx_resolver       = '213.73.91.35 216.87.84.211 valid=30s;'
+nginx_resolver       = '213.73.91.35 216.87.84.211 valid=30s'
 
 #
 # Nextcloud varibales
@@ -39,7 +39,7 @@ nc_passwd            = ''             # leave empty to generate random password
 # nc_db_type          = 'mysql'        # (MariaDB)
 # nc_db_host          = 'localhost'
 nc_db_type           = 'pgsql'        # (PostgreSQL)
-nc_db_host           = '/var/run/postgresql'
+nc_db_host           = ''
 nc_db                = 'nextcloud'
 nc_db_user           = 'nextcloud'
 nc_db_passwd         = ''             # leave empty to generate random password
