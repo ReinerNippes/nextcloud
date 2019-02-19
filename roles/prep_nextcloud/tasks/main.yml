@@ -65,6 +65,11 @@
       name: redis
       state: restarted
 
+  - name: set default nc_db_host
+    set_fact:
+      nc_db_host: 'localhost'
+    when: nc_db_host == ''
+
   - name: first setup nextcloud
     shell: |
       sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install \
