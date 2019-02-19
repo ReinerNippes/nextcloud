@@ -13,9 +13,12 @@
     update_cache: true
     state: present
 
-- name: apt install postgresql-client with Update
+- name: apt install postgresql with update
   apt:
-    name: postgresql-client
+    name:
+      - "postgresql-{{ postgresql_version }}"
+      - "postgresql-client-{{ postgresql_version }}"
+      - "postgresql-contrib-{{ postgresql_version }}"
     state: latest
     update_cache: true
-    
+  
