@@ -65,11 +65,6 @@
       name: redis
       state: restarted
 
-  - name: set default nc_db_host
-    set_fact:
-      nc_db_host: 'localhost'
-    when: nc_db_host == ''
-
   - name: first setup nextcloud
     shell: |
       sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install \
@@ -117,15 +112,15 @@
 
   - debug: var=setup_nc verbosity=2
 
-  - name: enable cron as backup jobs
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ background:cron
+  - name: backup jobs, upgrade apps and database tuning
+    shell: sudo -u {{ web_user[ansible_distribution] }} php occ {{ item }}
     args:
       chdir: /var/www/nextcloud/
-      
-  - name: convert filecache bigint
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ db:convert-filecache-bigint
-    args:
-      chdir: /var/www/nextcloud/
+    loop:
+      - background:cron
+      - upgrade
+      - db:add-missing-indices
+      - db:convert-filecache-bigint
       
   - name: upgrade nextcloud
     shell: sudo -u {{ web_user[ansible_distribution] }} php occ upgrade
