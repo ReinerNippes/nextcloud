@@ -4,7 +4,7 @@ localhost ansible_connection=local
 [nextcloud:vars]
 
 # Server domain name
-# Default is the fqdn of the machine 
+# Default is the fqdn of the machine
 # fqdn       = nc.example.org
 
 # selfsigned certificate as default
@@ -46,7 +46,7 @@ nc_db_prefix         = 'oc_'
 
 # Nextcloud mail setup
 nc_configure_mail    = false
-nc_mail_from         = 
+nc_mail_from         =
 nc_mail_smtpmode     = smtp
 nc_mail_smtpauthtype = LOGIN
 nc_mail_domain       =
@@ -56,10 +56,10 @@ nc_mail_smtpauth     = 1
 nc_mail_smtphost     =
 nc_mail_smtpport     = 587
 nc_mail_smtpname     =
-nc_mail_smtppwd      = 
+nc_mail_smtppwd      =
 
 # php Version
-php_version          = '7.2'
+php_version          = '7.3'
 
 # Install turn server for Nextcloud Talk
 talk_install         = false
@@ -83,10 +83,10 @@ install_collabora     = false
 # more info about onlyoffice office: https://www.onlyoffice.com
 install_onlyoffice    = false
 
-# 
+#
 # change dhparam numbits if generating takes to long
 # dhparam_numbits = 1024
 
-# 
+#
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)
 credential_store      = /etc/nextcloud
