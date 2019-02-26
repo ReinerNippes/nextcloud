@@ -21,12 +21,13 @@
     name:           "{{ nc_db }}"
     state:          present
     encoding:       UTF-8
-    template:       template0
+    template:       template1
     login_host:     '{{ nc_db_host | default(omit) }}'
     login_user:     "{{ postgres_user | default(omit) }}"
     login_password: "{{ postgres_admin_password | default(omit) }}"
   become:           yes
   become_user:      postgres
+
 
 - name: "Create {{ nc_db_user }} account"
   postgresql_user:
