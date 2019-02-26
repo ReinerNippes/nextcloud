@@ -66,17 +66,16 @@
       state: restarted
 
   - name: first setup nextcloud
-    shell: |
-      sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install \
-      --database {{ nc_db_type }} --database-host {{ nc_db_host }} --database-name {{ nc_db }} \
-      --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} \
-      --database-pass {{ nc_db_passwd }} \
-      --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} --data-dir {{ nc_datadir }}
+    shell: >
+      sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install 
+      --database {{ nc_db_type }} --database-host "{{ nc_db_host }}" --database-name {{ nc_db }} 
+      --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} 
+      --database-pass {{ nc_db_passwd }} --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} --data-dir {{ nc_datadir }}
     args:
       chdir: /var/www/nextcloud/
       creates: /var/www/nextcloud/config/config.php
     register: setup_nc
-
+ 
   - debug: var=setup_nc verbosity=2
   
   - name: set nextcloud domain config.php values
