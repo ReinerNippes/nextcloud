@@ -3,4 +3,4 @@
 
 restic_repository: ''
 
-restic_version: '0.9.3'
+restic_version: '0.9.4'
