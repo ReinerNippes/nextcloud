@@ -10,7 +10,7 @@ Ansible Playbook to install
 * redis - https://redis.io/
 * restic backup - https://restic.readthedocs.io
 * Nextcloud Talk
-* Collabora Online https://www.collaboraoffice.com/ 
+* Collabora Online https://www.collaboraoffice.com/
 or
 * Onlyoffice https://www.onlyoffice.com
 
@@ -50,17 +50,17 @@ ansible-playbook nextcloud.yml
 
 ```
 
-Login to your nextcloud web site https://\<fqdn\> 
+Login to your nextcloud web site https://\<fqdn\>
 
 
-Users and passwords have been set according to the entries in the inventory if defiend there. Otherwise the admin password will be displayed at the end of playbook. Additional you can find the credential_store = /etc/nextcloud 
+Users and passwords have been set according to the entries in the inventory if defiend there. Otherwise the admin password will be displayed at the end of playbook. Additional you can find the credential_store = /etc/nextcloud
 
 Role Variables
 --------------
 All variables are defined in inventory file.
 ```
 # Server domain name
-# Default is the fqdn of the machine 
+# Default is the fqdn of the machine
 # fqdn       = nc.example.org
 
 # selfsigned certificate as default
@@ -102,7 +102,7 @@ nc_db_prefix         = 'oc_'
 
 # Nextcloud mail setup
 nc_configure_mail    = false
-nc_mail_from         = 
+nc_mail_from         =
 nc_mail_smtpmode     = smtp
 nc_mail_smtpauthtype = LOGIN
 nc_mail_domain       =
@@ -112,10 +112,10 @@ nc_mail_smtpauth     = 1
 nc_mail_smtphost     =
 nc_mail_smtpport     = 587
 nc_mail_smtpname     =
-nc_mail_smtppwd      = 
+nc_mail_smtppwd      =
 
 # php Version
-php_version          = '7.2'
+php_version          = '7.3'
 
 # Install turn server for Nextcloud Talk
 talk_install         = false
@@ -139,11 +139,11 @@ install_collabora     = false
 # more info about onlyoffice office: https://www.onlyoffice.com
 install_onlyoffice    = false
 
-# 
+#
 # change dhparam numbits if generating takes to long
 #dhparam_numbits = 1024
 
-# 
+#
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)
 credential_store      = /etc/nextcloud
 ```
