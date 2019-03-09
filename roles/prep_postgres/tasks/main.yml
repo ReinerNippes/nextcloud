@@ -10,88 +10,47 @@
     state: latest
   become: true
 
-- name: docker pull postgres
-  docker_image:
-    name: "{{ postgres_image }}"
-
-- name: create postgres group
-  group:
-    name: postgres
-    gid: "{{ pg_group_id[ansible_distribution] }}"
-    
-- name: create postgres user
-  user:
-    name: postgres
-    uid: "{{ pg_user_id[ansible_distribution] }}"
-    group: postgres
-    system: true
-    home: /var/lib/postgresql
-    shell: /bin/bash
-    comment: PostgreSQL administrator
-    state: present
-    
-- name: create data directory
-  file:
-    name: "{{ pgdata }}"
-    owner: postgres
-    group: postgres
-    mode: 0700
-    state: directory
-
-- name: start postgres container
-  docker_container:
-    name: postgres
-    image: "{{ postgres_image }}"
-    state: started
-    restart_policy: always
-    user: postgres:postgres
-    tty: yes
-    ports:
-     - "127.0.0.1:5432:5432"
-    env:
-        POSTGRES_PASSWORD: "{{ lookup('password', '{{ credential_store }}/postgres_secret chars=ascii_letters,digits length=32') }}"
-        POSTGRES_USER:     "{{ postgres_user }}"
-        PGDATA:            "{{ pgdata }}"
-    volumes: 
-      - "{{ pgdata }}:{{ pgdata }}:rw"
-
-- name: wait for db to come up
-  wait_for:
-    delay: 3
-    path: /var/lib/postgresql/data/pgdata/global
+- name: ensure postgres is running
+  systemd:
+    name:    postgresql
+    enabled: true
+    state:   started
 
 - name: create {{ nc_db }} db
   postgresql_db:
     name:           "{{ nc_db }}"
     state:          present
     encoding:       UTF-8
-    template:       template0
-    login_host:     localhost
-    login_user:     "{{ postgres_user }}"
-    login_password: "{{ lookup('password', '{{ credential_store }}/postgres_secret chars=ascii_letters,digits length=32') }}"
+    template:       template1
+    login_host:     '{{ nc_db_host | default(omit) }}'
+    login_user:     "{{ postgres_user | default(omit) }}"
+    login_password: "{{ postgres_admin_password | default(omit) }}"
+  become:           yes
+  become_user:      postgres
 
-- name: generate db passwd if nc_db_passwd is empty
-  set_fact: 
-    nc_db_passwd: "{{ lookup('password', '{{ credential_store }}/database_secret chars=ascii_letters,digits length=32') }}"
-  when: nc_db_passwd == ''
 
 - name: "Create {{ nc_db_user }} account"
   postgresql_user:
     encrypted:      yes
-    login_host:     localhost
-    login_user:     "{{ postgres_user }}"
-    login_password: "{{ lookup('password', '{{ credential_store }}/postgres_secret chars=ascii_letters,digits length=32') }}"
     db:             "{{ nc_db }}"
     name:           "{{ nc_db_user }}"
     password:       "{{ nc_db_passwd }}"
+    login_host:     '{{ nc_db_host | default(omit) }}'
+    login_user:     "{{ postgres_user | default(omit) }}"
+    login_password: "{{ postgres_admin_password | default(omit) }}"
+  become:           yes
+  become_user:      postgres
 
 - name: "Grant all privileges on database {{ nc_db }} to {{ nc_db_user }}"
   postgresql_privs:
-    login_host:     localhost
-    login_user:     "{{ postgres_user }}"
-    login_password: "{{ lookup('password', '{{ credential_store }}/postgres_secret chars=ascii_letters,digits length=32') }}"
     db:             "postgres"
     privs:          ALL
     type:           database
     obj:            "{{ nc_db }}"
     role:           "{{ nc_db_user }}"
+    login_host:     '{{ nc_db_host | default(omit) }}'
+    login_user:     "{{ postgres_user | default(omit) }}"
+    login_password: "{{ postgres_admin_password | default(omit) }}"
+  become: yes
+  become_user:      postgres
+    

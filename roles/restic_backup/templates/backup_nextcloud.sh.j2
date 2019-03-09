@@ -16,7 +16,7 @@ sudo -u {{ web_user[ansible_distribution] }} php /var/www/nextcloud/occ maintena
 {% if nc_db_type == 'mysql' %}
 mysqldump --single-transaction -h localhost -u {{ nc_db_user }} -p{{ nc_db_passwd }} {{ nc_db }} | {{ restic_install_path }}/restic backup --stdin --stdin-filename db_mysql_nextcloud.sql
 {% elif nc_db_type == 'pgsql' %}
-sudo docker exec -t postgres pg_dump -c -U postgres {{ nc_db }} | {{ restic_install_path }}/restic backup --stdin --stdin-filename db_postgres_nextcloud.sql
+sudo -u postgres pg_dump -c -U postgres {{ nc_db }} | {{ restic_install_path }}/restic backup --stdin --stdin-filename db_postgres_nextcloud.sql
 {% endif %}
 
 # backup the data dir
