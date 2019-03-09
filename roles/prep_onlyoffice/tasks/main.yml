@@ -6,7 +6,7 @@
     path: /etc/nginx/nginx.conf 
     block: |
       upstream onlyoffice-docker {
-            server 127.0.0.1:8443;
+            server 127.0.0.1:{{ onlyoffice_ssl_port }};
       }
     marker: "# {mark} ANSIBLE MANAGED BLOCK collabra"
     insertafter: server_names_hash_bucket_size(.*)
@@ -31,7 +31,7 @@
     chdir: /var/www/nextcloud/
   
 - name: set onlyoffice server url
-  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set onlyoffice DocumentServerUrl --value https://{{ fqdn }}:8443
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set onlyoffice DocumentServerUrl --value https://{{ fqdn }}:{{ onlyoffice_ssl_port }}
   args:
     chdir: /var/www/nextcloud/
 
@@ -55,8 +55,8 @@
     interactive: true
     tty: yes
     ports:
-     - "8443:443"
-     - "8080:80"
+     - "{{ onlyoffice_ssl_port }}:443"
+#     - "8080:80"
     env:
       JWT_ENABLED:          'true'
       JWT_SECRET:           "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
@@ -72,7 +72,7 @@
     name: prep_ufw
   vars:
     ufw_rules: 
-      - { port: 8443, rule: allow }
+      - { port: '{{ onlyoffice_ssl_port }}', rule: allow }
   when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu"
 
 - name: open firewalld
@@ -82,7 +82,7 @@
     immediate: true
     state: enabled
   with_items:
-    - 8443/tcp
-    - 8080/tcp
+    - '{{ onlyoffice_ssl_port }}/tcp'
+#    - 8080/tcp
   when: ansible_os_family == "Redhat" 
 
