@@ -1,23 +1,6 @@
 ---
 # tasks file for prep_onlyoffice
 
-- name: configure nginx
-  blockinfile:
-    path: /etc/nginx/nginx.conf 
-    block: |
-      upstream onlyoffice-docker {
-            server 127.0.0.1:{{ onlyoffice_ssl_port }};
-      }
-    marker: "# {mark} ANSIBLE MANAGED BLOCK collabra"
-    insertafter: server_names_hash_bucket_size(.*)
-  register: nginx_collabora_conf
-
-- name: reload nginx
-  systemd:
-    name: nginx
-    state: reloaded
-  when: nginx_collabora_conf is changed
-
 - name: install onlyoffice app
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install onlyoffice
   args:
@@ -40,11 +23,6 @@
   args:
     chdir: /var/www/nextcloud/
 
-
-- name: pull onlyoffice image
-  docker_image:
-    name: onlyoffice/documentserver
-    
 - name: start a onlyoffice container
   docker_container:
     name: onlyoffice
