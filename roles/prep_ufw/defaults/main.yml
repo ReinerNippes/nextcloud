@@ -5,8 +5,8 @@
 #   - { [port: ""] [rule: allow] [proto: any] [from_ip: any] [to_ip: any] }
 ufw_rules: 
   - { port: 22, rule: allow }
-  - { port: 80, rule: allow }
-  - { port: 443, rule: allow }
+  - { port: '{{ nc_web_port }}', rule: allow }
+  - { port: '{{ nc_ssl_port }}', rule: allow }
 
 #ufw_applications:
 #  - { name: OpenSSH, rule: allow, from_ip: any }
