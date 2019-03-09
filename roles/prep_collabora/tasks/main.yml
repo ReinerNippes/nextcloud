@@ -42,7 +42,7 @@
     chdir: /var/www/nextcloud/
 
 - name: set collabora wopi url
-  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set richdocuments wopi_url --value https://{{ fqdn }}:443
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set richdocuments wopi_url --value https://{{ fqdn }}:{{ nc_ssl_port }}
   args:
     chdir: /var/www/nextcloud/
   notify: restart collabora container
