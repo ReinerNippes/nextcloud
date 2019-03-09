@@ -27,12 +27,13 @@
     state: latest
     enablerepo: nginx
 
-- name: open firewall ports 80/443
+- name: open firewall ports 22/{{ nc_web_port }}/{{ nc_ssl_port }}
   firewalld:
-    service: "{{ item }}"
+    port: "{{ item }}"
     permanent: true
+    immediate: true
     state: enabled
   with_items:
-    - http
-    - https
-    - ssh
+    - 22
+    - '{{ nc_web_port }}'
+    - '{{ nc_ssl_port }}'
