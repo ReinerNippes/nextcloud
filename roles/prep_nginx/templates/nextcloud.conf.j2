@@ -17,18 +17,41 @@ server {
 	root /var/www/nextcloud/;
 	access_log /var/log/nginx/nextcloud.access.log main;
 	error_log /var/log/nginx/nextcloud.error.log warn;
+
 	location = /robots.txt {
 		allow all;
 		log_not_found off;
 		access_log off;
 	}
+
 	location = /.well-known/carddav {
 		return 301 $scheme://$host:{{ nc_ssl_port }}/remote.php/dav;
 	}
 	location = /.well-known/caldav {
 		return 301 $scheme://$host:{{ nc_ssl_port }}/remote.php/dav;
 	}
+{% if install_collabora %}
+
+	location ^~ /loleaflet {
+		proxy_pass https://localhost:9980;
+		proxy_set_header Host $http_host;
+	}
+	
+	location ^~ /hosting/discovery {
+		proxy_pass https://localhost:9980;
+		proxy_set_header Host $http_host;
+	}
+	 
+	location ^~ /lool {
+		proxy_pass https://localhost:9980;
+		proxy_set_header Host $http_host;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+	} 
+{% endif %}
+
 	client_max_body_size 10240M;
+
 	location / {
 		rewrite ^ /index.php$uri;
 	}
