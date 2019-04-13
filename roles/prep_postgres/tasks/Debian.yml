@@ -23,3 +23,16 @@
     state: latest
     update_cache: true
     
+- name: install psycopg2
+  pip: 
+    name: 
+      - psycopg2
+      - pip
+    state: latest
+  become: true
+
+- name: ensure postgres is running
+  systemd:
+    name:    postgresql
+    enabled: true
+    state:   started

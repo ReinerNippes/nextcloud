@@ -3,11 +3,34 @@
 
 - name: add postgres repo
   yum:
-    name: https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm
+    name: https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
     state: present
 
-- name: install postgres client
+- name: install postgres server
   yum:
-    name: postgresql10
+    name: 
+      - postgresql{{ postgresql_version }}
+      - postgresql{{ postgresql_version }}-server
+      - postgresql{{ postgresql_version }}-contrib
     state: latest
     
+- name: install psycopg2-binary
+  pip: 
+    name: 
+      - psycopg2-binary
+      - pexpect
+      - pip
+    state: latest
+  become: true
+
+- name: 'init postgresql database'
+  command: /usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb
+  args:
+    creates: /var/lib/pgsql/{{ postgresql_version }}/data/postgresql.conf
+  become: yes
+
+- name: ensure postgres is running
+  systemd:
+    name:    postgresql-10
+    enabled: true
+    state:   started
