@@ -3,25 +3,24 @@ Nextcloud 15
 
 Ansible Playbook to install
 
-* Nextcloud 15 - https://nextcloud.com/
-* nginx 1.15 - https://nginx.org/
-* PHP 7.x - http://www.php.net/
-* MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
-* redis - https://redis.io/
-* restic backup - https://restic.readthedocs.io
+* Nextcloud 15 - <https://nextcloud.com/>
+* nginx 1.15 - <https://nginx.org/>
+* PHP 7.x - <http://www.php.net/>
+* MariaDB 10 - <https://mariadb.org/> or PostgreSQL 10 <https://www.postgresql.org/> (only Ubuntu right now)
+* redis - <https://redis.io/>
+* restic backup - <https://restic.readthedocs.io>
 * Nextcloud Talk
-* Collabora Online https://www.collaboraoffice.com/
+* Collabora Online <https://www.collaboraoffice.com/>
 or
-* Onlyoffice https://www.onlyoffice.com
+* Onlyoffice <https://www.onlyoffice.com>
 
 In less than 20 minutes.
 
 Most of the settings are recommentations from C. Rieger
 
-Visit his page for all details: https://www.c-rieger.de/
+Visit his page for all details: <https://www.c-rieger.de/>
 
 Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
-
 
 Requirements
 ------------
@@ -32,9 +31,10 @@ Not yet tested with other versions and flavours of Linux.
 
 Install
 -------
-```
+
+```ini
 # clone this repo
-git clone https://github.com/ReinerNippes/nextcloud
+git clone <https://github.com/ReinerNippes/nextcloud>
 
 # change to nextcloud13 directory
 cd nextcloud
@@ -50,15 +50,16 @@ ansible-playbook nextcloud.yml
 
 ```
 
-Login to your nextcloud web site https://\<fqdn\>
+Login to your nextcloud web site <https://your.fqdn>
 
-
-Users and passwords have been set according to the entries in the inventory if defiend there. Otherwise the admin password will be displayed at the end of playbook. Additional you can find the credential_store = /etc/nextcloud
+Users and passwords have been set according to the entries in the inventory if defined there. Otherwise the admin password will be displayed at the end of playbook. Additional you can find them in the credential_store = /etc/nextcloud
 
 Role Variables
 --------------
+
 All variables are defined in inventory file.
-```
+
+```ini
 # Server domain name
 # Default is the fqdn of the machine
 # fqdn       = nc.example.org
@@ -76,10 +77,6 @@ ssl_certificate_type  = 'selfsigned'
 # receive a certificate from staging
 # uncomment if you want to use letsencrypt staging environment
 # cert_stage = '--staging'
-
-# Your dns resolver (nginx reverse ip lookup)
-# e.g. your fritz.box ; default is ccc 213.73.91.35 (germany) - 216.87.84.211 OpenNIC (usa)
-nginx_resolver       = '213.73.91.35 216.87.84.211 valid=30s'
 
 #
 # Nextcloud varibales
