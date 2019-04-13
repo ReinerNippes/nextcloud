@@ -4,18 +4,6 @@
 - name: include os specific tasks
   include_tasks: "{{ ansible_distribution }}.yml"
 
-- name: install psycopg2
-  pip: 
-    name: psycopg2
-    state: latest
-  become: true
-
-- name: ensure postgres is running
-  systemd:
-    name:    postgresql
-    enabled: true
-    state:   started
-
 - name: create {{ nc_db }} db
   postgresql_db:
     name:           "{{ nc_db }}"
