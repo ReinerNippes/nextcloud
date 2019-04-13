@@ -31,9 +31,9 @@
   firewalld:
     port: "{{ item }}"
     permanent: true
-    immediate: true
+    immediate: false
     state: enabled
   with_items:
-    - 22
-    - '{{ nc_web_port }}'
-    - '{{ nc_ssl_port }}'
+    - 22/tcp
+    - '{{ nc_web_port }}/tcp'
+    - '{{ nc_ssl_port }}/tcp'
