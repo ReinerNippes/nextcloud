@@ -6,9 +6,15 @@
       nc_passwd: "{{ lookup('password', '{{ credential_store }}/nextcloud_admin_secret chars=ascii_letters,digits length=32') }}"
     when: nc_passwd == ''
 
+  - name: download nextcloud archive
+    get_url:
+      url:  "{{ next_archive }}"
+      dest: /tmp/nextcloud.tar.bz2
+      checksum: "sha256:{{ next_archive }}.sha256"
+
   - name: install nextcloud
     unarchive: 
-      src: "{{ next_archive }}"
+      src: /tmp/nextcloud.bz2
       dest: /var/www
       remote_src: true
       creates: /var/www/nextcloud/occ
@@ -138,4 +144,10 @@
       minute: '*/15'
       user: "{{ web_user[ansible_distribution] }}"
       job: "php -f /var/www/nextcloud/cron.php > /dev/null 2>&1"
+  
+  - name: run nextcloud cronjob
+    shell: sudo -u {{ web_user[ansible_distribution] }} php -f /var/www/nextcloud/cron.php
+    args:
+      chdir: /var/www/nextcloud/
+    when: setup_nc is changed
   
