@@ -14,7 +14,7 @@
 
   - name: install nextcloud
     unarchive: 
-      src: /tmp/nextcloud.bz2
+      src: /tmp/nextcloud.tar.bz2
       dest: /var/www
       remote_src: true
       creates: /var/www/nextcloud/occ
