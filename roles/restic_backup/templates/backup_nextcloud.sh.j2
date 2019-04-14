@@ -12,6 +12,9 @@ trap "sudo -u {{ web_user[ansible_distribution] }} php /var/www/nextcloud/occ ma
 # set nextcloud to maintenance mode
 sudo -u {{ web_user[ansible_distribution] }} php /var/www/nextcloud/occ maintenance:mode --on
 
+# unlock restic to keep automatic backup going
+{{ restic_install_path }}/restic unlock --cleanup-cache
+
 # backup the database
 {% if nc_db_type == 'mysql' %}
 mysqldump --single-transaction -h localhost -u {{ nc_db_user }} -p{{ nc_db_passwd }} {{ nc_db }} | {{ restic_install_path }}/restic backup --stdin --stdin-filename db_mysql_nextcloud.sql
@@ -19,11 +22,8 @@ mysqldump --single-transaction -h localhost -u {{ nc_db_user }} -p{{ nc_db_passw
 sudo -u postgres pg_dump -c -U postgres {{ nc_db }} | {{ restic_install_path }}/restic backup --stdin --stdin-filename db_postgres_nextcloud.sql
 {% endif %}
 
-# backup the data dir
-{{ restic_install_path }}/restic backup /var/nc-data
-
-# backup the nextcloud dir
-{{ restic_install_path }}/restic backup /var/www/nextcloud
+# backup the data dir and nextcloud
+{{ restic_install_path }}/restic backup /var/nc-data /var/www/nextcloud
 
 # turn maintenance mode off
 sudo -u {{ web_user[ansible_distribution] }} php /var/www/nextcloud/occ maintenance:mode --off
@@ -33,3 +33,4 @@ trap "" EXIT
 
 # clean up backup dir
 {{ restic_install_path }}/restic forget --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --keep-yearly 75
+{{ restic_install_path }}/restic prune
