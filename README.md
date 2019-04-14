@@ -89,9 +89,10 @@ nc_admin             = 'admin'
 nc_passwd            = ''             # leave empty to generate random password
 
 # database settings
-#nc_db_type          = 'mysql'        # (MariaDB)
+# nc_db_type          = 'mysql'        # (MariaDB)
+# nc_db_host          = 'localhost'
 nc_db_type           = 'pgsql'        # (PostgreSQL)
-nc_db_host           = 'localhost'
+nc_db_host           = ''
 nc_db                = 'nextcloud'
 nc_db_user           = 'nextcloud'
 nc_db_passwd         = ''             # leave empty to generate random password
@@ -122,11 +123,17 @@ next_archive         = https://download.nextcloud.com/server/releases/latest.tar
 
 # Install restic backup tool if backup_folder is not empty
 # more info about restic: https://restic.readthedocs.io/en/latest/
-backup_folder        = '' # e.g. /var/nc-backup
-# crontab settings restic for restic
-backup_day           = *
-backup_hour          = 4
-backup_minute        = 0
+# use a local directory as a restic repository (not a good idea anyway)
+restic_repo          = '/var/backups/nextcloud'
+
+# use rclone to backup a cloud storage, see https://rclone.org for more details
+# configure also rclone_remote in group_vars/all.yml
+# restic_repo         = "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"
+
+# crontab setings for the backup script - default daily at 3pm
+restic_backup_day    = '*'
+restic_backup_minute = '0'
+restic_backup_hour:  = '3'
 
 # Install Collabra Online
 # more info about collabora office: https://www.collaboraoffice.com/
@@ -138,7 +145,7 @@ install_onlyoffice    = false
 
 #
 # change dhparam numbits if generating takes to long
-#dhparam_numbits = 1024
+# dhparam_numbits = 1024
 
 #
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)

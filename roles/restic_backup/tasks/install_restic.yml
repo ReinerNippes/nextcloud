@@ -1,0 +1,30 @@
+---
+# tasks file to install restic
+
+- name: get latest restic version from github
+  uri:
+    url: https://api.github.com/repos/restic/restic/tags
+  register: restic_tags
+  when: restic_version == 'latest'
+
+- name: set restic version
+  set_fact:
+    restic_version: "{{ restic_tags.json.0.name | replace('v','') }}"
+  when: restic_version == 'latest'
+
+- name: download restic binary
+  get_url:
+    url: '{{ restic_download_url }}'
+    dest: '{{ restic_install_path }}/restic.bz2'
+    force: true
+    checksum: 'sha256:https://github.com/restic/restic/releases/download/v{{ restic_version }}/SHA256SUMS'
+
+- name: decompress the binary
+  shell: "bunzip2 --force {{ restic_install_path }}/restic.bz2"
+
+- name: ensure permissions are correct
+  file:
+    path: '{{ restic_install_path }}/restic'
+    mode: '0755'
+    owner: 'root'
+    group: 'root'
