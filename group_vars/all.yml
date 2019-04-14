@@ -27,3 +27,17 @@ pg_group_id:
 
 credential_store: /etc/nextcloud
 dhparam_path:     /etc/nextcloud/dhparam/dhparam.pem
+
+# example of rclone config to backup to a s3 bucket
+
+#rclone_remote: |
+#      [backup-selfhosted]
+#      type = s3
+#      provider = AWS
+#      env_auth = false
+#      access_key_id = AKIxxxxx
+#      secret_access_key = QMpoxxxx
+#      region = us-east-1
+#      acl = private
+#      server_side_encryption = AES256
+#      storage_class = STANDARD_IA

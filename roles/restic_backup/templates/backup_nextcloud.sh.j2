@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export RESTIC_REPOSITORY="{{ backup_folder }}"
-export RESTIC_PASSWORD="{{ lookup('password', '{{ credential_store }}/restic_secret chars=ascii_letters,digits length=32') }}"
+export RESTIC_REPOSITORY="{{ restic_repo }}"
+export RESTIC_PASSWORD="{{ restic_backup_secret }}"
 
 # abort entire script if any command fails
 set -e

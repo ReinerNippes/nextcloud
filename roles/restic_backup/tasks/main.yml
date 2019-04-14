@@ -1,65 +1,53 @@
 ---
 # tasks file for restic_backup
 
-- name: download restic binary
-  get_url:
-    url: '{{ restic_url }}'
-    dest: '/tmp/restic.bz2'
-    force: True
-  register: get_url_restic
+- name: install restic
+  include_tasks: install_restic.yml
 
-- name: decompress the binary
-  shell: "bzip2 -dc {{ get_url_restic.dest }} > {{ restic_install_path }}/restic-{{ restic_version }}"
-  args:
-    creates: '{{ restic_install_path }}/restic-{{ restic_version }}'
+- name: install restic
+  include_tasks: install_rclone.yml
+  when: ( 'rclone' in restic_repo )
 
-- name: ensure permissions are correct
-  file:
-    path: '{{ restic_install_path }}/restic-{{ restic_version }}'
-    mode: '0755'
-    owner: 'root'
-    group: 'root'
-
-- name: create symbolic link to the correct version
-  file:
-    src:  '{{ restic_install_path }}/restic-{{ restic_version }}'
-    path: '{{ restic_install_path }}/restic'
-    state: link
-    force: True
+- name: generate restic secret if restic_backup_secret is empty
+  set_fact:
+    restic_backup_secret: "{{ lookup('password', '{{ credential_store }}/restic_backup_secret chars=ascii_letters,digits length=32') }}"
+  when: restic_backup_secret == ''
 
 - name: create restic backup directory
   file:
-    name: '{{ backup_folder }}'
-    owner: "{{ web_user[ansible_distribution] }}"
-    group: "{{ web_user[ansible_distribution] }}"
-    mode: 0750
+    name:  '{{ restic_repo }}'
+    owner: 'root'
+    group: 'root'
+    mode:  '0700'
     state: directory
-
+  when: ( 'rclone' not in restic_repo )
+  
 - name: initialize repository
   command: '{{ restic_install_path }}/restic init'
   environment:
-    RESTIC_REPOSITORY: "{{ backup_folder }}"
-    RESTIC_PASSWORD:   "{{ lookup('password', '{{ credential_store }}/restic_secret chars=ascii_letters,digits length=32') }}"
-  no_log: True
+    RESTIC_REPOSITORY: "{{ restic_repo }}"
+    RESTIC_PASSWORD:   "{{ restic_backup_secret }}"
+#  no_log: true
   register: restic_init
   changed_when: "'created restic backend' in restic_init.stdout"
   failed_when:
     - restic_init.rc != 0
-    - not 'config file already exists' in restic_init.stderr
+    - not ( 'config already initialized' in restic_init.stderr or 'config file already exists' in restic_init.stderr )
 
-- name: cretae restic nextcloud backup script
+- name: cretae restic selfhosted backup script
   template:
-    src: backup_nextcloud.sh.j2
-    dest: /usr/local/bin/backup_nextcloud.sh
-    owner: root
-    group: root
-    mode: 0750
+    src:   'backup_nextcloud.sh.j2'
+    dest:  '/usr/local/bin/backup_nextcloud.sh'
+    owner: 'root'
+    group: 'root'
+    mode:  '0750'
+    force: false
     
 - name: crontab entry
   cron:
     name:   "backup nextcloud"
-    day:    "{{ backup_day }}"
-    minute: "{{ backup_minute }}"
-    hour:   "{{ backup_hour }}"
+    day:    "{{ restic_backup_day }}"
+    minute: "{{ restic_backup_minute }}"
+    hour:   "{{ restic_backup_hour }}"
     job:    "/usr/local/bin/backup_nextcloud.sh > /dev/null 2>&1"
   
