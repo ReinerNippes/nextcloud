@@ -32,7 +32,7 @@ Not yet tested with other versions and flavours of Linux.
 Install
 -------
 
-```ini
+```bash
 # clone this repo
 git clone <https://github.com/ReinerNippes/nextcloud>
 
@@ -123,7 +123,7 @@ next_archive         = https://download.nextcloud.com/server/releases/latest.tar
 
 # Install restic backup tool if backup_folder is not empty
 # more info about restic: https://restic.readthedocs.io/en/latest/
-# use a local directory as a restic repository (not a good idea anyway)
+# to use a local directory as a restic repository (not a good idea anyway)
 restic_repo          = '/var/backups/nextcloud'
 
 # use rclone to backup a cloud storage, see https://rclone.org for more details
