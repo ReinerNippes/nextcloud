@@ -144,10 +144,6 @@ install_collabora     = false
 install_onlyoffice    = false
 
 #
-# change dhparam numbits if generating takes to long
-# dhparam_numbits = 1024
-
-#
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)
 credential_store      = /etc/nextcloud
 ```
