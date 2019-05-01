@@ -37,3 +37,8 @@
     enabled: true
     state:   started
 
+- name: Wait for PostgreSQL to start if it wasnt
+  wait_for:
+    host: localhost
+    port: 5432
+  when: postgresql_start is changed
