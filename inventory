@@ -37,9 +37,8 @@ nc_passwd            = ''             # leave empty to generate random password
 
 # database settings
 # nc_db_type          = 'mysql'        # (MariaDB)
-# nc_db_host          = 'localhost'
 nc_db_type           = 'pgsql'        # (PostgreSQL)
-nc_db_host           = ''
+nc_db_host           = 'localhost'
 nc_db                = 'nextcloud'
 nc_db_user           = 'nextcloud'
 nc_db_passwd         = ''             # leave empty to generate random password
