@@ -11,7 +11,7 @@
     - prep_nginx
     - prep_php
     - { role: prep_mariadb,        when: (nc_db_type == 'mysql') and (nc_db_host == 'localhost') }
-    - { role: prep_postgres,       when: (nc_db_type == 'pgsql') and (nc_db_host == '') }
+    - { role: prep_postgres,       when: (nc_db_type == 'pgsql') and (nc_db_host == 'localhost') }
     - { role: prep_letsencrypt,    when: ssl_certificate_type  == 'letsencrypt' }
     - { role: prep_selfssl,        when: ssl_certificate_type  == 'selfsigned' }
     - { role: restic_backup,       when: restic_repo != '' }
