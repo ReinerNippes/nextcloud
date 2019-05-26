@@ -48,7 +48,7 @@
 - name: Enabling firewall
   ufw:
     state: enabled
-  when: ufw_reset
+  when: ufw_reset|bool
 
 - name: start ufw
   systemd:

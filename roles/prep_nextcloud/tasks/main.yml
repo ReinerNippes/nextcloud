@@ -95,7 +95,7 @@
     args:
       chdir: /var/www/nextcloud/
     with_items: "{{ nc_mail_config }}"
-    when: nc_configure_mail
+    when: nc_configure_mail|bool
 
   - name: copy defaults/config.json to /tmp 
     copy:
