@@ -2,24 +2,36 @@
 # tasks file for prep_onlyoffice
 
 - name: install onlyoffice app
-  shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install onlyoffice
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ app:install onlyoffice
   args:
     chdir: /var/www/nextcloud/
     creates: /var/www/nextcloud/apps/onlyoffice
   ignore_errors: true
   
 - name: enable onlyoffice app
-  shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:enable onlyoffice
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ app:enable onlyoffice
   args:
     chdir: /var/www/nextcloud/
   
 - name: set onlyoffice server url
-  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set onlyoffice DocumentServerUrl --value https://{{ fqdn }}:{{ onlyoffice_ssl_port }}
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:app:set onlyoffice DocumentServerUrl --value https://{{ fqdn }}:{{ onlyoffice_ssl_port }}
   args:
     chdir: /var/www/nextcloud/
 
 - name: set onlyoffice server url
-  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set onlyoffice jwt_secret --value {{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:app:set onlyoffice jwt_secret --value {{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}
   args:
     chdir: /var/www/nextcloud/
 
@@ -34,7 +46,6 @@
     tty: yes
     ports:
      - "{{ onlyoffice_ssl_port }}:443"
-#     - "8080:80"
     env:
       JWT_ENABLED:          'true'
       JWT_SECRET:           "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
@@ -61,6 +72,5 @@
     state: enabled
   with_items:
     - '{{ onlyoffice_ssl_port }}/tcp'
-#    - 8080/tcp
   when: ansible_os_family == "Redhat" 
 

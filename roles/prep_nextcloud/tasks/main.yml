@@ -72,11 +72,20 @@
       state: restarted
 
   - name: first setup nextcloud
+    become_user: "{{ web_user[ansible_distribution] }}"
+    become_flags: "{{ ansible_become_flags | default(omit) }}"
+    become: yes
     shell: >
-      sudo -u {{ web_user[ansible_distribution] }} php occ  maintenance:install 
-      --database {{ nc_db_type }} --database-host "{{ nc_db_host }}" --database-name {{ nc_db }} 
-      --database-table-prefix {{ nc_db_prefix }} --database-user {{ nc_db_user }} 
-      --database-pass {{ nc_db_passwd }} --admin-user {{ nc_admin }} --admin-pass {{ nc_passwd }} --data-dir {{ nc_datadir }}
+      php occ  maintenance:install 
+      --database {{ nc_db_type }} 
+      --database-host "{{ nc_db_host }}" 
+      --database-name {{ nc_db }} 
+      --database-table-prefix {{ nc_db_prefix }} 
+      --database-user {{ nc_db_user }} 
+      --database-pass {{ nc_db_passwd }} 
+      --admin-user {{ nc_admin }} 
+      --admin-pass {{ nc_passwd }} 
+      --data-dir {{ nc_datadir }}
     args:
       chdir: /var/www/nextcloud/
       creates: /var/www/nextcloud/config/config.php
@@ -85,13 +94,19 @@
   - debug: var=setup_nc verbosity=2
   
   - name: set nextcloud domain config.php values
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:system:set {{ item.key }} {{ item.value }}
+    become_user: "{{ web_user[ansible_distribution] }}"
+    become_flags: "{{ ansible_become_flags | default(omit) }}"
+    become: yes
+    shell: php occ config:system:set {{ item.key }} {{ item.value }}
     args:
       chdir: /var/www/nextcloud/
     with_items: "{{ nc_config }}"
 
   - name: set nextcloud mail config.php values
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:system:set {{ item.key }} {{ item.value }}
+    become_user: "{{ web_user[ansible_distribution] }}"
+    become_flags: "{{ ansible_become_flags | default(omit) }}"
+    become: yes
+    shell: php occ config:system:set {{ item.key }} {{ item.value }}
     args:
       chdir: /var/www/nextcloud/
     with_items: "{{ nc_mail_config }}"
@@ -105,7 +120,10 @@
       mode: 0600
       
   - name: set default config
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:import /tmp/nextcloud.config.json
+    become_user: "{{ web_user[ansible_distribution] }}"
+    become_flags: "{{ ansible_become_flags | default(omit) }}"
+    become: yes
+    shell: php occ config:import /tmp/nextcloud.config.json
     args:
       chdir: /var/www/nextcloud/
     register: setup_nc
@@ -118,7 +136,10 @@
   - debug: var=setup_nc verbosity=2
 
   - name: backup jobs, upgrade apps and database tuning
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ {{ item }}
+    become_user: "{{ web_user[ansible_distribution] }}"
+    become_flags: "{{ ansible_become_flags | default(omit) }}"
+    become: yes
+    shell: php occ {{ item }}
     args:
       chdir: /var/www/nextcloud/
     loop:
@@ -128,12 +149,18 @@
       - db:convert-filecache-bigint
       
   - name: upgrade nextcloud
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ upgrade
+    become_user: "{{ web_user[ansible_distribution] }}"
+    become_flags: "{{ ansible_become_flags | default(omit) }}"
+    become: yes
+    shell: php occ upgrade
     args:
       chdir: /var/www/nextcloud/
 
   - name: adjust app settings
-    shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:{{ item.key }} {{ item.value }}
+    become_user: "{{ web_user[ansible_distribution] }}"
+    become_flags: "{{ ansible_become_flags | default(omit) }}"
+    become: yes
+    shell: php occ app:{{ item.key }} {{ item.value }}
     args:
       chdir: /var/www/nextcloud/
     with_items: "{{ nc_app_config }}"
@@ -146,7 +173,10 @@
       job: "php -f /var/www/nextcloud/cron.php > /dev/null 2>&1"
   
   - name: run nextcloud cronjob
-    shell: sudo -u {{ web_user[ansible_distribution] }} php -f /var/www/nextcloud/cron.php
+    become_user: "{{ web_user[ansible_distribution] }}"
+    become_flags: "{{ ansible_become_flags | default(omit) }}"
+    become: yes
+    shell: php -f /var/www/nextcloud/cron.php
     args:
       chdir: /var/www/nextcloud/
     when: setup_nc is changed
