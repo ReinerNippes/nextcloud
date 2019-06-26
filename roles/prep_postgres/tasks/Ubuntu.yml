@@ -43,8 +43,3 @@
     host: localhost
     port: 5432
   when: postgresql_start is changed
-  
-- name: set nc_db_host to '' if runing on localhost
-  set_fact:
-    nc_db_host: ''
-  when: nc_db_host == 'localhost'
