@@ -10,9 +10,6 @@
     state:          present
     encoding:       UTF-8
     template:       template1
-    login_host:     '{{ nc_db_host | default(omit) }}'
-    login_user:     "{{ postgres_user | default(omit) }}"
-    login_password: "{{ postgres_admin_password | default(omit) }}"
   become:           yes
   become_user:      postgres
 
@@ -23,9 +20,6 @@
     db:             "{{ nc_db }}"
     name:           "{{ nc_db_user }}"
     password:       "{{ nc_db_passwd }}"
-    login_host:     '{{ nc_db_host | default(omit) }}'
-    login_user:     "{{ postgres_user | default(omit) }}"
-    login_password: "{{ postgres_admin_password | default(omit) }}"
   become:           yes
   become_user:      postgres
 
@@ -36,9 +30,6 @@
     type:           database
     obj:            "{{ nc_db }}"
     role:           "{{ nc_db_user }}"
-    login_host:     '{{ nc_db_host | default(omit) }}'
-    login_user:     "{{ postgres_user | default(omit) }}"
-    login_password: "{{ postgres_admin_password | default(omit) }}"
   become: yes
   become_user:      postgres
-    
+
