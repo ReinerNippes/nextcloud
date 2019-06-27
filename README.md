@@ -3,25 +3,24 @@ Nextcloud (Latest)
 
 Ansible Playbook to install
 
-* Nextcloud - https://nextcloud.com/
+* Nextcloud (Latest) - https://nextcloud.com/
 * nginx 1.15 - https://nginx.org/
 * PHP 7.x - http://www.php.net/
 * MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
 * redis - https://redis.io/
 * restic backup - https://restic.readthedocs.io
 * Nextcloud Talk
-* Collabora Online https://www.collaboraoffice.com/
+* Collabora Online <https://www.collaboraoffice.com/>
 or
-* Onlyoffice https://www.onlyoffice.com
+* Onlyoffice <https://www.onlyoffice.com>
 
 In less than 20 minutes.
 
 Most of the settings are recommentations from C. Rieger
 
-Visit his page for all details: https://www.c-rieger.de/
+Visit his page for all details: <https://www.c-rieger.de/>
 
 Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
-
 
 Requirements
 ------------
@@ -32,9 +31,10 @@ Not yet tested with other versions and flavours of Linux.
 
 Install
 -------
-```
+
+```bash
 # clone this repo
-git clone https://github.com/ReinerNippes/nextcloud
+git clone <https://github.com/ReinerNippes/nextcloud>
 
 # change to nextcloud13 directory
 cd nextcloud
@@ -50,15 +50,16 @@ ansible-playbook nextcloud.yml
 
 ```
 
-Login to your nextcloud web site https://\<fqdn\>
+Login to your nextcloud web site <https://your.fqdn>
 
-
-Users and passwords have been set according to the entries in the inventory if defiend there. Otherwise the admin password will be displayed at the end of playbook. Additional you can find the credential_store = /etc/nextcloud
+Users and passwords have been set according to the entries in the inventory if defined there. Otherwise the admin password will be displayed at the end of playbook. Additional you can find them in the credential_store = /etc/nextcloud
 
 Role Variables
 --------------
+
 All variables are defined in inventory file.
-```
+
+```ini
 # Server domain name
 # Default is the fqdn of the machine
 # fqdn       = nc.example.org
@@ -77,10 +78,6 @@ ssl_certificate_type  = 'selfsigned'
 # uncomment if you want to use letsencrypt staging environment
 # cert_stage = '--staging'
 
-# Your dns resolver (nginx reverse ip lookup)
-# e.g. your fritz.box ; default is ccc 213.73.91.35 (germany) - 216.87.84.211 OpenNIC (usa)
-nginx_resolver       = '213.73.91.35 216.87.84.211 valid=30s'
-
 #
 # Nextcloud varibales
 
@@ -92,9 +89,10 @@ nc_admin             = 'admin'
 nc_passwd            = ''             # leave empty to generate random password
 
 # database settings
-#nc_db_type          = 'mysql'        # (MariaDB)
+# nc_db_type          = 'mysql'        # (MariaDB)
+# nc_db_host          = 'localhost'
 nc_db_type           = 'pgsql'        # (PostgreSQL)
-nc_db_host           = 'localhost'
+nc_db_host           = ''
 nc_db                = 'nextcloud'
 nc_db_user           = 'nextcloud'
 nc_db_passwd         = ''             # leave empty to generate random password
@@ -125,11 +123,17 @@ next_archive         = https://download.nextcloud.com/server/releases/latest.tar
 
 # Install restic backup tool if backup_folder is not empty
 # more info about restic: https://restic.readthedocs.io/en/latest/
-backup_folder        = '' # e.g. /var/nc-backup
-# crontab settings restic for restic
-backup_day           = *
-backup_hour          = 4
-backup_minute        = 0
+# to use a local directory as a restic repository (not a good idea anyway)
+restic_repo          = '/var/backups/nextcloud'
+
+# use rclone to backup a cloud storage, see https://rclone.org for more details
+# configure also rclone_remote in group_vars/all.yml
+# restic_repo         = "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"
+
+# crontab setings for the backup script - default daily at 3pm
+restic_backup_day    = '*'
+restic_backup_minute = '0'
+restic_backup_hour:  = '3'
 
 # Install Collabra Online
 # more info about collabora office: https://www.collaboraoffice.com/
@@ -138,10 +142,6 @@ install_collabora     = false
 # Install Online Office
 # more info about onlyoffice office: https://www.onlyoffice.com
 install_onlyoffice    = false
-
-#
-# change dhparam numbits if generating takes to long
-#dhparam_numbits = 1024
 
 #
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)

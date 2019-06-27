@@ -13,9 +13,33 @@
     update_cache: true
     state: present
 
-- name: apt install postgresql-client with Update
+- name: apt install postgresql with update
   apt:
-    name: postgresql-client
+    name:
+      - "postgresql-{{ postgresql_version }}"
+      - "postgresql-client-{{ postgresql_version }}"
+      - "postgresql-contrib-{{ postgresql_version }}"
+      - "postgresql-server-dev-{{ postgresql_version }}"
     state: latest
     update_cache: true
-    
+
+- name: install psycopg2
+  pip: 
+    name: 
+      - psycopg2
+      - pip
+    state: latest
+  become: true
+
+- name: ensure postgres is running
+  systemd:
+    name:    postgresql
+    enabled: true
+    state:   started
+  register: postgresql_start
+
+- name: Wait for PostgreSQL to start if it wasnt
+  wait_for:
+    host: localhost
+    port: 5432
+  when: postgresql_start is changed

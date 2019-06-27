@@ -1,7 +1,7 @@
 [nextcloud]
 backend = auto
 enabled = true
-port = 80,443
+port = {{ nc_web_port }},{{ nc_ssl_port }}
 protocol = tcp
 filter = nextcloud
 maxretry = 3

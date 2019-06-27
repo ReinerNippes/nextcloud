@@ -1,6 +1,30 @@
 ---
-# defaults file for restic_backup
+# defaults file for restic backup
 
-restic_repository: ''
+# checkout the latest version of restic. set to x.y.z to get a specific version 
+restic_version:    'latest'
 
-restic_version: '0.9.3'
+restic_backup_secret:       '' 
+restic_install_path:        '/usr/local/bin'
+
+# use a local directory as a restic repository (not a good idea anyway)
+restic_repo:     '/var/backups/selfosted'
+
+# use rclone to backup a cloud storage, see https://rclone.org for more details
+#restic_repo:     "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ selfhosted_credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"
+#rclone_remote: |
+#      [backup-selfhosted]
+#      type = s3
+#      provider = AWS
+#      env_auth = false
+#      access_key_id = AKIxxxxx
+#      secret_access_key = QMpoxxxx
+#      region = us-east-1
+#      acl = private
+#      server_side_encryption = AES256
+#      storage_class = STANDARD_IA
+
+# crontab setings for the backup script - default daily at 3pm
+restic_backup_day:    '*'
+restic_backup_minute: '0'
+restic_backup_hour:   '3'
