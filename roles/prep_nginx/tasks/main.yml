@@ -52,17 +52,22 @@
   set_fact:
     fqdn: "{{ fqdn if ( fqdn ) else ansible_fqdn }}"
 
-- name: nextcloud nginx config
+- name: nginx nextcloud config
   template:
     src: nextcloud.conf.j2
     dest: /etc/nginx/conf.d/nextcloud.conf
-    force: no
+    owner: root
+    group: root
+    mode: 0644
   notify: restart nginx
 
 - name: nginx config for ssl
   template:
     src: ssl.conf.{{ ssl_certificate_type }}.j2
     dest: /etc/nginx/conf.d/ssl.conf
+    owner: root
+    group: root
+    mode: 0644
   notify: restart nginx
 
 - name: copy some nginx config file

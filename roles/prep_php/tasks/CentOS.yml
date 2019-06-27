@@ -41,7 +41,6 @@
       - "{% if nc_db_type == 'mysql' %}php-mysql{% elif nc_db_type == 'pgsql' %}php-pgsql{% endif %}"
       - php-curl
       - php-xml
-      - php-zip
       - php-intl
       - php-mbstring
       - php-json
@@ -60,6 +59,7 @@
       - php-pear
       - php-pdo
       - php-pecl-apcu
+      - php-pecl-zip
     state: latest
 
 - name: configure php

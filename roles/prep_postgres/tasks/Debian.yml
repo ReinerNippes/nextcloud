@@ -15,7 +15,24 @@
 
 - name: apt install postgresql-client with Update
   apt:
-    name: postgresql-client
+    name: 
+      - "postgresql-{{ postgresql_version }}"
+      - "postgresql-client-{{ postgresql_version }}"
+      - "postgresql-contrib-{{ postgresql_version }}"
+      - "postgresql-server-dev-{{ postgresql_version }}"
     state: latest
     update_cache: true
     
+- name: install psycopg2
+  pip: 
+    name: 
+      - psycopg2
+      - pip
+    state: latest
+  become: true
+
+- name: ensure postgres is running
+  systemd:
+    name:    postgresql
+    enabled: true
+    state:   started

@@ -1,34 +1,6 @@
 ---
 # tasks file for prep_collabora
 
-- name: configure nginx
-  blockinfile:
-    path: /etc/nginx/conf.d/nextcloud.conf 
-    block: |
-      location ^~ /loleaflet {
-      proxy_pass https://localhost:9980;
-      proxy_set_header Host $http_host;
-      }
-      location ^~ /hosting/discovery {
-      proxy_pass https://localhost:9980;
-      proxy_set_header Host $http_host;
-      }
-      location ^~ /lool {
-      proxy_pass https://localhost:9980;
-      proxy_set_header Host $http_host;
-      proxy_set_header Upgrade $http_upgrade;
-      proxy_set_header Connection "upgrade";
-      }
-    marker: "# {mark} ANSIBLE MANAGED BLOCK collabra"
-    insertafter: client_max_body_size(.*)
-  register: nginx_collabora_conf
-
-- name: reload nginx
-  systemd:
-    name: nginx
-    state: reloaded
-  when: nginx_collabora_conf is changed
-
 - name: install collabora app
   shell: sudo -u {{ web_user[ansible_distribution] }} php occ app:install richdocuments
   args:
@@ -42,7 +14,7 @@
     chdir: /var/www/nextcloud/
 
 - name: set collabora wopi url
-  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set richdocuments wopi_url --value https://{{ fqdn }}:443
+  shell: sudo -u {{ web_user[ansible_distribution] }} php occ config:app:set richdocuments wopi_url --value https://{{ fqdn }}:{{ nc_ssl_port }}
   args:
     chdir: /var/www/nextcloud/
   notify: restart collabora container

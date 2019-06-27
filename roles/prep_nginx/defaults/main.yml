@@ -2,3 +2,7 @@
 # defaults file for prep_nginx
 
 fqdn: ''
+
+# dns resolver (nginx reverse ip lookup) set to 127.0.0.1
+# see http://blog.zorinaq.com/nginx-resolver-vulns/
+nginx_resolver: '127.0.0.1'

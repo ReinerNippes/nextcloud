@@ -1,6 +1,6 @@
 galaxy_info:
   author: reiner nippes
-  description: bring up postgresql container for nextcloud
+  description: bring up postgresql database for nextcloud
   company: nippesit
 
   # If the issue tracker for your role is not on github, uncomment the
@@ -54,4 +54,3 @@ galaxy_info:
 
 dependencies: 
   - prep_secrets
-  - prep_docker

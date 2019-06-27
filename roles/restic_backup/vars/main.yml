@@ -1,5 +1,5 @@
 ---
 # vars file for restic_backup
 
-restic_url: 'https://github.com/restic/restic/releases/download/v{{ restic_version }}/restic_{{ restic_version }}_linux_amd64.bz2'
-restic_install_path: '/usr/local/bin'
+restic_download_url: 'https://github.com/restic/restic/releases/download/v{{ restic_version }}/restic_{{ restic_version }}_linux_amd64.bz2'
+rclone_download_url: 'https://downloads.rclone.org/rclone-current-linux-amd64'
