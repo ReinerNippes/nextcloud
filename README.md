@@ -1,14 +1,14 @@
-Nextcloud 15
+Nextcloud (Latest)
 =========
 
 Ansible Playbook to install
 
-* Nextcloud 15 - <https://nextcloud.com/>
-* nginx 1.15 - <https://nginx.org/>
-* PHP 7.x - <http://www.php.net/>
-* MariaDB 10 - <https://mariadb.org/> or PostgreSQL 10 <https://www.postgresql.org/> (only Ubuntu right now)
-* redis - <https://redis.io/>
-* restic backup - <https://restic.readthedocs.io>
+* Nextcloud (Latest) - https://nextcloud.com/
+* nginx 1.15 - https://nginx.org/
+* PHP 7.x - http://www.php.net/
+* MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
+* redis - https://redis.io/
+* restic backup - https://restic.readthedocs.io
 * Nextcloud Talk
 * Collabora Online <https://www.collaboraoffice.com/>
 or
