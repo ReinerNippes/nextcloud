@@ -34,7 +34,7 @@ Install
 
 ```bash
 # clone this repo
-git clone <https://github.com/ReinerNippes/nextcloud>
+git clone https://github.com/ReinerNippes/nextcloud
 
 # change to nextcloud13 directory
 cd nextcloud
