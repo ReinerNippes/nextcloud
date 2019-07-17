@@ -16,10 +16,10 @@ install_pip () {
 prepare_ubuntu() { 
 	$SUDO apt update -y
 	$SUDO apt dist-upgrade -y
-	$SUDO apt install software-properties-common curl git mc vim facter python-minimal -y
+	$SUDO apt install software-properties-common curl git mc vim facter python3 python3-distutils python3-requests -y
 	$SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python-dev libffi-dev libssl-dev make -y
 
-	PYTHON_BIN=/usr/bin/python
+	PYTHON_BIN=/usr/bin/python3
 	install_pip
 		
 	echo
