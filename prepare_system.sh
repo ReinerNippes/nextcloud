@@ -30,7 +30,7 @@ prepare_ubuntu() {
 prepare_debian() { 
 	$SUDO apt update -y
 	$SUDO apt dist-upgrade -y
-	$SUDO apt install dirmngr curl git mc vim facter python3 python3-requests aptitude -y
+	$SUDO apt install dirmngr curl git mc vim facter python3 python3-distutils python3-requests aptitude -y
 	$SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python3-dev libffi-dev libssl-dev make -y
 	
 	PYTHON_BIN=/usr/bin/python3
