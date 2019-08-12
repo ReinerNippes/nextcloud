@@ -64,15 +64,23 @@
 
 - name: disable transparent hugepages - copy service file
   copy:
-    src: disable-transparent-hugepages
-    dest: /etc/init.d/disable-transparent-hugepages
+    src: disable-transparent-huge-pages.service
+    dest: /usr/local/src/disable-transparent-huge-pages.service
     owner: root
     group: root
-    mode: 0755
+    mode: 0644
+
+- name: create link in /etc/systemd/system/
+  file:
+    src: /usr/local/src/disable-transparent-huge-pages.service
+    dest: /etc/systemd/system/disable-transparent-huge-pages.service
+    owner: root
+    group: root
+    state: link
 
 - name: enable service disable-transparent-hugepages
   service:
-    name: disable-transparent-hugepages
+    name: disable-transparent-huge-pages
     enabled: true
     state: started
     
