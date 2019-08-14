@@ -5,3 +5,8 @@ imagemagick_xml_path:
   CentOS: /etc/ImageMagick/policy.xml
   Ubuntu: /etc/ImageMagick-6/policy.xml
   Debian: /etc/ImageMagick-6/policy.xml
+  
+service_path:
+  CentOS: '/usr/lib/systemd/system'
+  Ubuntu: '/lib/systemd/system'
+  Debian: '/lib/systemd/system'
