@@ -5,12 +5,12 @@
 
 install_pip () {
 	curl https://bootstrap.pypa.io/get-pip.py | $SUDO $PYTHON_BIN
-	$SUDO pip install setuptools -U
-	$SUDO pip install ansible -U
-	$SUDO pip install netaddr -U
-	$SUDO pip install dnspython -U
-	$SUDO pip install passlib -U
-	$SUDO pip install bcrypt -U
+	$SUDO $PIP_BIN install setuptools -U
+	$SUDO $PIP_BIN install ansible -U
+	$SUDO $PIP_BIN install netaddr -U
+	$SUDO $PIP_BIN install dnspython -U
+	$SUDO $PIP_BIN install passlib -U
+	$SUDO $PIP_BIN install bcrypt -U
 }
 
 prepare_ubuntu() { 
@@ -20,6 +20,7 @@ prepare_ubuntu() {
 	$SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python3-dev libffi-dev libssl-dev make -y
 
 	PYTHON_BIN=/usr/bin/python3
+	PIP_BIN=/usr/local/bin/pip
 	install_pip
 		
 	echo
@@ -34,6 +35,7 @@ prepare_debian() {
 	$SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python3-dev libffi-dev libssl-dev make -y
 	
 	PYTHON_BIN=/usr/bin/python3
+	PIP_BIN=/usr/local/bin/pip
 	install_pip
 	
 	echo
@@ -55,9 +57,11 @@ prepare_raspbian() {
 
 prepare_centos() { 
 	$SUDO yum install epel-release -y
-	$SUDO yum install git vim mc curl facter libselinux-python -y
+	$SUDO yum install git vim mc curl facter libselinux-python python36 python36-pip -y
 	$SUDO yum update -y
-	PYTHON_BIN=/usr/bin/python
+
+	PYTHON_BIN=/usr/bin/python3.6
+	PIP_BIN=/usr/local/bin/pip
 	install_pip
 	
 	echo
