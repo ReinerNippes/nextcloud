@@ -26,7 +26,7 @@
 - name: install psycopg2
   pip: 
     name: 
-      - psycopg2
+      - psycopg2-binary
       - pip
     state: latest
   become: true
