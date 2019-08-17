@@ -2,7 +2,8 @@
 # vars file for prep_redis
 
 redis_conf_path:
-  'CentOS': '/etc'
-  'Ubuntu': '/etc/redis'
-  'Debian': '/etc/redis' 
+  CentOS: '/etc'
+  Amazon: '/etc'
+  Ubuntu: '/etc/redis'
+  Debian: '/etc/redis' 
   

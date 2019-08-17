@@ -1,0 +1,38 @@
+---
+# Amazon related tasks
+
+# Disable SELinux
+- selinux:
+    state: permissive
+    policy: targeted
+  when: ansible_os_family == "RedHat"
+
+- name: add amazon epel repo
+  shell: amazon-linux-extras install epel
+  args:
+    creates: /etc/yum.repos.d/amzn2-extras.repo
+
+- name: update os
+  yum:
+    name: '*'
+    update_cache: true
+    state: latest
+
+- name: install needed packages
+  yum:
+    name:
+      - zip
+      - unzip
+      - bzip2
+      - screen
+      - curl
+      - wget
+      - perl-File-FcntlLock 
+      - ImageMagick
+      - ghostscript
+      - postfix
+      - firewalld
+      - facter
+      - policycoreutils-python
+    state: latest
+    enablerepo: amzn2extra-epel
