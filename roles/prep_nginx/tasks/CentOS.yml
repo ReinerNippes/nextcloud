@@ -21,8 +21,6 @@
   yum:
     name:
       - nginx
-      - python-pip
-      - python-netaddr
       - firewalld
     state: latest
     enablerepo: nginx
