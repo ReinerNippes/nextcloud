@@ -1,0 +1,78 @@
+---
+# CentOS related OS tasks
+
+- name: add amazon epel repo
+  shell: amazon-linux-extras install postgresql{{ postgresql_version }}
+
+- name: install postgres server
+  yum:
+    name: 
+      - postgresql-server
+      - postgresql-contrib
+    state: latest
+    
+- name: install psycopg2-binary
+  pip: 
+    name: 
+      - psycopg2-binary
+      - pexpect
+    state: latest
+  become: true
+
+- name: 'init postgresql database'
+  command: /usr/bin/postgresql-setup --initdb
+  args:
+    creates: /var/lib/pgsql/data/PG_VERSION
+  become: yes
+
+- name: ensure postgres is running
+  systemd:
+    name:    postgresql
+    enabled: true
+    state:   started
+
+- name: update postgresql authentication settings
+  template:
+    dest: '/var/lib/pgsql/data/pg_hba.conf'
+    owner: postgres
+    src: pg_hba.conf.j2
+  register: pg_hba_conf
+
+- name: apply postgresql general settings
+  template:
+    dest: '/var/lib/pgsql/data/postgresql.conf'
+    owner: postgres
+    src: postgresql.conf.j2
+  register: pg_general_conf
+
+- name: create unix socket directory
+  file:
+    path: '/var/run/postgresql'
+    state: directory
+    owner: 'postgres'
+    group: 'postgres'
+    mode: 02775
+    setype: 'postgresql_var_run_t'
+
+- name: configure postgresql tmpfiles.d
+  template:
+    src: 'postgresql.tmpfiles.d.j2'
+    dest: '/usr/lib/tmpfiles.d/postgresql.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    setype: 'lib_t'
+  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
+
+- name: restart postgresql when authentication settings changed
+  service:
+    name: postgresql
+    state: restarted
+  when: pg_hba_conf is changed or pg_general_conf is changed
+  register: postgresql_restart
+
+- name: wait for postgresql restart
+  wait_for:
+    host: localhost
+    port: 5432
+  when: postgresql_restart is changed
