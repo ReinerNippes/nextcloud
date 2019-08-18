@@ -39,7 +39,7 @@ curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud/master/prepare_
 # clone this repo
 git clone https://github.com/ReinerNippes/nextcloud
 
-# change to nextcloud13 directory
+# change to nextcloud directory
 cd nextcloud
 
 # edit variables
@@ -53,17 +53,13 @@ sudo ./nextcloud.yml
 
 # if your are fine with the defaults in the inventory (e.g. db version) just provide the ssl parameter
 ./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=letsencrypt -e 'cert_email=nc@example.org'
-
 or
-
 ./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=selfsigned
-
 or
-
-./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=selfsigned -e  -e nc_db_type=mysql
+./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=selfsigned -e nc_db_type=mysql
 ```
 
-Login to your nextcloud web site <https://your.fqdn>
+Login to your nextcloud web site <https://nc.example.org>
 
 Users and passwords have been set according to the entries in the inventory if defined there. Otherwise the admin password will be displayed at the end of playbook. Additional you can find them in the credential_store = /etc/nextcloud
 
