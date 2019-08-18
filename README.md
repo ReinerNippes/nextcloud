@@ -4,11 +4,11 @@ Nextcloud (Latest)
 Ansible Playbook to install
 
 * Nextcloud (Latest) - https://nextcloud.com/
-* nginx 1.15 - https://nginx.org/
-* PHP 7.x - http://www.php.net/
-* MariaDB 10 - https://mariadb.org/ or PostgreSQL 10 https://www.postgresql.org/ (only Ubuntu right now)
-* redis - https://redis.io/
-* restic backup - https://restic.readthedocs.io
+* nginx 1.17 - <https://nginx.org/>
+* PHP 7.x - <http://www.php.net/>
+* MariaDB 10 - <https://mariadb.org/> or PostgreSQL 10 <https://www.postgresql.org/>
+* redis - <https://redis.io/>
+* restic backup - <https://restic.readthedocs.io>
 * Nextcloud Talk
 * Collabora Online <https://www.collaboraoffice.com/>
 or
@@ -25,7 +25,7 @@ Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I
 Requirements
 ------------
 
-Ubuntu 16.04, Ubuntu 18.04, CentOS 7 or Debian 9
+Ubuntu 16.04, Ubuntu 18.04, CentOS 7, Debian 9, Amazon Linux 
 
 Not yet tested with other versions and flavours of Linux.
 
