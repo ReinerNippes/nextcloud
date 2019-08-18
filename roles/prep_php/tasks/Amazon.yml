@@ -1,30 +1,8 @@
 ---
-- name: add php{{ php_version | replace(".","") }} repo
-  yum_repository:
-    name: remi-php{{ php_version | replace(".","") }}
-    description: Remi's PHP {{ php_version | replace(".","") }} RPM repository for Enterprise Linux 7 - $basearch
-    mirrorlist: http://cdn.remirepo.net/enterprise/7/php{{ php_version | replace(".","") }}/mirror
-    gpgkey: http://rpms.remirepo.net/RPM-GPG-KEY-remi
-    gpgcheck: yes
-    enabled: 1
-
-- name: add remi safe repo
-  yum_repository:
-    name: remi-safe
-    description: Safe Remi’s RPM repository for Enterprise Linux 7 - $basearch 
-    mirrorlist: https://rpms.remirepo.net/enterprise/7/safe/mirror
-    gpgkey: https://rpms.remirepo.net/RPM-GPG-KEY-remi
-    gpgcheck: yes
-    enabled: 1
-
-- name: add remi repo
-  yum_repository:
-    name: remi
-    description: Remi’s RPM repository for Enterprise Linux 7 - $basearch
-    mirrorlist: https://rpms.remirepo.net/enterprise/7/remi/mirror
-    gpgkey: https://rpms.remirepo.net/RPM-GPG-KEY-remi
-    gpgcheck: yes
-    enabled: 1
+- name: install amazon php7.3
+  shell: amazon-linux-extras install php{{ php_version }}
+  args:
+    creates: /usr/bin/php
 
 - name: update os
   yum:
@@ -35,32 +13,32 @@
 - name: install needed packages
   yum:
     name:
-      - php{{ php_version | replace(".","") }}-php
-      - php{{ php_version | replace(".","") }}-php-cli
-      - php{{ php_version | replace(".","") }}-php-fpm
-      - php{{ php_version | replace(".","") }}-php-gd
-      - php{{ php_version | replace(".","") }}-{% if nc_db_type == 'mysql' %}php-mysql{% elif nc_db_type == 'pgsql' %}php-pgsql{% endif %}
-      - php{{ php_version | replace(".","") }}-php-curl
-      - php{{ php_version | replace(".","") }}-php-xml
-      - php{{ php_version | replace(".","") }}-php-intl
-      - php{{ php_version | replace(".","") }}-php-mbstring
-      - php{{ php_version | replace(".","") }}-php-json
-      - php{{ php_version | replace(".","") }}-php-bz2
-      - php{{ php_version | replace(".","") }}-php-smbclient
-      - php{{ php_version | replace(".","") }}-php-redis
-#      - php{{ php_version | replace(".","") }}-php-pecl-imagick
-      - php{{ php_version | replace(".","") }}-php-common
-      - php{{ php_version | replace(".","") }}-php-gmp
-      - php{{ php_version | replace(".","") }}-php-intl
-      - php{{ php_version | replace(".","") }}-php-imap
-      - php{{ php_version | replace(".","") }}-php-ldap
-      - php{{ php_version | replace(".","") }}-php-opcache
-      - php{{ php_version | replace(".","") }}-php-mcrypt
-      - php{{ php_version | replace(".","") }}-php-mysqlnd
-      - php{{ php_version | replace(".","") }}-php-pear
-      - php{{ php_version | replace(".","") }}-php-pdo
-      - php{{ php_version | replace(".","") }}-php-pecl-apcu
-      - php{{ php_version | replace(".","") }}-php-pecl-zip
+      - php
+      - php-cli
+      - php-fpm
+      - php-gd
+      - php-{% if nc_db_type == 'mysql' %}mysql{% elif nc_db_type == 'pgsql' %}pgsql{% endif %}
+      - php-curl
+      - php-xml
+      - php-intl
+      - php-mbstring
+      - php-json
+      - php-bz2
+#      - php-smbclient
+      - php-redis
+      - php-pecl-imagick
+      - php-common
+      - php-gmp
+      - php-intl
+#      - php-imap
+      - php-ldap
+      - php-opcache
+#      - php-mcrypt
+      - php-mysqlnd
+      - php-pear
+      - php-pdo
+      - php-pecl-apcu
+      - php-pecl-zip
     state: latest
 
 - name: configure php
@@ -82,13 +60,14 @@
     group: "{{ item.group }}"
     mode:  0770
   with_items: 
-    - { owner: nginx,  group: nginx, name: '/var/opt/remi/php{{ php_version | replace(".","") }}/lib/php/session' }
-    - { owner: root,   group: nginx, name: '/var/opt/remi/php{{ php_version | replace(".","") }}/lib/php/wsdlcache' }
-    - { owner: root,   group: nginx, name: '/var/opt/remi/php{{ php_version | replace(".","") }}/lib/php/opcache' }
+    - { owner: nginx,  group: nginx, name: '/var/lib/php/session' }
+    - { owner: root,   group: nginx, name: '/var/lib/php/wsdlcache' }
+    - { owner: root,   group: nginx, name: '/var/lib/php/opcache' }
+    - { owner: root,   group: nginx, name: '/var/lib/php/peclxml' }
 
 - name: replace opcache.max_accelerated_files=4000
   lineinfile:
-    path: /etc/opt/remi/php{{ php_version | replace(".","") }}/php.d/10-opcache.ini
+    path: /etc/php.d/10-opcache.ini
     regexp: '^opcache.max_accelerated_files=(.*)'
     line:   'opcache.max_accelerated_files=10000'
     backup: true

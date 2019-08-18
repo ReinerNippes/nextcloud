@@ -1,0 +1,24 @@
+---
+# Amazon Linux related docker OS tasks
+
+- name: install docker
+  yum: 
+    name: docker
+    state: latest
+
+- name: remove python-requests
+  yum:
+    name: python-requests
+    state: absent
+
+- name: install python docker
+  pip:
+    name:
+      - pip
+      - docker
+    state: latest
+
+- name: re-install cloud-init
+  yum:
+    name: cloud-init
+    state: latest

@@ -7,24 +7,24 @@ php_db_extension:
 
 php_service_name:
   CentOS: php-fpm
-  Amazon: php{{ php_version | replace(".","") }}-php-fpm
+  Amazon: php-fpm
   Ubuntu: php{{ php_version }}-fpm
   Debian: php{{ php_version }}-fpm
 
 php_fpm_conf_dir:
   CentOS: /etc
-  Amazon: /etc/opt/remi/php{{ php_version | replace(".","") }}
+  Amazon: /etc
   Ubuntu: /etc/php/{{ php_version }}/fpm
   Debian: /etc/php/{{ php_version }}/fpm
 
 php_cli_conf_dir:
   CentOS: /etc
-  Amazon: /etc/opt/remi/php{{ php_version | replace(".","") }}
+  Amazon: /etc
   Ubuntu: /etc/php/{{ php_version }}/cli
   Debian: /etc/php/{{ php_version }}/cli
 
 php_www_conf_dir:
   CentOS: /etc/php-fpm.d
-  Amazon: /etc/opt/remi/php{{ php_version | replace(".","") }}/php-fpm.d
+  Amazon: /etc/php-fpm.d
   Ubuntu: /etc/php/{{ php_version }}/fpm/pool.d
   Debian: /etc/php/{{ php_version }}/fpm/pool.d
