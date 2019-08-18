@@ -26,7 +26,7 @@ pg_group_id:
   'Debian': '70'
 
 credential_store: /etc/nextcloud
-dhparam_path:     /etc/nextcloud/dhparam/dhparam.pem
+dhparam_path:     /etc/nginx/certs/dhparam.pem
 
 # example of rclone config to backup to a s3 bucket
 
