@@ -25,7 +25,7 @@ Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I
 Requirements
 ------------
 
-Ubuntu 16.04, Ubuntu 18.04, CentOS 7, Debian 9, Amazon Linux 
+Ubuntu 16.04 und 18.04, CentOS 7, Debian 9 und 10, Amazon Linux 2
 
 Not yet tested with other versions and flavours of Linux.
 
