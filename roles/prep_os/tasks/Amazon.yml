@@ -1,12 +1,6 @@
 ---
 # Amazon related tasks
 
-# Disable SELinux
-- selinux:
-    state: permissive
-    policy: targeted
-  when: false #ansible_os_family == "RedHat"
-
 - name: add amazon epel repo
   shell: amazon-linux-extras install epel
   args:
