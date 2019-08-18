@@ -36,21 +36,3 @@
     name: mysql
     state: stopped
   when: install_mariadb is changed
-    
-- name: create log dir
-  file:
-    name: /var/log/mysql
-    owner: mysql
-    group: mysql
-    mode: 0755
-    state: directory
-  when: false
-  
-- name: create socket dir
-  file:
-    name: /var/run/mysqld
-    owner: mysql
-    group: mysql
-    mode: 0755
-    state: directory
-  when: false
