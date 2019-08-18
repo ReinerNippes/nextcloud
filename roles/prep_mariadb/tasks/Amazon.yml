@@ -1,0 +1,38 @@
+---
+
+# Amazon related tasks
+
+- name: add MariaDB repo
+  yum_repository:
+    name: mariadb
+    description: Extra Packages for Enterprise Linux 7 - $basearch
+    baseurl: http://yum.mariadb.org/{{ mariadb_version }}/centos7-amd64
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+    gpgcheck: yes
+    enabled: 1
+
+- name: install MariaDB
+  yum: 
+    name:
+      - MariaDB-server
+      - MariaDB-client
+    enablerepo: mariadb 
+    state: latest
+  register: install_mariadb
+
+- name: install MySQLdb python package for database setup
+  yum: 
+    name: MySQL-python 
+    state: present
+  when: false
+
+- name: enable MariaDB
+  systemd:
+    name: mysql
+    enabled: true
+
+- name: stop if installed
+  systemd:
+    name: mysql
+    state: stopped
+  when: install_mariadb is changed
