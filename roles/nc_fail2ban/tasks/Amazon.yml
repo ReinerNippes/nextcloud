@@ -1,0 +1,8 @@
+---
+
+# Amazon related tasks
+
+- name: install fail2ban
+  yum: 
+    name: fail2ban
+    state: latest
