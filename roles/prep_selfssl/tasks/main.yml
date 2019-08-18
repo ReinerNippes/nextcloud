@@ -31,10 +31,6 @@
     mode: 0755
     state: directory
 
-- name: docker pull postgres
-  docker_image:
-    name: paulczar/omgwtfssl
-
 - name: create selfsigned certifcate (doocker)
   docker_container:
     name: omgwtfssl
