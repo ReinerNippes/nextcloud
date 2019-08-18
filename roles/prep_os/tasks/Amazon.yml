@@ -5,7 +5,7 @@
 - selinux:
     state: permissive
     policy: targeted
-  when: ansible_os_family == "RedHat"
+  when: false #ansible_os_family == "RedHat"
 
 - name: add amazon epel repo
   shell: amazon-linux-extras install epel
