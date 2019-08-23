@@ -1,31 +1,10 @@
 ---
+
 - name: add php{{ php_version | replace(".","") }} repo
-  yum_repository:
-    name: remi-php{{ php_version | replace(".","") }}
-    description: Remi's PHP {{ php_version | replace(".","") }} RPM repository for Enterprise Linux {{ ansible_distribution_major_version|int }} - $basearch
-    mirrorlist: https://rpms.remirepo.net/enterprise/{{ ansible_distribution_major_version|int }}/php{{ php_version | replace(".","") }}/httpsmirror
-    gpgkey: http://rpms.remirepo.net/RPM-GPG-KEY-remi
-    gpgcheck: yes
-    enabled: 1
-
-- name: add remi safe repo
-  yum_repository:
-    name: remi-safe
-    description: Safe Remi’s RPM repository for Enterprise Linux $releasever - $basearch 
-    mirrorlist: http://rpms.remirepo.net/enterprise/$releasever/safe/mirror
-    gpgkey: http://rpms.remirepo.net/RPM-GPG-KEY-remi
-    gpgcheck: yes
-    enabled: 1
-
-- name: add remi repo
-  yum_repository:
-    name: remi
-    description: Remi’s RPM repository for Enterprise Linux $releasever - $basearch
-    mirrorlist: http://rpms.remirepo.net/enterprise/$releasever/remi/mirror
-    gpgkey: http://rpms.remirepo.net/RPM-GPG-KEY-remi
-    gpgcheck: yes
-    enabled: 1
-
+  yum:
+    name: 'https://rpms.remirepo.net/fedora/remi-release-30.rpm'
+    state: present
+    
 - name: update os
   yum:
     name: '*'
@@ -55,7 +34,6 @@
       - php-ldap
       - php-opcache
       - php-mcrypt
-      - php-mysql
       - php-pear
       - php-pdo
       - php-pecl-apcu

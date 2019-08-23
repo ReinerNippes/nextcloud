@@ -1,0 +1,27 @@
+---
+# Fedora related tasks
+
+- name: update os
+  yum:
+    name: '*'
+    update_cache: true
+    state: latest
+
+- name: install needed packages
+  yum:
+    name:
+      - zip
+      - unzip
+      - bzip2
+      - screen
+      - curl
+      - wget
+      - perl-File-FcntlLock 
+      - ImageMagick
+      - ghostscript
+      - postfix
+      - firewalld
+      - facter
+      - policycoreutils-python
+    state: latest
+    enablerepo: epel 
