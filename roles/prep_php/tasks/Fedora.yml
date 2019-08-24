@@ -39,6 +39,8 @@
       - php-pecl-apcu
       - php-pecl-zip
     state: latest
+    enablerepo: remi-php73
+    disablerepo: remi-php54
 
 - name: configure php
   copy:
