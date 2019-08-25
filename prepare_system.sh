@@ -77,11 +77,12 @@ prepare_centos() {
 }
 
 prepare_fedora() {
-        $SUDO yum install git vim mc curl facter libselinux-python python python3-dnf -y
-        $SUDO yum update -y
+        $SUDO dnf install git vim mc curl facter libselinux-python python python3 python3-dnf -y
+        $SUDO dnf update -y
 
         PYTHON_BIN=/usr/bin/python
         install_pip
+        $SUDO dnf reinstall python3-pip -y
 
         set +x
         echo
@@ -108,7 +109,7 @@ prepare_amzn() {
 usage() {
         echo
         echo "Linux distribution not detected."
-        echo "Use: ID=[ubuntu|debian|centos|raspbian|amzn] prepare_system.sh"
+        echo "Use: ID=[ubuntu|debian|centos|raspbian|amzn|fedora] prepare_system.sh"
         echo "Other distributions not yet supported."
         echo
 }
