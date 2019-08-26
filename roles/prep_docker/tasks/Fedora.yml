@@ -1,0 +1,37 @@
+---
+# Fedora related OS tasks
+
+- name: add docker repo
+  get_url: 
+    url: https://download.docker.com/linux/fedora/docker-ce.repo
+    dest: /etc/yum.repos.d/docker.repo
+    owner: root
+    group: root
+    mode: 0644
+
+- name: install docker
+  yum: 
+    name: docker-ce
+    state: latest
+
+- name: enable docker
+  systemd:
+    name: docker
+    daemon_reload: yes
+    enabled: yes
+
+- name: fix docker backend for collabora
+  lineinfile:
+    path: /etc/systemd/system/multi-user.target.wants/docker.service
+    regexp: '^ExecStart='
+    line: 'ExecStart=/usr/bin/dockerd --storage-driver=devicemapper'
+  register: systemdchanged
+
+# force restart of docker rightaway
+- name: restart docker
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: restarted
+  when: systemdchanged.changed
+

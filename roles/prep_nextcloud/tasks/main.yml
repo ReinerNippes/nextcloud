@@ -33,12 +33,13 @@
       setype: httpd_sys_rw_content_t
       state: present
     with_items: 
-      - '{{ nc_datadir }}(/.)?'
-      - '/var/www/nextcloud/config(/.)?'
-      - '/var/www/nextcloud/apps(/.)?'
-      - '/var/www/nextcloud/assets(/.)?'
+      - '{{ nc_datadir }}(/.*)?'
+      - '/var/www/nextcloud/config(/.*)?'
+      - '/var/www/nextcloud/apps(/.*)?'
+      - '/var/www/nextcloud/assets(/.*)?'
       - '/var/www/nextcloud/.htaccess'
       - '/var/www/nextcloud/.user.ini'
+      - '/var/www/html/nextcloud/3rdparty/aws/aws-sdk-php/src/data/logs(/.*)?'
     when: 
       - (ansible_os_family == "RedHat")
       - ('status' in ansible_selinux)
