@@ -177,7 +177,8 @@
       minute: '*/15'
       user: "{{ web_user[ansible_distribution] }}"
       job: "php -f /var/www/nextcloud/cron.php > /dev/null 2>&1"
-  
+    when: not (ansible_distribution == 'Fedora')
+    
   - name: run nextcloud cronjob
     become_user: "{{ web_user[ansible_distribution] }}"
     become_flags: "{{ ansible_become_flags | default(omit) }}"

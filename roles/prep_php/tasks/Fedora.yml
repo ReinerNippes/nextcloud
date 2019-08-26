@@ -80,3 +80,8 @@
       alias php="php -c /etc/php-cli.ini"
     dest: /etc/profile.d/php-cli-ini.sh  
   when: false
+
+- name: unmask tmp.mount
+  systemd:
+    name: tmp.mount
+    masked: no
