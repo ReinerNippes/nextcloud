@@ -45,15 +45,19 @@
       - ('status' in ansible_selinux)
       - (ansible_selinux.status == "enabled")
 
-  - name: enable sendmail 
-    seboolean:
-      name: httpd_can_sendmail on
-      state: yes
-      persistent: yes
-    when: false # ansible_os_family == "RedHat"
+  - name: enable seboolean settings
+    command: setsebool -P {{ item }} on
+    loop:
+      - httpd_can_sendmail
+      - httpd_unified
+      - httpd_can_network_connect_db
+    when: ansible_os_family == "RedHat"
 
   - name: restorecon 
-    command: restorecon -Rv '/var/www/nextcloud/'
+    command: restorecon -Rv '{{ item }}'
+    loop:
+      - '/var/www/nextcloud/'
+      - '{{ nc_datadir }}'
     when: 
       - (ansible_os_family == "RedHat")
       - ('status' in ansible_selinux)
@@ -172,13 +176,12 @@
       chdir: /var/www/nextcloud/
     with_items: "{{ nc_app_config }}"
 
-  - name: nextcloud cronjob
+  - name: add nextcloud cronjob
     cron:
       name: nextcloud cronjob
       minute: '*/15'
       user: "{{ web_user[ansible_distribution] }}"
       job: "php -f /var/www/nextcloud/cron.php > /dev/null 2>&1"
-    when: not (ansible_distribution == 'Fedora')
     
   - name: run nextcloud cronjob
     become_user: "{{ web_user[ansible_distribution] }}"

@@ -16,6 +16,7 @@
       - screen
       - curl
       - wget
+      - cronie
       - perl-File-FcntlLock 
       - ImageMagick
       - ghostscript
