@@ -26,3 +26,9 @@
       - policycoreutils-python
     state: latest
     enablerepo: epel 
+
+- name: enable cronie
+  systemd:
+    name:    'crond.service'
+    state:   'started'
+    enabled: true
