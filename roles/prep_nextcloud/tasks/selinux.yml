@@ -14,6 +14,7 @@
     - '/var/www/nextcloud/.user.ini'
     - '/var/www/html/nextcloud/3rdparty/aws/aws-sdk-php/src/data/logs(/.*)?'
     - '/usr/local/tmp(/.*)?'
+    - '/upload_tmp(/.*)?'
 
 - name: enable seboolean settings
   command: setsebool -P {{ item }} on
@@ -32,8 +33,12 @@
   loop:
     - httpd-to-php-fpm.pp
     - httpd-to-redis-socket.pp
+    - httpd-to-upload-tmp.pp
+
 - name: restorecon 
   command: restorecon -Rv '{{ item }}'
   loop:
     - '/var/www/nextcloud/'
     - '{{ nc_datadir }}'
+    - '/upload_tmp'
+    - '/usr/local/tmp'
