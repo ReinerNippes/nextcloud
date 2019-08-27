@@ -21,13 +21,14 @@
     - httpd_can_sendmail
     - httpd_unified
     - httpd_graceful_shutdown
+    - httpd_can_network_relay
     - httpd_can_network_connect
     - httpd_can_network_connect_db
     - daemons_enable_cluster_mode
     - httpd_execmem
 
 - name: enable seboolean settings
-  command: semodule -i {{ item }}
+  command: semodule -i {{ role_path }}/files/{{ item }}
   loop:
     - httpd-to-php-fpm.pp
     - httpd-to-redis-socket.pp
