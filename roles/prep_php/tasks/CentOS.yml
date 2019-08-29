@@ -55,7 +55,7 @@
       - php-ldap
       - php-opcache
       - php-mcrypt
-      - php-mysql
+#      - php-mysql
       - php-pear
       - php-pdo
       - php-pecl-apcu
