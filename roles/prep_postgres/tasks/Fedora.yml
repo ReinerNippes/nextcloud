@@ -3,7 +3,7 @@
 
 - name: add postgres repo
   yum:
-    name: https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/fedora/fedora-30-x86_64/pgdg-fedora-repo-latest.noarch.rpm
+    name: https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/fedora/fedora-{{ ansible_distribution_major_version|int }}-x86_64/pgdg-fedora-repo-latest.noarch.rpm
     state: present
 
 - name: install postgres server

@@ -2,7 +2,7 @@
 
 - name: add php{{ php_version | replace(".","") }} repo
   yum:
-    name: 'https://rpms.remirepo.net/fedora/remi-release-30.rpm'
+    name: 'https://rpms.remirepo.net/fedora/remi-release-{{ ansible_distribution_major_version|int }}.rpm'
     state: present
     
 - name: update os
