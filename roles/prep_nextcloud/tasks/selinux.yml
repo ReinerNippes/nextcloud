@@ -36,7 +36,7 @@
     - httpd-to-upload-tmp.pp
 
 - name: restorecon 
-  command: restorecon -Rv '{{ item }}'
+  command: restorecon -Rv {{ item }}
   loop:
     - '/var/www/nextcloud/'
     - '{{ nc_datadir }}'
