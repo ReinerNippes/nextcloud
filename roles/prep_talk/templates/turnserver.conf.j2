@@ -1,18 +1,12 @@
-listening-port=3478
-{% if ssl_certificate_type is defined %}
 tls-listening-port=5349
-{% else %}
-no-tls
-{% endif %}
 fingerprint
-lt-cred-mech
+#lt-cred-mech
 use-auth-secret
 static-auth-secret={{ lookup('password', '{{ credential_store }}/talk_secret chars=ascii_letters,digits length=32') | lower }}
 realm={{ fqdn }}
 total-quota=100
 bps-capacity=0
-stale-nonce
-{% if ssl_certificate_type is defined %}
+stale-nonce=600
 {% if ssl_certificate_type  == 'letsencrypt' %}
 cert=/etc/letsencrypt/live/{{ fqdn }}/fullchain.pem
 pkey=/etc/letsencrypt/live/{{ fqdn }}/privkey.pem
@@ -21,8 +15,10 @@ pkey=/etc/letsencrypt/live/{{ fqdn }}/privkey.pem
 cert=/etc/nginx/certs/cert.pem
 pkey=/etc/nginx/certs/key.pem
 {% endif %}
-cipher-list="ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AES:RSA+3DES:!ADH:!AECDH:!MD5"
-{% endif %}
-no-loopback-peers
+dh-file={{ dhparam_path }}
+cipher-list="TLS-CHACHA20-POLY1305-SHA256:TLS-AES-256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384"
+#no-loopback-peers
 no-multicast-peers
-
+no-tlsv1
+no-tlsv1_1
+no-stdout-log
