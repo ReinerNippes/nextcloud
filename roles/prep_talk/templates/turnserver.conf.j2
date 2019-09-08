@@ -16,7 +16,7 @@ cert=/etc/nginx/certs/cert.pem
 pkey=/etc/nginx/certs/key.pem
 {% endif %}
 dh-file={{ dhparam_path }}
-cipher-list="TLS-CHACHA20-POLY1305-SHA256:TLS-AES-256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384"
+cipher-list="ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AES:RSA+3DES:!ADH:!AECDH:!MD5"
 #no-loopback-peers
 no-multicast-peers
 no-tlsv1
