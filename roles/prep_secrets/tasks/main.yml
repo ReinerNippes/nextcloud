@@ -8,6 +8,7 @@
     group: "{{ ansible_env.SUDO_USER | default('root') }}"
     mode:  0775
     state: directory
+  delegate_to: localhost
 
 - name: generate db passwd if nc_db_passwd is empty
   set_fact: 
