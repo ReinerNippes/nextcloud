@@ -16,7 +16,7 @@ install_pip () {
 prepare_ubuntu() {
         $SUDO apt update -y
         $SUDO apt dist-upgrade -y
-        $SUDO apt install software-properties-common curl git mc vim facter python aptitude -y
+        $SUDO apt install software-properties-common curl git mc vim facter python python-apt aptitude -y
         $SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python-dev libffi-dev libssl-dev make -y
 
         PYTHON_BIN=/usr/bin/python
@@ -33,7 +33,7 @@ prepare_ubuntu() {
 prepare_debian() {
         $SUDO apt update -y
         $SUDO apt dist-upgrade -y
-        $SUDO apt install dirmngr curl git mc vim facter python aptitude -y
+        $SUDO apt install dirmngr curl git mc vim facter python python-apt aptitude -y
         $SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python-dev libffi-dev libssl-dev make -y
 
         PYTHON_BIN=/usr/bin/python
