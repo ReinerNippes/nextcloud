@@ -3,7 +3,7 @@ Nextcloud (Latest)
 
 Ansible Playbook to install
 
-* Nextcloud (Latest) - https://nextcloud.com/
+* Nextcloud (Latest) - <https://nextcloud.com/>
 * nginx 1.17 - <https://nginx.org/>
 * PHP 7.x - <http://www.php.net/>
 * MariaDB 10 - <https://mariadb.org/> or PostgreSQL 10 <https://www.postgresql.org/>
@@ -20,12 +20,12 @@ Most of the settings are recommentations from C. Rieger
 
 Visit his page for all details: <https://www.c-rieger.de/>
 
-Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian and CentOS machines. So backup of your existing configuration is a good advice.
+Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian, Fedora and CentOS machines. So backup of your existing configuration is a good advice.
 
 Requirements
 ------------
 
-Ubuntu 16.04 und 18.04, CentOS 7, Debian 9 und 10, Amazon Linux 2
+Ubuntu 16.04 und 18.04, CentOS 7, Debian 9 und 10, Amazon Linux 2, Fedora 30
 
 Not yet tested with other versions and flavours of Linux.
 
@@ -51,6 +51,9 @@ vim inventory
 # on debian use sudo
 sudo ./nextcloud.yml
 
+# on Fedora use
+./nextcloud.yml -e 'ansible_python_interpreter=/usr/bin/python3'
+
 # if your are fine with the defaults in the inventory (e.g. db version) just provide the ssl parameter
 ./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=letsencrypt -e 'cert_email=nc@example.org'
 or
@@ -58,6 +61,8 @@ or
 or
 ./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=selfsigned -e nc_db_type=mysql
 ```
+
+> **WARNING**: Remember to update the inventory file if you want to run the playbook later again. E.g. to update the system. If you don't the defaults in the inventory file will be apply during the second run.
 
 Login to your nextcloud web site <https://nc.example.org>
 
