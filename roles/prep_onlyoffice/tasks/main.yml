@@ -27,13 +27,22 @@
   args:
     chdir: /var/www/nextcloud/
 
-- name: set onlyoffice server url
+- name: set onlyoffice server secret
   become_user: "{{ web_user[ansible_distribution] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: php occ config:app:set onlyoffice jwt_secret --value {{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}
   args:
     chdir: /var/www/nextcloud/
+
+- name: set onlyoffice cert check off
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean 
+  args:
+    chdir: /var/www/nextcloud/
+  when: ssl_certificate_type  == 'selfsigned'
 
 - name: start a onlyoffice container
   docker_container:
@@ -47,14 +56,10 @@
     ports:
      - "{{ onlyoffice_ssl_port }}:443"
     env:
-      JWT_ENABLED:          'true'
-      JWT_SECRET:           "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
-      SSL_CERTIFICATE_PATH: /etc/letsencrypt/live/{{ fqdn }}/fullchain.pem
-      SSL_KEY_PATH:         /etc/letsencrypt/live/{{ fqdn }}/privkey.pem
-      SSL_DHPARAM_PATH:     '{{ dhparam_path }}'
-    volumes:
-      - '/etc/letsencrypt:/etc/letsencrypt:ro'
-      - '{{ dhparam_path | dirname }}:{{ dhparam_path | dirname }}:ro'
+      ONLYOFFICE_HTTPS_HSTS_ENABLED: 'false'
+      JWT_ENABLED:  'true'
+      JWT_SECRET:   "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
+    volumes:        '{{ onlyoffice_volumes[ssl_certificate_type] }}'
 
 - name: open ufw firewall
   include_role:

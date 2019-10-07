@@ -27,42 +27,12 @@
       WEB_USER:   "{{ web_user[ansible_distribution] }}"
       WEB_GROUP:  "{{ web_group[ansible_distribution] }}"
 
-  - name: selinux targets
-    sefcontext:
-      target: "{{ item }}"
-      setype: httpd_sys_rw_content_t
-      state: present
-    with_items: 
-      - '{{ nc_datadir }}(/.)?'
-      - '/var/www/nextcloud/config(/.)?'
-      - '/var/www/nextcloud/apps(/.)?'
-      - '/var/www/nextcloud/assets(/.)?'
-      - '/var/www/nextcloud/.htaccess'
-      - '/var/www/nextcloud/.user.ini'
+  - name: include selinux tasks
+    include_tasks: selinux.yml
     when: 
       - (ansible_os_family == "RedHat")
       - ('status' in ansible_selinux)
       - (ansible_selinux.status == "enabled")
-
-  - name: enable sendmail 
-    seboolean:
-      name: httpd_can_sendmail on
-      state: yes
-      persistent: yes
-    when: false # ansible_os_family == "RedHat"
-
-  - name: restorecon 
-    command: restorecon -Rv '/var/www/nextcloud/'
-    when: 
-      - (ansible_os_family == "RedHat")
-      - ('status' in ansible_selinux)
-      - (ansible_selinux.status == "enabled")
-
-# Disable SELinux
-  - selinux:
-      state: permissive
-      policy: targeted
-    when: false #ansible_os_family == "RedHat"
 
   - name: flush all handlers to restart server
     meta: flush_handlers
@@ -171,13 +141,13 @@
       chdir: /var/www/nextcloud/
     with_items: "{{ nc_app_config }}"
 
-  - name: nextcloud cronjob
+  - name: add nextcloud cronjob
     cron:
       name: nextcloud cronjob
       minute: '*/15'
       user: "{{ web_user[ansible_distribution] }}"
       job: "php -f /var/www/nextcloud/cron.php > /dev/null 2>&1"
-  
+    
   - name: run nextcloud cronjob
     become_user: "{{ web_user[ansible_distribution] }}"
     become_flags: "{{ ansible_become_flags | default(omit) }}"
