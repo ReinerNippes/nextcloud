@@ -12,7 +12,7 @@
     - '/var/www/nextcloud/assets(/.*)?'
     - '/var/www/nextcloud/.htaccess'
     - '/var/www/nextcloud/.user.ini'
-    - '/var/www/html/nextcloud/3rdparty/aws/aws-sdk-php/src/data/logs(/.*)?'
+    - '/var/www/nextcloud/3rdparty/aws/aws-sdk-php/src/data/logs(/.*)?'
     - '/usr/local/tmp(/.*)?'
     - '/upload_tmp(/.*)?'
 
