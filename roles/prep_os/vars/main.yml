@@ -3,12 +3,14 @@
 
 imagemagick_xml_path:
   CentOS: /etc/ImageMagick/policy.xml
+  Fedora: /etc/ImageMagick-6/policy.xml
   Amazon: /etc/ImageMagick/policy.xml
   Ubuntu: /etc/ImageMagick-6/policy.xml
   Debian: /etc/ImageMagick-6/policy.xml
   
 service_path:
   CentOS: '/usr/lib/systemd/system'
+  Fedora: '/usr/lib/systemd/system'
   Amazon: '/usr/lib/systemd/system'
   Ubuntu: '/lib/systemd/system'
   Debian: '/lib/systemd/system'

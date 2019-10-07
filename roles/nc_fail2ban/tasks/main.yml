@@ -26,3 +26,10 @@
   systemd:
     name: fail2ban
     enabled: true
+
+- name: include selinux tasks
+  include_tasks: selinux.yml
+  when: 
+  - (ansible_os_family == "RedHat")
+  - ('status' in ansible_selinux)
+  - (ansible_selinux.status == "enabled")

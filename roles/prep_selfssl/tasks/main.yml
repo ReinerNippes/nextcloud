@@ -47,14 +47,25 @@
     mode: 0755
     state: directory
 
-- name: create selfsigned certifcate (doocker)
-  docker_container:
-    name: omgwtfssl
-    image: paulczar/omgwtfssl
-    state: started
-    restart_policy: 'no'
-    env:
-      SSL_SUBJECT: "{{ fqdn }}"
-    volumes: 
-      - /etc/nginx/certs:/certs
-  notify: restart nginx
+- name: install needed pip packages
+  pip:
+    name:
+      - pyOpenSSL
+    state: latest
+
+- name: generate an openssl private key with the default values
+  openssl_privatekey:
+    path: /etc/nginx/certs/key.pem
+
+- name: generate an openssl certificate signing request
+  openssl_csr:
+    path: /etc/nginx/certs/cert.csr
+    privatekey_path: /etc/nginx/certs/key.pem
+    common_name: "{{ fqdn }}"
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: /etc/nginx/certs/cert.pem
+    privatekey_path: /etc/nginx/certs/key.pem
+    csr_path: /etc/nginx/certs/cert.csr
+    provider: selfsigned

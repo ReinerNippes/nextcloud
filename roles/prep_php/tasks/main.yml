@@ -29,6 +29,12 @@
     - { file: '{{ ansible_distribution }}/php-fpm.conf', dest: '{{ php_fpm_conf_dir[ansible_distribution] }}/php-fpm.conf' }
   notify: restart php-fpm
 
+- name: include selinux tasks
+  include_tasks: selinux.yml
+  when: 
+    - (ansible_os_family == "RedHat")
+    - ('status' in ansible_selinux)
+    - (ansible_selinux.status == "enabled")
 
 - name: enable php-fpm
   systemd:

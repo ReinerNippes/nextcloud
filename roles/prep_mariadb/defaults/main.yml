@@ -1,4 +1,4 @@
 ---
 # defaults file for prep_mariadb
 
-mariadb_version: 10.2
+mariadb_version: 10.3
