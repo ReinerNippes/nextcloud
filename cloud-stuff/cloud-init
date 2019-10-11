@@ -45,10 +45,10 @@ system_info:
 # e.g.: ansible-pull ... -e "next_archive=https://download.nextcloud.com/server/prereleases/nextcloud-13.0.5RC2.tar.bz2" -e "nc_passwd=your_secret"
 #
 runcmd:
-  - curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud13/master/prepare_system.sh | /bin/bash
+  - curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud/master/prepare_system.sh | /bin/bash
   - # 
   - # Insert a command to set a DynDNS record for this server here
   - # e.g. Strato DynDNS
   - # curl --silent --show-error --insecure --user [BENUTZERNAME]:[PASSWORT] https://dyndns.strato.com/nic/update?hostname=[HOSTNAME]
-  - HOME=/root ansible-pull --clean --force -d /root/nextcloud -i 'nextcloud' --checkout devel -U https://github.com/ReinerNippes/nextcloud13.git nextcloud.yml -e "dhparam_numbits=1024" -e "fqdn=nextcloud.domain.com"
+  - HOME=/root ansible-pull --clean --force -d /root/nextcloud -i 'localhost,' -U https://github.com/ReinerNippes/nextcloud.git nextcloud.yml -e "fqdn=nextcloud.domain.com"
 
