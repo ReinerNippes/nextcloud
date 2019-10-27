@@ -40,7 +40,7 @@ Install
 curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud/master/prepare_system.sh | /bin/bash
 
 # clone this repo
-git clone https://github.com/ReinerNippes/nextcloud
+git clone --branch nextcloud-reloaded https://github.com/ReinerNippes/nextcloud
 
 # change to nextcloud directory
 cd nextcloud
