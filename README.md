@@ -23,7 +23,7 @@ Visit his page for all details: <https://www.c-rieger.de/>
 
 > **WARNING**: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian, Fedora and CentOS machines. So backup of your existing configuration is a good advice.
 
-> **WARNING**: This playbook is not compatible with older version. Do not run this version on older installations.
+> **WARNING**: This playbook is not compatible with older versions. Do not run this version on older installations.
 
 Requirements
 ------------
