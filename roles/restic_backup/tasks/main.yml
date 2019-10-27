@@ -37,7 +37,7 @@
 - name: cretae restic selfhosted backup script
   template:
     src:   'backup_nextcloud.sh.j2'
-    dest:  '/usr/local/bin/backup_nextcloud.sh'
+    dest:  '{{ restic_install_path }}/backup_nextcloud.sh'
     owner: 'root'
     group: 'root'
     mode:  '0750'
@@ -49,5 +49,5 @@
     day:    "{{ restic_backup_day }}"
     minute: "{{ restic_backup_minute }}"
     hour:   "{{ restic_backup_hour }}"
-    job:    "/usr/local/bin/backup_nextcloud.sh > /dev/null 2>&1"
+    job:    "{{ restic_install_path }}/backup_nextcloud.sh > /dev/null 2>&1"
   

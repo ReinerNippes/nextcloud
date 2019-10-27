@@ -1,0 +1,29 @@
+---
+# dnf related tasks
+
+- name: add additional mariaddb repo
+  yum_repository:
+    name: mariadb
+    description: Extra Packages for MariaDB {{ mariadb_version }}.{{ mariadb_version_minor }}
+    baseurl: "{{ mariadb_yum_repopath[ansible_distribution] }}"
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+    gpgcheck: yes
+    enabled: 1
+
+- name: install mariadb-server packages
+  dnf: 
+    name:
+      - MariaDB-server
+      - MariaDB-client
+      - python3-PyMySQL
+    enablerepo: mariadb 
+    state: latest
+  register: install_mariadb
+
+- name: open mariadb port if running on remote server
+  firewalld:
+    port: "3306"
+    permanent: true
+    immediate: false
+    state: enabled
+  when: groups['database'] != groups['webserver']

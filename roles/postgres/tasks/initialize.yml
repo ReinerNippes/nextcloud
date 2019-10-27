@@ -1,0 +1,47 @@
+---
+
+- name: set postgresql environment variables
+  template:
+    src: postgres.sh.j2
+    dest: /etc/profile.d/postgres.sh
+    mode: 0644
+  notify: restart postgresql
+
+- name: ensure postgresql data directory exists
+  file:
+    path: "{{ postgresql_data_dir[ansible_distribution] }}"
+    owner: "{{ postgresql_user }}"
+    group: "{{ postgresql_group }}"
+    state: directory
+    mode: 0700
+
+- name: check if postgresql database is initialized
+  stat:
+    path: "{{ postgresql_data_dir[ansible_distribution] }}/PG_VERSION"
+  register: pgdata_dir_version
+
+- name: ensure postgresql database is initialized.
+  command: "{{ postgresql_bin_path[ansible_distribution] }}/initdb -D {{ postgresql_data_dir[ansible_distribution] }}"
+  when: not pgdata_dir_version.stat.exists
+  become: true
+  become_user: "{{ postgresql_user }}"
+
+- name: restart postgresql after new locales are generated.
+  systemd:
+    name: "{{ postgresql_daemon[ansible_distribution] }}"
+    state: started
+    enabled: true
+  register: postgres_started
+
+- name: force-restart postgresql after new locales are generated.
+  systemd:
+    name: "{{ postgresql_daemon[ansible_distribution] }}"
+    state: restarted
+  when: locale_gen_result.changed|default(false) and (not postgres_started.changed)
+
+- name: wait for postgresql come up
+  wait_for:
+    host: localhost
+    port: 5432
+  when: postgres_started is changed
+

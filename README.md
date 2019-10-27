@@ -6,10 +6,11 @@ Ansible Playbook to install
 * Nextcloud (Latest) - <https://nextcloud.com/>
 * nginx 1.17 - <https://nginx.org/>
 * PHP 7.x - <http://www.php.net/>
-* MariaDB 10 - <https://mariadb.org/> or PostgreSQL 10 <https://www.postgresql.org/>
+* MariaDB 10.4 - <https://mariadb.org/> or PostgreSQL 10/11 <https://www.postgresql.org/>
 * redis - <https://redis.io/>
 * restic backup - <https://restic.readthedocs.io>
 * Nextcloud Talk
+* Fulltextsearch / Elasticsearch
 * Collabora Online <https://www.collaboraoffice.com/>
 or
 * Onlyoffice <https://www.onlyoffice.com>
@@ -20,12 +21,14 @@ Most of the settings are recommentations from C. Rieger
 
 Visit his page for all details: <https://www.c-rieger.de/>
 
-Warning: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian, Fedora and CentOS machines. So backup of your existing configuration is a good advice.
+> **WARNING**: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian, Fedora and CentOS machines. So backup of your existing configuration is a good advice.
+
+> **WARNING**: This playbook is not compatible with older version. Do not run this version on older installations.
 
 Requirements
 ------------
 
-Ubuntu 16.04 und 18.04, CentOS 7, Debian 9 und 10, Amazon Linux 2, Fedora 30
+Ubuntu 16.04 und 18.04, CentOS 7, Debian 9/10 und 10, Amazon Linux 2, Fedora 30
 
 Not yet tested with other versions and flavours of Linux.
 
@@ -55,11 +58,11 @@ sudo ./nextcloud.yml
 ./nextcloud.yml -e 'ansible_python_interpreter=/usr/bin/python3'
 
 # if your are fine with the defaults in the inventory (e.g. db version) just provide the ssl parameter
-./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=letsencrypt -e 'cert_email=nc@example.org'
+./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e ssl_certificate_type=letsencrypt -e 'cert_email=nc@example.org'
 or
-./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=selfsigned
+./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e ssl_certificate_type=selfsigned
 or
-./nextcloud.yml -e fqdn=nc.example.org -e ssl_certificate_type=selfsigned -e nc_db_type=mysql
+./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e ssl_certificate_type=selfsigned -e nextcloud_db_type=mysql
 ```
 
 > **WARNING**: Remember to update the inventory file if you want to run the playbook later again. E.g. to update the system. If you don't the defaults in the inventory file will be apply during the second run.
@@ -74,90 +77,96 @@ Role Variables
 All variables are defined in inventory file.
 
 ```ini
-# Server domain name
-# Default is the fqdn of the machine
-# fqdn       = nc.example.org
+# Your Nextcloud Server Domain Name
 
-# selfsigned certificate as default
-ssl_certificate_type  = 'selfsigned'
+# Default is the fqdn of the Machine
+nextcloud_fqdn          = nextcloud.toplevel.domain
 
-# Letsencrypt or selfsigned certificate
-# ssl_certificate_type  = 'letsencrypt'
+# Selfsigned Certificate are Default
+# ssl_certificate_type  = 'selfsigned'
 
+# Letsencrypt Certificate provided with acme.sh (https://github.com/Neilpang/acme.sh)
+ssl_certificate_type  = 'acme.sh'
 
-# Your email adresse for letsencrypt
-# cert_email = nc@example.org
-
-# receive a certificate from staging
-# uncomment if you want to use letsencrypt staging environment
-# cert_stage = '--staging'
+# Your email Addresse for Letsencrypt
+# ssl_cert_email = nc@example.org
 
 #
 # Nextcloud varibales
 
-# data dir
-nc_datadir           = /var/nc-data
+# Nextcloud Webserver Ports
+nextcloud_web_port          = 80
+nextcloud_ssl_port          = 443
 
-# admin user
-nc_admin             = 'admin'
-nc_passwd            = ''             # leave empty to generate random password
+# Nextcloud Web Root
+nextcloud_www_dir           = /var/www/nextcloud
 
-# database settings
-# nc_db_type          = 'mysql'        # (MariaDB)
-# nc_db_host          = 'localhost'
-nc_db_type           = 'pgsql'        # (PostgreSQL)
-nc_db_host           = ''
-nc_db                = 'nextcloud'
-nc_db_user           = 'nextcloud'
-nc_db_passwd         = ''             # leave empty to generate random password
-nc_db_prefix         = 'oc_'
+# Nextcloud Data Dir
+nextcloud_data_dir          = /var/nc-data
 
-# Nextcloud mail setup
-nc_configure_mail    = false
-nc_mail_from         =
-nc_mail_smtpmode     = smtp
-nc_mail_smtpauthtype = LOGIN
-nc_mail_domain       =
-nc_mail_smtpname     =
-nc_mail_smtpsecure   = tls
-nc_mail_smtpauth     = 1
-nc_mail_smtphost     =
-nc_mail_smtpport     = 587
-nc_mail_smtpname     =
-nc_mail_smtppwd      =
+# Nextcloud Admin User
+# Leave Password Empty to generate secure, random one
+nextcloud_admin             = 'admin'
+nextcloud_passwd            = ''
 
-# php Version
-php_version          = '7.3'
+# Nextcloud Database Settings
+# Leave Password Empty to generate secure, random one
+#nextcloud_db_type           = 'mysql'        # (MariaDB)
+nextcloud_db_type           = 'pgsql'        # (PostgreSQL)
+nextcloud_db_host           = 'localhost'
+nextcloud_db                = 'nextcloud'
+nextcloud_db_user           = 'nextcloud'
+nextcloud_db_passwd         = ''
+nextcloud_db_prefix         = 'oc_'
 
-# Install turn server for Nextcloud Talk
-talk_install         = false
+# Nextcloud Mail Setup
+nextcloud_configure_mail    = false
+nextcloud_mail_from         =
+nextcloud_mail_smtpmode     = smtp
+nextcloud_mail_smtpauthtype = LOGIN
+nextcloud_mail_domain       =
+nextcloud_mail_smtpname     =
+nextcloud_mail_smtpsecure   = tls
+nextcloud_mail_smtpauth     = 1
+nextcloud_mail_smtphost     =
+nextcloud_mail_smtpport     = 587
+nextcloud_mail_smtpname     =
+nextcloud_mail_smtppwd      =
 
 # Allways get the latest version of Nextcloud
-next_archive         = https://download.nextcloud.com/server/releases/latest.tar.bz2
+nextcloud_archive           = https://download.nextcloud.com/server/releases/latest.tar.bz2
+
+# php Version
+php_version                 = '7.3'
+# optional php packages see: roles/php/var/main.yml
+php_install_optional_packages = false
+
+# Install turn server for Nextcloud Talk
+talk_install                = false
 
 # Install restic backup tool if backup_folder is not empty
 # more info about restic: https://restic.readthedocs.io/en/latest/
 # to use a local directory as a restic repository (not a good idea anyway)
-restic_repo          = '/var/backups/nextcloud'
+restic_repo                 = '/var/backups/nextcloud'
 
 # use rclone to backup a cloud storage, see https://rclone.org for more details
 # configure also rclone_remote in group_vars/all.yml
 # restic_repo         = "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"
 
 # crontab setings for the backup script - default daily at 3pm
-restic_backup_day    = '*'
-restic_backup_minute = '0'
-restic_backup_hour:  = '3'
+restic_backup_day           = '*'
+restic_backup_minute        = '0'
+restic_backup_hour:         = '3'
 
 # Install Collabra Online
 # more info about collabora office: https://www.collaboraoffice.com/
-install_collabora     = false
+install_collabora           = false
 
 # Install Online Office
 # more info about onlyoffice office: https://www.onlyoffice.com
-install_onlyoffice    = false
+install_onlyoffice          = false
+onlyoffice_ssl_port         = 8443
 
-#
-# defaults path of your generated credentials (e.g. database, talk, onlyoffice)
-credential_store      = /etc/nextcloud
+# Install fulltextsearch
+install_fulltextsearch      = false
 ```

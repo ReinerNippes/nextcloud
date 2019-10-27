@@ -1,0 +1,10 @@
+---
+# dnf related tasks
+
+- name: install needed packages
+  dnf:
+    name:
+      - nginx
+      - python3-pyOpenSSL
+    state: latest
+    disablerepo: nginx

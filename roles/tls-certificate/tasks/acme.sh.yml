@@ -1,0 +1,71 @@
+---
+
+# create letsencrypt certificates with acme.sh
+
+- name: check acme.sh is installed
+  stat:
+    path: "{{ certificates_acmesh_dir }}"
+  register: acme
+
+- name: install acme.sh
+  block:
+  - name: git clone acme.sh
+    git:
+      repo: 'https://github.com/Neilpang/acme.sh.git'
+      dest: '{{ certificates_acmesh_git_dir }}'
+      update: no
+      version: master
+
+  - name: install acme.sh
+    command: ./acme.sh --install --home "{{ certificates_acmesh_dir }}"
+    args:
+      chdir: "{{ certificates_acmesh_git_dir }}"
+      creates: "{{ certificates_acmesh_dir }}"
+  when: not acme.stat.exists
+
+- name: install acme.sh certificate
+  block:
+  - name: create fake site for first setup
+    template:
+      src: fakesite.conf.j2
+      dest: /etc/nginx/conf.d/fakesite.conf
+    register: fake_site
+
+  - name: restart nginx
+    service:
+      name: nginx
+      state: restarted
+    when: fake_site.changed 
+
+  - name: get certificates
+    command: |
+      ./acme.sh
+        --home {{ certificates_acmesh_dir }}
+        --issue -d {{ nextcloud_fqdn }}
+        --nginx
+    args:
+      chdir: "{{ certificates_acmesh_dir }}"
+      creates: "{{ certificates_acmesh_dir }}/{{ nextcloud_fqdn }}/{{ nextcloud_fqdn }}.key"
+    register: acme_get
+    failed_when: acme_get.rc != 0 and acme_get.rc != 2
+
+  - name: install certificates
+    command: |
+      ./acme.sh
+        --home {{ certificates_acmesh_dir }}
+        --install-cert -d {{ nextcloud_fqdn }}
+        --fullchain-file {{ certificates_path }}/{{ nextcloud_fqdn }}.crt
+        --key-file {{ certificates_path }}/{{ nextcloud_fqdn }}.key
+        --reloadcmd "systemctl restart nginx"
+    args:
+      chdir: "{{ certificates_acmesh_dir }}"
+      creates: "{{ certificates_path }}/{{ nextcloud_fqdn }}.key"
+    when: acme_get.changed 
+    notify: restart web services
+
+  always:
+  - name: remove fakesite
+    file:
+      name: /etc/nginx/conf.d/fakesite.conf
+      state: absent
+    notify: restart web services

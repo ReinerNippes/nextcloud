@@ -1,0 +1,17 @@
+---
+# tasks file for fulltextsearch
+
+- name: include os specific tasks
+  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+
+- name: install ingest-attachment
+  command: /usr/share/elasticsearch/bin/elasticsearch-plugin install ingest-attachment --batch
+  args:
+    creates: /usr/share/elasticsearch/plugins/ingest-attachment
+  notify: restart elasticsearch
+  
+- name: enable elasticsearch
+  systemd:
+    name: elasticsearch
+    state: started
+    enabled: true

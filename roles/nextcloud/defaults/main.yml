@@ -1,0 +1,73 @@
+---
+# defaults for nextcloud
+
+nextcloud_config:
+  - "overwrite.cli.url --value=https://{{ nextcloud_fqdn }}"
+  - "trusted_domains 0 --value={{ nextcloud_fqdn }}"
+  - "redis host --value='{% if groups['redis'][0] == 'localhost' %}{{ redis_socket.path }}{% else %}{{ redis_tcp.address }}{% endif %}'"
+  - "redis port --value='{% if groups['redis'][0] == 'localhost' %}0{% else %}{{ redis_tcp.port }}{% endif %}' --type=integer"
+  - "redis timeout --value='0' --type=integer"
+  - "redis password --value='{{ lookup('password', '{{ credential_store }}/redis_secret chars=ascii_letters,digits length=32') }}'"
+  - "memcache.local --value='\\OC\\Memcache\\Redis'"
+  - "memcache.locking --value='\\OC\\Memcache\\Redis'"
+  - "filelocking.enabled --value=true --type=boolean"
+  - "enable_previews --value=true --type=boolean"
+  - "enabledPreviewProviders 0 --value='OC\\Preview\\PNG'"
+  - "enabledPreviewProviders 1 --value='OC\\Preview\\JPEG'"
+  - "enabledPreviewProviders 2 --value='OC\\Preview\\GIF'"
+  - "enabledPreviewProviders 3 --value='OC\\Preview\\BMP'"
+  - "enabledPreviewProviders 4 --value='OC\\Preview\\XBitmap'"
+  - "enabledPreviewProviders 5 --value='OC\\Preview\\MarkDown'"
+  - "enabledPreviewProviders 6 --value='OC\\Preview\\MP3'"
+  - "enabledPreviewProviders 7 --value='OC\\Preview\\TXT'"
+  - "enabledPreviewProviders 8 --value='OC\\Preview\\Illustrator'"
+  - "enabledPreviewProviders 9 --value='OC\\Preview\\Movie'"
+  - "enabledPreviewProviders 10 --value='OC\\Preview\\MSOffice2003'"
+  - "enabledPreviewProviders 11 --value='OC\\Preview\\MSOffice2007'"
+  - "enabledPreviewProviders 12 --value='OC\\Preview\\MSOfficeDoc'"
+  - "enabledPreviewProviders 13 --value='OC\\Preview\\OpenDocument'"
+  - "enabledPreviewProviders 14 --value='OC\\Preview\\PDF'"
+  - "enabledPreviewProviders 15 --value='OC\\Preview\\Photoshop'"
+  - "enabledPreviewProviders 16 --value='OC\\Preview\\Postscript'"
+  - "enabledPreviewProviders 17 --value='OC\\Preview\\StarOffice'"
+  - "enabledPreviewProviders 18 --value='OC\\Preview\\SVG'"
+  - "enabledPreviewProviders 19 --value='OC\\Preview\\TIFF'"
+  - "enabledPreviewProviders 20 --value='OC\\Preview\\Font'"
+  - "preview_max_x --value='1024' --type=integer"
+  - "preview_max_y --value='768' --type=integer"
+  - "preview_max_scale_facto --value='1' --type=integer"
+  - "auth.bruteforce.protection.enabled --value=true --type=boolean"
+  - "trashbin_retention_obligation --value='auto,7'"
+  - "skeletondirectory --value=''"
+  - "defaultapp --value='file'"
+  - "activity_expire_days --value='14'  --type=integer"
+  - "integrity.check.disabled --value=false --type=boolean"
+  - "updater.release.channel --value=stable"
+  - "loglevel --value=1 --type=integer"
+  - "maintenance --value=false --type=boolean"
+  - "theme --value=''"
+
+nextcloud_mail_config:
+  - "mail_from_address --value={{ nextcloud_mail_from }}"
+  - "mail_smtpmode --value={{ nextcloud__mail_smtpmode }}"
+  - "mail_smtpauthtype --value={{ nextcloud_mail_smtpauthtype }}"
+  - "mail_domain --value={{ nextcloud_mail_domain }}"
+  - "mail_smtpname --value={{ nextcloud_mail_smtpname }}"
+  - "mail_smtpsecure --value={{ nextcloud_mail_smtpsecure }}"
+  - "mail_smtpauth --value={{ nextcloud__mail_smtpauth }}"
+  - "mail_smtphost --value={{ nextcloud_mail_smtphost }}"
+  - "mail_smtpport --value={{ nextcloud_mail_smtpport }}"
+  - "mail_smtpname --value={{ nextcloud_mail_smtpname }}"
+  - "mail_smtppassword --value={{ nextcloud_mail_smtppwd }}"
+
+nextcloud_app_config:
+  - name:  survey_client
+    state: disable
+  - name:  firstrunwizard
+    state: disable
+  - name:  admin_audit
+    state: enable
+  - name:  files_pdfviewer
+    state: enable
+#  - name:  extract
+#    state: enable

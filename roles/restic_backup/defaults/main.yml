@@ -8,7 +8,7 @@ restic_backup_secret:       ''
 restic_install_path:        '/usr/local/bin'
 
 # use a local directory as a restic repository (not a good idea anyway)
-restic_repo:     '/var/backups/selfosted'
+restic_repo:     ''
 
 # use rclone to backup a cloud storage, see https://rclone.org for more details
 #restic_repo:     "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ selfhosted_credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"

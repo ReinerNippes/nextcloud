@@ -1,0 +1,62 @@
+---
+# tasks file for nextcloud
+
+- name: include os specific tasks
+  include_tasks: 'os/main.yml'
+
+- name: download nextcloud archive
+  get_url:
+    url:  "{{ nextcloud_archive }}"
+    dest: /tmp/nextcloud.tar.bz2
+    checksum: "sha256:{{ nextcloud_archive }}.sha256"
+
+- name: install nextcloud
+  unarchive: 
+    src: /tmp/nextcloud.tar.bz2
+    dest: /var/www
+    remote_src: true
+    owner: "{{ web_user[ansible_distribution] }}"
+    group: "{{ web_group[ansible_distribution] }}"
+    mode:  "o-rwx"
+    creates: "{{ nextcloud_www_dir }}/occ"
+
+- name: include selinux tasks
+  include_tasks: selinux.yml
+  when: 
+    - (ansible_os_family == "RedHat")
+    - ('status' in ansible_selinux)
+    - (ansible_selinux.status == "enabled")
+
+- name: flush all handlers to restart server
+  meta: flush_handlers
+
+- name: configure nextcloud
+  include_tasks: configure/nextcloud.yml
+
+- name: add nextcloud cronjob
+  cron:
+    name: nextcloud cronjob
+    minute: '*/15'
+    user: "{{ web_user[ansible_distribution] }}"
+    job: "php -f {{ nextcloud_www_dir }}/cron.php > /dev/null 2>&1"
+
+- name: run nextcloud cronjob
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php -f {{ nextcloud_www_dir }}/cron.php
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  when: setup_nextcloud is changed
+
+- name: configure fulltextsearch
+  include_tasks: configure/fulltextsearch.yml
+  when: install_fulltextsearch|bool
+
+- name: configure collabora
+  include_tasks: configure/collabora.yml
+  when: install_collabora|bool
+
+- name: configure onlyoffice
+  include_tasks: configure/onlyoffice.yml
+  when: install_onlyoffice|bool

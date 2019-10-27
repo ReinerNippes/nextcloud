@@ -1,0 +1,32 @@
+---
+# performance and sercurity tuning
+
+- name: sysctl vm.overcommit_memory=1
+  sysctl: 
+    name: vm.overcommit_memory
+    value: "1"
+    state: present
+    reload: true
+    sysctl_file: /etc/sysctl.conf
+
+- name: sysctl -w net.core.somaxconn=65535
+  sysctl:
+    name: net.core.somaxconn
+    value: "65535"
+    state: present
+    reload: true
+    sysctl_file: /etc/sysctl.conf
+
+- name: disable transparent hugepages - copy service file
+  copy:
+    src: disable-transparent-huge-pages.service
+    dest: '{{ systemd_service_path[ansible_distribution] }}/disable-transparent-huge-pages.service'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: enable service disable-transparent-hugepages
+  service:
+    name: disable-transparent-huge-pages.service
+    enabled: true
+    state: started

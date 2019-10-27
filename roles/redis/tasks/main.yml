@@ -1,0 +1,36 @@
+---
+# tasks file for redis
+
+- name: include os specific tasks
+  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+
+- name: configure redis
+  template:
+    src: redis.conf.j2
+    dest: "{{ redis_conf_path[ansible_distribution] }}/redis.conf"
+    owner: redis
+    group: redis
+    mode: 0600
+    force: true
+    backup: true
+  notify: restart redis-server
+
+- name: add user {{ web_user[ansible_distribution] }} to group redis if running togehter with webserver
+  user:
+   name:   "{{ web_user[ansible_distribution] }}"
+   groups: redis
+  when: groups['redis'] == groups['webserver']
+
+- name: start and enable redis
+  systemd:
+    name:    redis
+    state:   started
+    enabled: true
+
+- name: sysctl vm.overcommit_memory=1
+  sysctl: 
+    name: vm.overcommit_memory
+    value: "1"
+    state: present
+    reload: true
+    sysctl_file: /etc/sysctl.conf

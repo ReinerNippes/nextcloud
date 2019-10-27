@@ -1,0 +1,30 @@
+---
+# yum related os tasks
+
+- name: install needed fedora os packages
+  dnf:
+    name:
+      - zip
+      - unzip
+      - bzip2
+      - screen
+      - curl
+      - wget
+      - cronie
+      - firewalld
+      - facter
+      - policycoreutils-python
+    state: latest
+    enablerepo: epel 
+
+- name: update os
+  dnf:
+    name: '*'
+    update_cache: true
+    state: latest
+
+- name: enable cronie
+  systemd:
+    name:    crond.service
+    state:   started
+    enabled: true

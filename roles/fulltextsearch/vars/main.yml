@@ -1,0 +1,8 @@
+---
+
+elasticsearch_jdk_version:
+  Debian:
+    v9:  openjdk-8-jre
+    v10: openjdk-11-jre
+  Ubuntu:
+    v18: openjdk-11-jre

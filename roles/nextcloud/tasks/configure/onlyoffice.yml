@@ -1,0 +1,45 @@
+---
+# tasks file for onlyoffice configuration
+
+- name: install onlyoffice app
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ app:install onlyoffice
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+    creates: "{{ nextcloud_www_dir }}/apps/onlyoffice"
+  ignore_errors: true
+  
+- name: enable onlyoffice app
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ app:enable onlyoffice
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  
+- name: set onlyoffice server url
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:app:set onlyoffice DocumentServerUrl --value https://{{ nextcloud_fqdn }}:{{ onlyoffice_ssl_port }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+
+- name: set onlyoffice server secret
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:app:set onlyoffice jwt_secret --value {{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+
+- name: set onlyoffice cert check off
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean 
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  when: ssl_certificate_type  == 'selfsigned'

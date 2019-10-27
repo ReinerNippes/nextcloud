@@ -1,9 +1,0 @@
----
-# handlers file for prep_collabora
-
-- name: restart collabora container
-  shell: docker restart collabora_online
-#  docker_container:
-#    name: collabra_online
-#    state: started
-#    restart: yes

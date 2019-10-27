@@ -1,31 +1,87 @@
 #!/usr/bin/env ansible-playbook
 
+- name: update os
+  hosts: all
+  become: true
+  gather_facts: true
+
+  roles:
+    - os
+
+- name: 'install redis'
+  hosts: redis
+  become: true
+  gather_facts: false
+
+  roles:
+    - redis
+
+- name: 'install webserver'
+  hosts: webserver
+  become: true
+  gather_facts: false
+
+  roles:
+    - webserver
+    - php
+
+- name: 'install database'
+  hosts: database
+  become: true
+  gather_facts: false
+
+  roles:
+    - { role: mariadb,  when: (nextcloud_db_type == 'mysql') }
+    - { role: postgres, when: (nextcloud_db_type == 'pgsql') }
+
+- name: 'install elasticsearch'
+  hosts: elasticsearch
+  become: true
+  gather_facts: false
+
+  roles:
+    - { role: fulltextsearch, when: install_fulltextsearch|bool }
+
+- name: 'install collabora'
+  hosts: collabora
+  become: true
+  gather_facts: false
+
+  roles:
+    - { role: collabora,      when: install_collabora|bool }
+
+- name: 'install onlyoffice'
+  hosts: onlyoffice
+  become: true
+  gather_facts: false
+
+  roles:
+    - { role: onlyoffice,      when: install_onlyoffice|bool }
+
 - name: 'install nextcloud'
   hosts: nextcloud
   become: true
+  gather_facts: false
 
   roles:
-    - { role: prep_ufw,         when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu" }
-    - prep_os
-    - prep_redis
-    - prep_nginx
-    - prep_php
-    - { role: prep_mariadb,        when: (nc_db_type == 'mysql') and (nc_db_host == 'localhost') }
-    - { role: prep_postgres,       when: (nc_db_type == 'pgsql') and (nc_db_host == 'localhost') }
-    - { role: prep_letsencrypt,    when: ssl_certificate_type  == 'letsencrypt' }
-    - { role: prep_selfssl,        when: ssl_certificate_type  == 'selfsigned' }
-    - { role: restic_backup,       when: restic_repo != '' }
-    - prep_nextcloud
-    - { role: prep_talk,           when: talk_install == 'true' }
-    - { role: prep_collabora,      when: install_collabora == 'true' }
-    - { role: prep_onlyoffice,     when: install_onlyoffice == 'true' }
-    - nc_fail2ban
+    - { role: restic_backup,  when: restic_repo != '' }
+    - nextcloud
+    - fail2ban
 
   post_tasks:
+    - name: check install status
+      uri:
+        url: https://{{ nextcloud_fqdn }}/status.php
+        return_content: yes
+      register: nextcloud_status
+
     - name: We are ready
-      debug:
-        msg: 
-          - "Your Nextcloud at https://{{ fqdn }} is ready."
-          - "Login with user: {{ nc_admin }} and password: {{ nc_passwd }} "
+      assert:
+        that: nextcloud_status.json.installed
+        fail_msg: 
+          - "Upss. Something went wrong."
+          - "Your Nextcloud at https://{{ nextcloud_fqdn }} is down."
+        success_msg: 
+          - "Your Nextcloud {{ nextcloud_status.json.version }} at https://{{ nextcloud_fqdn }} is ready."
+          - "Login with user: {{ nextcloud_admin }} and password: {{ nextcloud_passwd }} "
           - "Other secrets you'll find in the directory {{ credential_store }} "
- 

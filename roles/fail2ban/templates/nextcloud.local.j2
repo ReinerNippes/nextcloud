@@ -1,0 +1,10 @@
+[nextcloud]
+backend = auto
+enabled = true
+port = {{ nextcloud_web_port }},{{ nextcloud_ssl_port }}
+protocol = tcp
+filter = nextcloud
+maxretry = 3
+bantime = 36000
+findtime = 36000
+logpath = {{ nextcloud_data_dir }}/nextcloud.log

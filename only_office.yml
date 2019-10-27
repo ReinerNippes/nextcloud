@@ -1,9 +1,0 @@
-#!/usr/bin/env ansible-playbook
-
-- name: 'install onlyoffice for nextcloud'
-  hosts: nextcloud
-  become: true
-
-  roles:
-    - { role: prep_onlyoffice,     when: install_onlyoffice == 'true' }
-

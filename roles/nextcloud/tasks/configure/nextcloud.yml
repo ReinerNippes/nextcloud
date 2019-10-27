@@ -1,0 +1,74 @@
+---
+
+# configure nextcloud
+
+- name: generate admin passwd if nextcloud_passwd is empty
+  set_fact:
+    nextcloud_passwd: "{{ lookup('password', '{{ credential_store }}/nextcloud_admin_secret chars=ascii_letters,digits length=32') }}"
+  when: nextcloud_passwd == ''
+
+- name: first setup nextcloud
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: >
+    php occ  maintenance:install 
+    --database {{ nextcloud_db_type }} 
+    --database-host "{{ nextcloud_db_host }}" 
+    --database-name {{ nextcloud_db }} 
+    --database-table-prefix {{ nextcloud_db_prefix }} 
+    --database-user {{ nextcloud_db_user }} 
+    --database-pass {{ lookup('password', '{{ credential_store }}/database_secret chars=ascii_letters,digits length=32') }} 
+    --admin-user {{ nextcloud_admin }} 
+    --admin-pass {{ nextcloud_passwd }} 
+    --data-dir {{ nextcloud_data_dir }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+    creates: "{{ nextcloud_www_dir }}/config/config.php"
+  register: setup_nextcloud
+
+- debug: var=setup_nextcloud verbosity=2
+
+- name: set nextcloud domain config.php values
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:system:set {{ item }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  loop: "{{ nextcloud_config }}"
+
+- name: set nextcloud mail config.php values
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:system:set {{ item }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  loop: "{{ nextcloud_mail_config }}"
+  when: nextcloud_configure_mail|bool
+
+- name: backup jobs, upgrade apps and database tuning
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ {{ item }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  loop:
+    - background:cron
+    - upgrade
+    - db:add-missing-indices
+    - db:convert-filecache-bigint
+    - app:update --all
+
+- name: install apps
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: |
+    php occ app:install {{ item.name }} --no-interaction --no-warnings
+    php occ app:{{ item.state }} {{ item.name }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  loop: "{{ nextcloud_app_config }}"

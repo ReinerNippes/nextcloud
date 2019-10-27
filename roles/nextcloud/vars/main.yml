@@ -1,0 +1,10 @@
+---
+# vars file for nextcloud
+
+imagemagick_xml_path:
+  CentOS: "{% if ansible_distribution_major_version|int <= 7 %}/etc/ImageMagick/policy.xml{% endif %}"
+  Fedora: /etc/ImageMagick-6/policy.xml
+  Amazon: /etc/ImageMagick/policy.xml
+  Ubuntu: /etc/ImageMagick-6/policy.xml
+  Debian: /etc/ImageMagick-6/policy.xml
+  

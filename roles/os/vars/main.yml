@@ -1,0 +1,15 @@
+---
+# vars file for os
+
+# ufw defaults
+
+# /etc/defaut/ufw settings
+ufw_ipv6: "yes"
+ufw_default_input_policy: DROP
+ufw_default_output_policy: ACCEPT
+ufw_default_forward_policy: DROP
+ufw_default_application_policy: SKIP
+
+# firewall state: enabled | disabled
+ufw_state: enabled
+ufw_logging: "off"

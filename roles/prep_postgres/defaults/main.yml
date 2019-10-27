@@ -1,6 +1,0 @@
----
-# defaults file for prep_postgres
-
-postgresql_version: 10
-postgres_user:      postgres
-pgdata:             /var/lib/postgresql/data/pgdata

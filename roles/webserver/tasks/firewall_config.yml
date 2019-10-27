@@ -1,0 +1,48 @@
+---
+# ensure firewalls are open
+
+- name: configure ufw firewall
+  block:
+  - name: open special web server ports
+    ufw:
+      rule: allow
+      port: "{{ item|int }}"
+      proto: tcp
+    loop: 
+      - "{{ nextcloud_web_port }}"
+      - "{{ nextcloud_ssl_port }}"
+
+  - name: open database port if remote server
+    ufw:
+      rule: allow
+      port: "{% if nextcloud_db_type == 'mysql' %}3306{% elif nextcloud_db_type == 'pgsql' %}5432{% endif %}"
+      proto: tcp
+      from: "{{ item.ansible_default_ipv4.address }}"
+    loop: "{{ hostvars[groups['webserver']] }}"
+    delegate_to: "{{ groups['database'][0] }}"
+    when: groups['database'] != groups['webserver']
+
+  - name: open redis port if remote server
+    ufw:
+      rule: allow
+      port: "{{ redis_tcp.port }}"
+      proto: tcp
+      from: "{{ item.ansible_default_ipv4.address }}"
+    loop: "{{ hostvars[groups['webserver']] }}"
+    delegate_to: "{{ groups['redis'][0] }}"
+    when: groups['redis'] != groups['webserver']
+
+  when: ansible_os_family == 'Debian'
+
+- name: configure firewalld firewall
+  block:
+  - name: open firewall ports {{ nextcloud_web_port }}/{{ nextcloud_ssl_port }}
+    firewalld:
+      port: "{{ item }}"
+      permanent: true
+      immediate: false
+      state: enabled
+    loop:
+      - '{{ nextcloud_web_port }}/tcp'
+      - '{{ nextcloud_ssl_port }}/tcp'
+  when: ansible_os_family == 'RedHat'

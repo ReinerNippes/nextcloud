@@ -1,0 +1,41 @@
+---
+# tasks file for nginx
+
+- name: pkg manager spefic tasks
+  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+
+- name: create some folders
+  file:
+    name: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: '{{ nextcloud_data_dir }}', owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0750' }
+    - { path: '{{ nextcloud_www_dir }}',  owner: '{{ web_user[ansible_distribution] }}', group: '{{ web_group[ansible_distribution] }}', mode: '0750' }
+
+- name: use ec2 public hostname if fqdn is not defined
+  set_fact:
+    nextcloud_fqdn: "{{ nextcloud_fqdn if ( nextcloud_fqdn ) else facter_ec2_metadata['public-hostname'] }}"
+  when: facter_ec2_metadata is defined
+
+- name: use ansible_fqdn if fqdn is not defined
+  set_fact:
+    nextcloud_fqdn: "{{ nextcloud_fqdn if ( nextcloud_fqdn ) else ansible_fqdn }}"
+
+- name: create tls certificate (webserver)
+  include_role: 
+    name: tls-certificate
+
+- name: include configuration tasks
+  include_tasks: "configure.yml"
+
+- name: nginx started and enabled
+  systemd:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: open redis/database server firewalls
+  include_tasks: firewall_config.yml

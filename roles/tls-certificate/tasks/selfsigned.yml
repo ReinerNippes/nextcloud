@@ -1,0 +1,18 @@
+---
+
+- name: generate an openssl private key with the default values
+  openssl_privatekey:
+    path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.key'
+
+- name: generate an openssl certificate signing request
+  openssl_csr:
+    path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.csr'
+    privatekey_path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.key'
+    common_name: "{{ nextcloud_fqdn }}"
+
+- name: generate a self signed openssl certificate
+  openssl_certificate:
+    path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.crt'
+    privatekey_path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.key'
+    csr_path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.csr'
+    provider: selfsigned

@@ -1,0 +1,42 @@
+---
+# apt related OS tasks
+
+- name: add apt key for nginx repo
+  apt_key:
+    url: "{{ nginx_apt_key[ansible_distribution].url | default(omit) }}"
+    keyserver: "{{ nginx_apt_key[ansible_distribution].keyserver | default(omit) }}"
+    id: "{{ nginx_apt_key[ansible_distribution].id | default(omit) }}"
+    state: present
+
+- name: add additional nginx repo
+  apt_repository:
+    repo: "{{ nginx_apt_repo_url[ansible_distribution] }}"
+    validate_certs: true
+    update_cache: true
+    state: present
+
+- name: apt dist-upgrade
+  apt:
+    upgrade: dist
+    autoremove: true
+
+- name: remove standard nginx
+  apt:
+    name:
+      - nginx-full
+      - nginx-extras
+    state: absent
+
+- name: apt dist-upgrade
+  apt:
+    upgrade: dist
+    autoremove: true
+
+- name: install additional packages
+  apt:
+    name:
+      - nginx
+      - openssl
+      - python-openssl
+    autoremove: true
+    state: latest

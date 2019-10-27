@@ -1,27 +1,14 @@
 #!/bin/bash -uxe
 #
-# Prepare system for nextcloud devel
+# Prepare system for nextcloud installtion
 #
-
-install_pip () {
-        curl https://bootstrap.pypa.io/get-pip.py | $SUDO $PYTHON_BIN
-        $SUDO pip install setuptools -U
-        $SUDO pip install ansible -U
-        $SUDO pip install netaddr -U
-        $SUDO pip install dnspython -U
-        $SUDO pip install passlib -U
-        $SUDO pip install bcrypt -U
-}
 
 prepare_ubuntu() {
         $SUDO apt update -y
         $SUDO apt dist-upgrade -y
-        $SUDO apt install software-properties-common curl git mc vim facter python python-apt aptitude -y
+        $SUDO apt install software-properties-common curl git mc vim facter python python-apt python-pip python-passlib python-bcrypt aptitude ansible -y
         $SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python-dev libffi-dev libssl-dev make -y
-
-        PYTHON_BIN=/usr/bin/python
-        install_pip
-        $SUDO pip install python-apt -U
+        $SUDO pip install ansible -U
 
         set +x
         echo
@@ -33,12 +20,9 @@ prepare_ubuntu() {
 prepare_debian() {
         $SUDO apt update -y
         $SUDO apt dist-upgrade -y
-        $SUDO apt install dirmngr curl git mc vim facter python python-apt aptitude -y
+        $SUDO apt install dirmngr curl git mc vim facter python python-pip python-apt python-passlib python-bcrypt aptitude ansible -y
         $SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python-dev libffi-dev libssl-dev make -y
-
-        PYTHON_BIN=/usr/bin/python
-        install_pip
-        $SUDO pip install python-apt -U
+        $SUDO pip install ansible -U
 
         set +x
         echo
@@ -50,9 +34,8 @@ prepare_debian() {
 prepare_raspbian() {
         $SUDO apt update -y
         $SUDO apt dist-upgrade -y
-        $SUDO apt install dirmngr mc vim git libffi-dev curl facter -y
-        PYTHON_BIN=/usr/bin/python
-        install_pip
+        $SUDO apt install dirmngr mc vim git libffi-dev curl facter python python-apt python-pip python-passlib python-bcrypt aptitude ansible -y
+        $SUDO pip install ansible -U
 
         set +x
         echo
@@ -63,11 +46,9 @@ prepare_raspbian() {
 
 prepare_centos() {
         $SUDO yum install epel-release -y
-        $SUDO yum install git vim mc curl facter libselinux-python python -y
+        $SUDO yum install git vim mc curl facter libselinux-python python python-pip python-passlib python-bcrypt aptitude ansible -y
         $SUDO yum update -y
-
-        PYTHON_BIN=/usr/bin/python
-        install_pip
+        $SUDO pip install ansible -U
 
         set +x
         echo
@@ -77,12 +58,8 @@ prepare_centos() {
 }
 
 prepare_fedora() {
-        $SUDO dnf install git vim mc curl facter libselinux-python python python3 python3-dnf -y
+        $SUDO dnf install git vim mc curl facter libselinux-python python3 python3-dnf python3-pip python3-libselinux python3-bcrypt python3-passlib ansible -y
         $SUDO dnf update -y
-
-        PYTHON_BIN=/usr/bin/python
-        install_pip
-        $SUDO dnf reinstall python3-pip -y
 
         set +x
         echo
@@ -93,11 +70,9 @@ prepare_fedora() {
 
 prepare_amzn() {
         $SUDO amazon-linux-extras install epel -y
-        $SUDO yum install git vim mc curl facter libselinux-python python -y
+        $SUDO yum install git vim mc curl facter libselinux-python python python-pip python-passlib python-bcrypt aptitude ansible -y
         $SUDO yum update -y
-
-        PYTHON_BIN=/usr/bin/python
-        install_pip
+        $SUDO pip install ansible -U
 
         set +x
         echo

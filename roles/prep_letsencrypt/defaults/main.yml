@@ -1,4 +1,0 @@
----
-# defaults file for prep_letsencrypt
-
-dhparam_numbits: 2048

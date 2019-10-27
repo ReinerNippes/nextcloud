@@ -1,8 +1,0 @@
----
-# Ubuntu related OS tasks
-
-- name: install mariadb-server packages
-  apt:
-    name: mariadb-server
-    autoremove: true
-    state: latest

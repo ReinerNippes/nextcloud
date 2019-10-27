@@ -1,7 +1,0 @@
----
-# Debian related OS tasks
-
-- name: Installing ufw package
-  package:
-    name: ufw
-    state: latest
