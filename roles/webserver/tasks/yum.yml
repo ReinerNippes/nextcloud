@@ -1,0 +1,25 @@
+---
+# yum related tasks
+
+- name: add nginx yum repos
+  yum_repository:
+    name: nginx
+    description: NGINX YUM repo
+    baseurl: "{{ nginx_yum_repo_url[ansible_distribution] }}"
+    gpgkey: https://nginx.org/keys/nginx_signing.key
+    gpgcheck: yes
+    enabled: 0
+
+- name: update os
+  yum:
+    name: '*'
+    update_cache: true
+    state: latest
+
+- name: install needed packages
+  yum:
+    name:
+      - nginx
+#      - python2-pyOpenSSL
+    state: latest
+    enablerepo: nginx

@@ -1,0 +1,27 @@
+---
+# tasks file for collabora configuration
+
+- name: install collabora app
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ app:install richdocuments
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+    creates: "{{ nextcloud_www_dir }}/apps/richdocuments"
+
+- name: enable collabora app
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ app:enable richdocuments
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+
+- name: set collabora wopi url
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ config:app:set richdocuments wopi_url --value https://{{ nextcloud_fqdn }}:{{ nextcloud_ssl_port }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"

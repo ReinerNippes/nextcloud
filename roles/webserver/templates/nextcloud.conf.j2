@@ -1,0 +1,96 @@
+server {
+	listen {{ nextcloud_web_port }} default_server;
+	{% if ansible_default_ipv6.address is defined %}listen [::]:{{ nextcloud_web_port }};{% endif %}
+	server_name {{ nextcloud_fqdn }};
+	#Your DDNS adress, (e.g. from desec.io or no-ip.com)
+	location ^~ /.well-known/acme-challenge {
+		proxy_pass http://127.0.0.1:81;
+	}
+	location / {
+		return 301 https://$server_name:{{ nextcloud_ssl_port }}$request_uri;
+	}
+}
+server {
+	listen {{ nextcloud_ssl_port }} ssl http2 default_server;
+	{% if ansible_default_ipv6.address is defined %}listen [::]:{{ nextcloud_ssl_port }} ssl http2;{% endif %}
+	server_name {{ nextcloud_fqdn }};
+	root {{ nextcloud_www_dir }};
+	access_log /var/log/nginx/nextcloud.access.log main;
+	error_log /var/log/nginx/nextcloud.error.log warn;
+
+	location = /robots.txt {
+		allow all;
+		log_not_found off;
+		access_log off;
+	}
+
+	location = /.well-known/carddav {
+		return 301 $scheme://$host:{{ nextcloud_ssl_port }}/remote.php/dav;
+	}
+	location = /.well-known/caldav {
+		return 301 $scheme://$host:{{ nextcloud_ssl_port }}/remote.php/dav;
+	}
+{% if install_collabora %}
+
+	location ^~ /loleaflet {
+		proxy_pass https://localhost:9980;
+		proxy_set_header Host $http_host;
+	}
+	
+	location ^~ /hosting/discovery {
+		proxy_pass https://localhost:9980;
+		proxy_set_header Host $http_host;
+	}
+	 
+	location ^~ /lool {
+		proxy_pass https://localhost:9980;
+		proxy_set_header Host $http_host;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+	} 
+{% endif %}
+
+	client_max_body_size 10240M;
+
+	location / {
+		rewrite ^ /index.php$uri;
+	}
+	location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)/ {
+		deny all;
+	}
+	location ~ ^/(?:\.|autotest|occ|issue|indie|db_|console) {
+		deny all;
+	}
+	location ~* \.(?:flv|mp4|mov|m4a)$ {
+		mp4;
+		mp4_buffer_size 5m;
+		mp4_max_buffer_size 10m;
+		fastcgi_split_path_info ^(.+\.php)(/.*)$;
+		include fastcgi_params;
+		include /etc/nginx/conf.d/php_optimization.conf;
+		fastcgi_pass php-handler;
+		fastcgi_param HTTPS on;
+	}
+	location ~ ^/(?:index|remote|public|cron|core/ajax/update|status|ocs/v[12]|updater/.+|ocs-provider/.+)\.php(?:$|/) {
+		fastcgi_split_path_info ^(.+\.php)(/.*)$;
+		include fastcgi_params;
+		include /etc/nginx/conf.d/php_optimization.conf;
+		fastcgi_pass php-handler;
+		fastcgi_param HTTPS on;
+	}
+	location ~ ^/(?:updater|ocs-provider)(?:$|/) {
+		try_files $uri/ =404;
+		index index.php;
+	}
+	location ~ \.(?:css|js|woff|svg|gif)$ {
+		try_files $uri /index.php$uri$is_args$args;
+		add_header Cache-Control "public, max-age=15778463";
+		access_log off;
+		expires 30d;
+	}
+	location ~ \.(?:png|html|ttf|ico|jpg|jpeg)$ {
+		try_files $uri /index.php$uri$is_args$args;
+		access_log off;
+		expires 30d;
+	}
+}

@@ -1,4 +1,0 @@
----
-# defaults file for prep_secrets
-
-credential_store: /etc/nextcloud

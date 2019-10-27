@@ -1,0 +1,6 @@
+---
+# defaults file for postgres
+
+postgresql_version: 11
+postgres_user:      postgres
+pgdata:             /var/lib/postgresql/data/pgdata

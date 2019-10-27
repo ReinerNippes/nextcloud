@@ -1,7 +1,0 @@
----
-# handlers file for prep_php
-
-- name: restart php-fpm
-  systemd:
-    name: "{{ php_service_name[ansible_distribution] }}"
-    state: restarted

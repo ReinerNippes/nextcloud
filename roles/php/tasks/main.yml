@@ -1,0 +1,34 @@
+---
+# tasks file for php
+
+- name: pkg manager spefic tasks
+  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+
+- name: configure php
+  template:
+    src: "{{ item.file }}.j2"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+    backup: true
+  loop:
+    - { file: 'fpm.php.ini',  dest: '{{ php_php_conf[ansible_distribution] }}' }
+    - { file: 'cli.php.ini',  dest: '{{ php_cli_conf[ansible_distribution] }}' }
+    - { file: 'www.conf',     dest: '{{ php_www_conf[ansible_distribution] }}' }
+    - { file: 'php-fpm.conf', dest: '{{ php_fpm_conf[ansible_distribution] }}' }
+  notify: restart php-fpm
+
+- name: include selinux tasks
+  include_tasks: selinux.yml
+  when: 
+    - (ansible_os_family == "RedHat")
+    - ('status' in ansible_selinux)
+    - (ansible_selinux.status == "enabled")
+
+- name: enable php-fpm
+  systemd:
+    name: "{{ php_service_name[ansible_distribution] }}"
+    state: started
+    enabled: true

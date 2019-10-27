@@ -1,0 +1,9 @@
+---
+
+# yum related tasks
+
+- name: install needed packages
+  yum:
+    name: redis
+    state: latest
+    enablerepo: "{{ redis_yum_repo[ansible_distribution] }}"

@@ -1,0 +1,15 @@
+---
+# tasks file to setup os
+
+- name: include os specific tasks
+  include_tasks: '{{ ansible_pkg_mgr }}.yml'
+
+- name: init firewall
+  include_tasks: 'firewall_init.yml'
+
+- name: make sure {{ credential_store }} is available
+  file: 
+    name: '{{ credential_store }}'
+    mode:  0700
+    state: directory
+  become: false

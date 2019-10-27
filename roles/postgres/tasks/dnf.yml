@@ -1,0 +1,14 @@
+---
+# dnf related OS tasks
+
+- name: add postgres repo
+  dnf:
+    name: "{{ postgresql_yum_repo_rpm[ansible_distribution] }}"
+    state: present
+  when: ansible_distribution in ['Fedora','CentOS']
+
+- name: install postgres server
+  dnf:
+    name: "{{ postgresql_packages[ansible_distribution] }}"
+    state: latest
+    exclude: python-unversioned-command

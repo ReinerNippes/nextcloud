@@ -1,0 +1,21 @@
+---
+
+- name: selinux targets
+  sefcontext:
+    target: "{{ item }}"
+    setype: httpd_sys_rw_content_t
+    state: present
+  loop: 
+    - '/tmp(/.*)?'
+
+- name: restorecon 
+  command: restorecon -Rv '{{ item }}'
+  loop:
+    - '/tmp'
+
+- name: setfacl -R -m u:nginx:rwx
+  command: setfacl -R -m u:nginx:rwx {{ item }}
+  loop:
+    - /var/lib/php/opcache/
+    - /var/lib/php/session/
+    - /var/lib/php/wsdlcache/

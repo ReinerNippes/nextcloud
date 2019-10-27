@@ -1,0 +1,15 @@
+---
+# vars file for redis
+
+redis_yum_repo:
+  Amazon: amzn2extra-epel
+  CentOS: epel
+  Fedora: epel
+
+redis_conf_path:
+  CentOS: '/etc'
+  Fedora: '/etc'
+  Amazon: '/etc'
+  Ubuntu: '/etc/redis'
+  Debian: '/etc/redis' 
+  

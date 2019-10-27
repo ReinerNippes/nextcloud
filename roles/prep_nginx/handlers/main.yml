@@ -1,8 +1,0 @@
----
-# handlers file for prep_nginx
-
-- name: restart nginx
-  listen: enable coturn
-  systemd:
-    name: nginx
-    state: restarted

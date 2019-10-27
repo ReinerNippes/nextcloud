@@ -1,0 +1,17 @@
+[www]
+user = {{ web_user[ansible_distribution] }}
+group = {{ web_group[ansible_distribution] }}
+listen = {{ php_socket[ansible_distribution] }}
+listen.owner = {{ web_user[ansible_distribution] }}
+listen.group = {{ web_group[ansible_distribution] }}
+pm = dynamic
+pm.max_children = 240
+pm.start_servers = 20
+pm.min_spare_servers = 10
+pm.max_spare_servers = 20
+pm.max_requests = 500
+env[HOSTNAME] = $HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp

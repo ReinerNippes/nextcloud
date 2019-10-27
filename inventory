@@ -1,76 +1,78 @@
-[nextcloud]
-localhost ansible_connection=local
+[all:vars]
 
-[nextcloud:vars]
+# Your Nextcloud Server Domain Name
 
-# Server domain name
-# Default is the fqdn of the machine
-# fqdn       = nc.example.org
+# Default is the fqdn of the Machine
+nextcloud_fqdn          = nextcloud.example.tld
 
-# selfsigned certificate as default
+# Selfsigned Certificate are Default
 ssl_certificate_type  = 'selfsigned'
 
-# Letsencrypt or selfsigned certificate
-# ssl_certificate_type  = 'letsencrypt'
+# Letsencrypt Certificate provided with acme.sh (https://github.com/Neilpang/acme.sh)
+# ssl_certificate_type  = 'acme.sh'
 
-
-# Your email adresse for letsencrypt
-# cert_email = nc@example.org
-
-# receive a certificate from staging
-# uncomment if you want to use letsencrypt staging environment
-# cert_stage = '--staging'
+# Your email Addresse for Letsencrypt
+# ssl_cert_email = nc@example.org
 
 #
 # Nextcloud varibales
 
-# web ports
-nc_web_port          = 80
-nc_ssl_port          = 443
+# Nextcloud Webserver Ports
+nextcloud_web_port          = 80
+nextcloud_ssl_port          = 443
 
-# data dir
-nc_datadir           = /var/nc-data
+# Nextcloud Web Root
+nextcloud_www_dir           = /var/www/nextcloud
 
-# admin user
-nc_admin             = 'admin'
-nc_passwd            = ''             # leave empty to generate random password
+# Nextcloud Data Dir
+nextcloud_data_dir          = /var/nc-data
 
-# database settings
-# nc_db_type          = 'mysql'        # (MariaDB)
-nc_db_type           = 'pgsql'        # (PostgreSQL)
-nc_db_host           = 'localhost'
-nc_db                = 'nextcloud'
-nc_db_user           = 'nextcloud'
-nc_db_passwd         = ''             # leave empty to generate random password
-nc_db_prefix         = 'oc_'
+# Nextcloud Admin User
+# Leave Password Empty to generate secure, random one
+nextcloud_admin             = 'admin'
+nextcloud_passwd            = ''
 
-# Nextcloud mail setup
-nc_configure_mail    = false
-nc_mail_from         =
-nc_mail_smtpmode     = smtp
-nc_mail_smtpauthtype = LOGIN
-nc_mail_domain       =
-nc_mail_smtpname     =
-nc_mail_smtpsecure   = tls
-nc_mail_smtpauth     = 1
-nc_mail_smtphost     =
-nc_mail_smtpport     = 587
-nc_mail_smtpname     =
-nc_mail_smtppwd      =
+# Nextcloud Database Settings
+# Leave Password Empty to generate secure, random one
+#nextcloud_db_type           = 'mysql'        # (MariaDB)
+nextcloud_db_type           = 'pgsql'        # (PostgreSQL)
+nextcloud_db_host           = 'localhost'
+nextcloud_db                = 'nextcloud'
+nextcloud_db_user           = 'nextcloud'
+nextcloud_db_passwd         = ''
+nextcloud_db_prefix         = 'oc_'
 
-# php Version
-php_version          = '7.3'
+# Nextcloud Mail Setup
+nextcloud_configure_mail    = false
+nextcloud_mail_from         =
+nextcloud_mail_smtpmode     = smtp
+nextcloud_mail_smtpauthtype = LOGIN
+nextcloud_mail_domain       =
+nextcloud_mail_smtpname     =
+nextcloud_mail_smtpsecure   = tls
+nextcloud_mail_smtpauth     = 1
+nextcloud_mail_smtphost     =
+nextcloud_mail_smtpport     = 587
+nextcloud_mail_smtpname     =
+nextcloud_mail_smtppwd      =
+
+# Allways get the latest version of Nextcloud
+nextcloud_archive           = https://download.nextcloud.com/server/releases/latest.tar.bz2
+
+# php version
+php_version                 = '7.3'
+
+# optional php packages see: roles/php/var/main.yml
+php_install_optional_packages = false
 
 # Install turn server for Nextcloud Talk
 talk_install         = false
 
-# Allways get the latest version of Nextcloud
-next_archive         = https://download.nextcloud.com/server/releases/latest.tar.bz2
-
 # Install restic backup tool if backup_folder is not empty
 # more info about restic: https://restic.readthedocs.io/en/latest/
 # to use a local directory as a restic repository (not a good idea anyway)
-restic_repo          = ''   # e.g. '/var/backups/nextcloud'
+# example: restic_repo          = '/var/backups/nextcloud'
+restic_repo          = ''    
 
 # use rclone to backup a cloud storage, see https://rclone.org for more details
 # configure also rclone_remote in group_vars/all.yml
@@ -90,6 +92,30 @@ install_collabora     = false
 install_onlyoffice    = false
 onlyoffice_ssl_port   = 8443
 
+# Install fulltextsearch
+install_fulltextsearch = false
+
 #
-# defaults path of your generated credentials (e.g. database, talk, onlyoffice)
-credential_store      = /etc/nextcloud
+# Environment Definitions
+#
+
+[nextcloud]
+localhost ansible_connection=local
+
+[redis]
+localhost ansible_connection=local
+
+[database]
+localhost ansible_connection=local
+
+[webserver]
+localhost ansible_connection=local
+
+[elasticsearch]
+localhost ansible_connection=local
+
+[collabora]
+localhost ansible_connection=local
+
+[onlyoffice]
+localhost ansible_connection=local

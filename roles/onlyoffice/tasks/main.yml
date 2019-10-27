@@ -1,0 +1,41 @@
+---
+# tasks file for onlyoffice installation
+
+- name: create tls certificate (onlyoffice)
+  include_role: 
+    name: tls-certificate
+
+- name: start a onlyoffice container
+  docker_container:
+    name: onlyoffice
+    image: onlyoffice/documentserver
+    state: started
+    restart: yes
+    restart_policy: always
+    interactive: true
+    tty: yes
+    ports:
+     - "{{ onlyoffice_ssl_port }}:443"
+    env:
+      ONLYOFFICE_HTTPS_HSTS_ENABLED: 'false'
+      JWT_ENABLED:  'true'
+      JWT_SECRET:   "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
+    volumes:
+    - '{{ certificates_path }}/{{ nextcloud_fqdn }}.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro'
+    - '{{ certificates_path }}/{{ nextcloud_fqdn }}.crt:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro'
+    - '{{ certificates_path }}/dhparam.pem:/var/www/onlyoffice/Data/certs/dhparam.pem:ro'
+
+- name: open special web server ports
+  ufw:
+    rule: allow
+    port: "{{ onlyoffice_ssl_port }}"
+    proto: tcp
+  when: ansible_os_family == 'Debian'
+
+- name: open firewall ports {{ nextcloud_web_port }}/{{ nextcloud_ssl_port }}
+  firewalld:
+    port: "{{ onlyoffice_ssl_port }}/tcp"
+    permanent: true
+    immediate: false
+    state: enabled
+  when: ansible_os_family == 'RedHat'

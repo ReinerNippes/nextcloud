@@ -1,0 +1,33 @@
+---
+# apt related OS tasks
+
+- name: add apt key for nginx repo
+  apt_key:
+#    url: 
+    keyserver: keyserver.ubuntu.com
+    id: '0xF1656F24C74CD1D8'
+    state: present
+
+- name: add additional mariaddb repo
+  apt_repository:
+    repo: 'deb [arch=amd64,arm64] http://{{ mariadb_mirror_server }}/mariadb/repo/{{ mariadb_version }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} main'
+    validate_certs: true
+    update_cache: true
+    state: present
+
+- name: install mariadb-server packages
+  apt:
+    name: 
+      - mariadb-server
+      - mariadb-client
+      - python-pymysql
+    autoremove: true
+    state: latest
+
+- name: open mariadb port if running on remote server
+  ufw:
+    rule:  "allow"
+    port:  "3306"
+    proto: "tcp"
+    from:  "{{ hostvars[groups['nextcloud'][0]].ansible_default_ipv4.address }}"
+  when: groups['database'] != groups['webserver']

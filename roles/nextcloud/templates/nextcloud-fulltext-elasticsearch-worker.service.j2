@@ -1,0 +1,15 @@
+[Unit]
+Description=Elasticsearch Worker for Nextcloud Fulltext Search
+After=network.target elasticsearch.service
+
+[Service]
+User={{ web_user[ansible_distribution] }}
+Group={{ web_user[ansible_distribution] }}
+WorkingDirectory={{ nextcloud_www_dir }}
+ExecStart=/usr/bin/php {{ nextcloud_www_dir }}/occ fulltextsearch:live -q
+ExecStop=/usr/bin/php {{ nextcloud_www_dir }}/occ fulltextsearch:stop
+Nice=19
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

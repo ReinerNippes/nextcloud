@@ -1,0 +1,16 @@
+---
+# tasks file for collabora installation
+
+- name: start a collabora container
+  docker_container:
+    name: collabora_online
+    image: collabora/code
+    state: started
+    restart: yes
+    restart_policy: always
+    tty: yes
+    ports:
+     - "127.0.0.1:9980:9980"
+    env:
+        domain: "{{ nextcloud_fqdn | regex_replace('\\.', '\\.') }}"
+    capabilities: MKNOD

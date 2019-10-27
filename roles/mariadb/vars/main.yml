@@ -1,0 +1,21 @@
+---
+# vars file for mariadb
+
+mariadb_conf_dir:
+  Amazon: /etc/my.cnf.d
+  CentOS: /etc/my.cnf.d
+  Fedora: /etc/my.cnf.d
+  Ubuntu: /etc/mysql/mariadb.conf.d/
+  Debian: /etc/mysql/mariadb.conf.d/
+
+mariadb_socket:
+  Amazon: /var/lib/mysql/mysql.sock
+  CentOS: /var/lib/mysql/mysql.sock
+  Fedora: /var/lib/mysql/mysql.sock
+  Ubuntu: /var/run/mysqld/mysqld.sock
+  Debian: /var/run/mysqld/mysqld.sock
+
+mariadb_yum_repopath:
+  Amazon: http://{{ mariadb_mirror_server }}/mariadb//mariadb-{{ mariadb_version }}.{{ mariadb_version_minor }}/yum/centos7-amd64
+  CentOS: http://{{ mariadb_mirror_server }}/mariadb//mariadb-{{ mariadb_version }}.{{ mariadb_version_minor }}/yum/{{ ansible_distribution | lower }}{{ ansible_distribution_major_version|int }}-amd64
+  Fedora: http://{{ mariadb_mirror_server }}/mariadb//mariadb-{{ mariadb_version }}.{{ mariadb_version_minor }}/yum/{{ ansible_distribution | lower }}{{ ansible_distribution_major_version|int }}-amd64

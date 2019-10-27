@@ -1,36 +1,7 @@
 ---
-# Some common variables used in more then roles
- 
-web_user:
-  CentOS: 'nginx'
-  Fedora: 'nginx'
-  Amazon: 'nginx'
-  Ubuntu: 'www-data'
-  Debian: 'www-data'
-
-web_group:
-  CentOS: 'nginx'
-  Fedora: 'nginx'
-  Amazon: 'nginx'
-  Ubuntu: 'www-data'
-  Debian: 'www-data'
-
-pg_user_id:
-  CentOS: '70'
-  Fedora: '70'
-  Amazon: '70'
-  Ubuntu: '70'
-  Debian: '70'
-
-pg_group_id:
-  CentOS: '70'
-  Fedora: '70'
-  Amazon: '70'
-  Ubuntu: '70'
-  Debian: '70'
-
-credential_store: /etc/nextcloud
-dhparam_path:     /etc/nginx/certs/dhparam.pem
+# defaults path of your generated credentials (e.g. database, talk, onlyoffice)
+# the directory must be writeable for the user running this playbook
+credential_store: ~/.nextcloud
 
 # example of rclone config to backup to a s3 bucket
 
@@ -45,3 +16,39 @@ dhparam_path:     /etc/nginx/certs/dhparam.pem
 #      acl = private
 #      server_side_encryption = AES256
 #      storage_class = STANDARD_IA
+
+# redis config
+# if inventory_name is localhost unix socket will be useed
+redis_socket:
+  path:    "/var/run/redis/redis.sock"
+  perm:    "770"
+redis_tcp:
+  address: "{{ hostvars[groups['redis'][0]].ansible_default_ipv4.address }}"
+  port:    "6379"
+
+# Some common variables used in more then roles
+ 
+web_user:
+  CentOS: "nginx"
+  Fedora: "nginx"
+  Amazon: "nginx"
+  Ubuntu: "www-data"
+  Debian: "www-data"
+
+web_group:
+  CentOS: "nginx"
+  Fedora: "nginx"
+  Amazon: "nginx"
+  Ubuntu: "www-data"
+  Debian: "www-data"
+
+systemd_service_path:
+  CentOS: '/usr/lib/systemd/system'
+  Fedora: '/usr/lib/systemd/system'
+  Amazon: '/usr/lib/systemd/system'
+  Ubuntu: '/lib/systemd/system'
+  Debian: '/lib/systemd/system'
+
+# temporary defined here
+# needed by webserver and onlyoffice
+certificates_path: '/etc/ssl/nextcloud'

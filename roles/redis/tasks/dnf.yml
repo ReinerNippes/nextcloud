@@ -1,0 +1,9 @@
+---
+
+# dnf related tasks
+
+- name: install needed packages
+  dnf:
+    name: redis
+    state: latest
+    enablerepo: "{{ redis_yum_repo[ansible_distribution] }}"

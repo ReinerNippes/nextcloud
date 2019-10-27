@@ -1,0 +1,129 @@
+---
+# vars file for php
+
+php_apt_repo_url:
+  Ubuntu: deb http://ppa.launchpad.net/ondrej/php/ubuntu {{ ansible_distribution_release }} main
+  Debian: deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main
+
+php_apt_key:
+  Debian:
+    url: https://packages.sury.org/php/apt.gpg
+  Ubuntu:
+    keyserver: keyserver.ubuntu.com
+    id: 14AA40EC0831756756D7F66C4F4EA0AAE5267A6C
+
+php_yum_repo_typ:
+  CentOS: enterprise
+  Fedora: fedora
+
+php_yum_repo_name:
+  Amazon: amzn2extra-php{{ php_version }}
+  CentOS: remi-php{{ php_version | replace(".","") }}
+  Fedora: remi-php{{ php_version | replace(".","") }}
+  
+
+php_db_extension:
+  mysql: php{{ php_version }}-mysql
+  pgsql: php{{ php_version }}-pgsql
+
+php_service_name:
+  CentOS: php-fpm
+  Fedora: php-fpm
+  Amazon: php-fpm
+  Ubuntu: php{{ php_version }}-fpm
+  Debian: php{{ php_version }}-fpm
+
+php_php_conf:
+  CentOS: /etc/php.ini
+  Fedora: /etc/php.ini
+  Amazon: /etc/php.ini
+  Ubuntu: /etc/php/{{ php_version }}/fpm/php.ini
+  Debian: /etc/php/{{ php_version }}/fpm/php.ini
+
+php_fpm_conf:
+  CentOS: /etc/php-fpm.conf
+  Fedora: /etc/php-fpm.conf
+  Amazon: /etc/php-fpm.conf
+  Ubuntu: /etc/php/{{ php_version }}/fpm/php-fpm.conf
+  Debian: /etc/php/{{ php_version }}/fpm/php-fpm.conf
+
+php_cli_conf:
+  CentOS: /etc/php-cli.ini
+  Fedora: /etc/php-cli.ini
+  Amazon: /etc/php-cli.ini
+  Ubuntu: /etc/php/{{ php_version }}/cli/php.ini
+  Debian: /etc/php/{{ php_version }}/cli/php.ini
+
+php_www_conf:
+  CentOS: /etc/php-fpm.d/www.conf
+  Fedora: /etc/php-fpm.d/www.conf
+  Amazon: /etc/php-fpm.d/www.conf
+  Ubuntu: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+  Debian: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+
+php_pid:
+  CentOS: /run/php-fpm/php{{ php_version }}-fpm.pid
+  Fedora: /run/php-fpm/php{{ php_version }}-fpm.pid
+  Amazon: /run/php-fpm/php{{ php_version }}-fpm.pid
+  Ubuntu: /run/php/php{{ php_version }}-fpm.pid
+  Debian: /run/php/php{{ php_version }}-fpm.pid
+
+php_socket:
+  CentOS: /run/php-fpm/php{{ php_version }}-fpm.sock
+  Fedora: /run/php-fpm/php{{ php_version }}-fpm.sock
+  Amazon: /run/php-fpm/php{{ php_version }}-fpm.sock
+  Ubuntu: /run/php/php{{ php_version }}-fpm.sock
+  Debian: /run/php/php{{ php_version }}-fpm.sock
+
+php_package_required:
+  yum:
+    - php
+    - php-cli
+    - php-fpm
+    - php-curl
+    - php-common
+    - php-gd
+    - php-json
+    - php-mbstring
+    - php-xml
+    - php-intl
+    - php-pecl-apcu
+    - php-redis
+    - php-opcache
+    - php-pecl-imagick
+    - php-bz2
+    - php-pecl-zip
+    - php-{% if nextcloud_db_type == 'mysql' %}mysqlnd{% elif nextcloud_db_type == 'pgsql' %}pgsql{% endif %}
+#    - php-mcrypt
+    - php-pear
+  apt:
+    - php{{ php_version }}
+    - php{{ php_version }}-cli
+    - php{{ php_version }}-fpm
+    - php{{ php_version }}-curl
+    - php{{ php_version }}-common
+    - php{{ php_version }}-gd
+    - php{{ php_version }}-json
+    - php{{ php_version }}-mbstring
+    - php{{ php_version }}-xml
+    - php{{ php_version }}-intl
+    - php-apcu
+    - php-redis
+    - php-imagick
+    - php{{ php_version }}-bz2
+    - php{{ php_version }}-zip
+    - "{{ php_db_extension[nextcloud_db_type] }}"
+    - php-pear
+
+php_package_optional:
+  yum:
+    - php-smbclient
+    - php-gmp
+    - php-imap
+    - php-ldap
+  apt:
+    - php-smbclient
+    - php{{ php_version }}-gmp
+    - php{{ php_version }}-ldap
+    - php{{ php_version }}-imap
+

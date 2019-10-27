@@ -1,0 +1,19 @@
+---
+# tasks file for docker
+
+- name: include os specific tasks
+  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+
+- name: enable docker
+  systemd:
+    name:          docker
+    state:         started
+    enabled:       true
+    daemon_reload: yes
+
+- name: add to group docker
+  user:
+    name: '{{ ansible_env.SUDO_USER }}'
+    append: true
+    groups: docker
+  when: ansible_env.SUDO_USER | default('root') != 'root'

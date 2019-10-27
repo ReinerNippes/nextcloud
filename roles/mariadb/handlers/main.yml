@@ -1,0 +1,7 @@
+---
+# handlers file for mariadb
+- name: restart mariadb
+  systemd:
+    name: mysql
+    state: restarted
+  

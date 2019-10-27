@@ -1,0 +1,27 @@
+---
+
+- name: import elasticsearch rpm key
+  rpm_key:
+    state: present
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+
+- name: add elasticsearch-7.x
+  yum_repository:
+    name: elasticsearch-7.x
+    description: Elasticsearch repository for 7.x packages
+    baseurl: https://artifacts.elastic.co/packages/7.x/yum
+    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    gpgcheck: yes
+    enabled: 1
+
+- name: update os
+  dnf:
+    name: '*'
+    update_cache: true
+    state: latest
+
+- name: install needed packages
+  dnf:
+    name: elasticsearch
+    state: latest

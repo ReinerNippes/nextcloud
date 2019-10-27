@@ -1,0 +1,65 @@
+---
+
+- name: add php{{ php_version | replace(".","") }} repo on fedora/centos
+  yum:
+    name: 'https://rpms.remirepo.net/{{ php_yum_repo_typ[ansible_distribution]}}/remi-release-{{ ansible_distribution_major_version|int }}.rpm'
+    state: present
+  when: ansible_distribution in ['Fedora','CentOS']
+
+- name: install php{{ php_version }} on amazon linux 2
+  shell: amazon-linux-extras install php{{ php_version }}
+  args:
+    creates: /usr/bin/php
+  when: ansible_distribution in ['Amazon']
+
+- name: update os
+  yum:
+    name: '*'
+    update_cache: true
+    state: latest
+
+- name: install needed php packages
+  yum:
+    name: "{{ php_package_required[ansible_pkg_mgr] }}"
+    state: latest
+    enablerepo: "{{ php_yum_repo_name[ansible_distribution] }}"
+
+- name: install optional php packages
+  yum:
+    name: "{{ php_package_optional[ansible_pkg_mgr] }}"
+    state: latest
+    enablerepo: "{{ php_yum_repo_name[ansible_distribution] }}"
+  when: php_install_optional_packages|bool
+
+- name: correct ownership /var/lib/php
+  file:
+    name: "{{ item.name }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode:  0770
+  loop: 
+    - { owner:  nginx, group: nginx, name: /var/lib/php/session }
+    - { owner: root,   group: nginx, name: /var/lib/php/wsdlcache }
+    - { owner: root,   group: nginx, name: /var/lib/php/opcache }
+
+- name: replace opcache.max_accelerated_files=4000
+  lineinfile:
+    path: /etc/php.d/10-opcache.ini
+    regexp: '^opcache.max_accelerated_files=(.*)'
+    line:   'opcache.max_accelerated_files=10000'
+    backup: true
+  notify: restart php-fpm
+
+- name: alias php 
+  copy:
+    content: |
+      #!/bin/bash
+      alias php="php -c /etc/php-cli.ini"
+    dest: /etc/profile.d/php-cli-ini.sh  
+  when: false
+
+- name: unmask tmp.mount
+  systemd:
+    name: tmp.mount
+    masked: no
+  when: ansible_distribution in ['Fedora']

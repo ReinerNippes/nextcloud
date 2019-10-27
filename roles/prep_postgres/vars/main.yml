@@ -1,7 +1,0 @@
----
-# vars file for prep_postgres
-
-postgres_run_dir: '/var/run/postgresql'
-postgres_allowed_ipv4: '127.0.0.1/32'
-postgres_allowed_ipv6: '::1/128'
-

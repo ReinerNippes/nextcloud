@@ -1,0 +1,10 @@
+---
+# dnf related tasks
+
+- name: install needed fedora packages
+  dnf:
+    name:
+    - perl-File-FcntlLock 
+    - ImageMagick
+    - ghostscript
+    state: latest

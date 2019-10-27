@@ -1,0 +1,7 @@
+---
+# handlers file for os
+
+- name: reload ufw
+  ufw:
+    state: reloaded
+  when: ufw_state == 'enabled'

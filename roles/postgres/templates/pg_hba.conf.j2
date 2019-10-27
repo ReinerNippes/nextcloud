@@ -1,0 +1,17 @@
+{{ ansible_managed | comment }}
+# PostgreSQL Client Authentication Configuration File
+# ===================================================
+#
+# See: https://www.postgresql.org/docs/current/static/auth-pg-hba-conf.html
+
+# local access
+{% for client in postgresql_hba_entries %}
+{{ client.type }} {{ client.database }} {{ client.user }} {{ client.address|default('') }} {{ client.ip_address|default('') }} {{ client.ip_mask|default('') }} {{ client.auth_method }} {{ client.auth_options|default("") }}
+{% endfor %}
+
+# remota access
+{% if groups['database'] != groups['webserver'] %}
+{% for client in groups['webserver'] %}
+host {{ nextcloud_db }} {{ nextcloud_db_user }} {{ hostvars[client].ansible_default_ipv4.address }} md5
+{% endfor %}
+{% endif %}

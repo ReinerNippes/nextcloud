@@ -1,0 +1,18 @@
+---
+# yum related OS tasks
+
+- name: add postgres repo
+  yum:
+    name: "{{ postgresql_yum_repo_rpm[ansible_distribution] }}"
+    state: present
+  when: ansible_distribution in ['Fedora','CentOS']
+
+- name: add amazon postgres repo
+  shell: amazon-linux-extras install postgresql{{ postgresql_version }}
+  when: ansible_distribution in ['Amazon']
+
+- name: install postgres server
+  yum:
+    name: "{{ postgresql_packages[ansible_distribution] }}"
+    state: latest
+    exclude: python-unversioned-command

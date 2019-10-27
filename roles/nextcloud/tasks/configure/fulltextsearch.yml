@@ -1,0 +1,84 @@
+---
+
+# tasks to configure fulltextsearch
+
+- name: install fulltextsearch apps
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: 'php occ app:install {{ item }}'
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+    creates: "{{ nextcloud_www_dir }}/apps/{{ item }}"
+  loop:
+    - fulltextsearch
+    - fulltextsearch_elasticsearch
+    - files_fulltextsearch
+    - files_fulltextsearch_tesseract
+  register: fulltextsearch_app_installed
+
+- name: enable fulltextsearch apps
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: 'php occ app:enable {{ item }}'
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  loop:
+    - fulltextsearch
+    - fulltextsearch_elasticsearch
+    - files_fulltextsearch
+    - files_fulltextsearch_tesseract
+  when: fulltextsearch_app_installed is changed
+
+- name: configure fulltextsearch app
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: 'php occ {{ item }}'
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  loop:
+    - config:app:set fulltextsearch search_platform --value "OCA\FullTextSearch_ElasticSearch\Platform\ElasticSearchPlatform"
+    - config:app:set fulltextsearch app_navigation --value="1"
+    - config:app:set fulltextsearch_elasticsearch analyzer_tokenizer --value "standard"
+    - config:app:set fulltextsearch_elasticsearch elastic_host --value "http://localhost:9200"
+    - config:app:set fulltextsearch_elasticsearch elastic_index --value "nc_index"
+    - config:app:set files_fulltextsearch files_local  --value="1"
+    - config:app:set files_fulltextsearch files_external  --value="0"
+    - config:app:set files_fulltextsearch files_group_folders --value="1"
+    - config:app:set files_fulltextsearch files_encrypted --value="1"
+    - config:app:set files_fulltextsearch files_federated --value="0"
+    - config:app:set files_fulltextsearch files_size --value="20"
+    - config:app:set files_fulltextsearch files_pdf --value="1"
+    - config:app:set files_fulltextsearch files_office --value="1"
+    - config:app:set files_fulltextsearch files_image --value="1"
+    - config:app:set files_fulltextsearch files_audio --value="0"
+    - config:app:set files_fulltextsearch_tesseract tesseract_enabled --value="1"
+    - config:app:set files_fulltextsearch_tesseract tesseract_psm --value="4"
+    - config:app:set files_fulltextsearch_tesseract tesseract_lang --value="eng,de"
+    - config:app:set files_fulltextsearch_tesseract tesseract_pdf --value="1"
+
+- name: create fulltextsearch index
+  become_user: "{{ web_user[ansible_distribution] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: 'php occ fulltextsearch:index'
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  when: fulltextsearch_app_installed.changed
+
+- name: fulltextsearch - copy service file
+  template:
+    src: nextcloud-fulltext-elasticsearch-worker.service.j2
+    dest: '{{ systemd_service_path[ansible_distribution] }}/nextcloud-fulltext-elasticsearch-worker.service'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: enable service nextcloud-fulltext-elasticsearch-worker
+  service:
+    name: nextcloud-fulltext-elasticsearch-worker.service
+    enabled: true
+    state: started
+

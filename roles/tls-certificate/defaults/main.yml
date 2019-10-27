@@ -1,0 +1,6 @@
+---
+# defaults file for acme.sh
+
+certificates_path:           "/etc/ssl/nextcloud"
+certificates_acmesh_git_dir: "/opt/acme/git"
+certificates_acmesh_dir:     "/opt/acme/sh"

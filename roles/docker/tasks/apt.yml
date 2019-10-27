@@ -1,0 +1,37 @@
+---
+# apt related OS tasks
+
+- name: remove debian repo docker if present
+  apt:
+    name:
+      - docker
+      - docker-engine
+      - docker.io
+    state: absent
+
+- name: install needed packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - software-properties-common
+    state: latest
+
+- name: add docker key
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+    state: present
+
+- name: add additional docker repo
+  apt_repository:
+    repo: 'deb https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable'
+    validate_certs: true
+    update_cache: true
+    state: present
+
+- name: install docker
+  apt:
+    name: 
+      - docker-ce
+      - python-docker
+    state: latest

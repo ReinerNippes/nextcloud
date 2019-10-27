@@ -1,0 +1,54 @@
+user {{ web_user[ansible_distribution] }};
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+		worker_connections 1024;
+		multi_accept on;
+		use epoll;
+	}
+http {
+		server_names_hash_bucket_size 128;
+		upstream php-handler {
+			server unix:{{ php_socket[ansible_distribution] }};
+		}
+{% if install_onlyoffice %}
+		upstream onlyoffice-docker {
+			server 127.0.0.1:{{ onlyoffice_ssl_port }};
+		}
+{% endif %}
+
+		set_real_ip_from 127.0.0.1;
+		set_real_ip_from 10.0.0.0/8;
+		set_real_ip_from 172.16.0.0/12;
+		set_real_ip_from 192.168.2.0/24;
+		real_ip_header X-Forwarded-For;
+		real_ip_recursive on;
+
+		include /etc/nginx/mime.types;
+		#include /etc/nginx/ssl.conf;
+		default_type application/octet-stream;
+		log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+		'$status $body_bytes_sent "$http_referer" '
+		'"$http_user_agent" "$http_x_forwarded_for" '
+		'"$host" sn="$server_name" '
+		'rt=$request_time '
+		'ua="$upstream_addr" us="$upstream_status" '
+		'ut="$upstream_response_time" ul="$upstream_response_length" '
+		'cs=$upstream_cache_status' ;
+		access_log /var/log/nginx/access.log main;
+		sendfile on;
+		send_timeout 3600;
+		tcp_nopush on;
+		tcp_nodelay on;
+		open_file_cache max=500 inactive=10m;
+		open_file_cache_errors on;
+		keepalive_timeout 65;
+		reset_timedout_connection on;
+		server_tokens off;
+		resolver {{ nginx_resolver|default('8.8.8.8') }};
+		resolver_timeout 10s;
+		include /etc/nginx/sites-enabled/*.conf;
+		include /etc/nginx/conf.d/*.conf;
+}
