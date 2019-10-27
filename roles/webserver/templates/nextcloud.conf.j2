@@ -7,7 +7,7 @@ server {
 		proxy_pass http://127.0.0.1:81;
 	}
 	location / {
-		return 301 https://$server_name:{{ nextcloud_ssl_port }}$request_uri;
+		return 301 https://$server_name:{{ nextcloud_ssl_port }};
 	}
 }
 server {
@@ -53,7 +53,7 @@ server {
 	client_max_body_size 10240M;
 
 	location / {
-		rewrite ^ /index.php$uri;
+		rewrite ^ /index.php;
 	}
 	location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)/ {
 		deny all;
@@ -73,6 +73,7 @@ server {
 	}
 	location ~ ^/(?:index|remote|public|cron|core/ajax/update|status|ocs/v[12]|updater/.+|ocs-provider/.+)\.php(?:$|/) {
 		fastcgi_split_path_info ^(.+\.php)(/.*)$;
+		try_files $fastcgi_script_name =404;
 		include fastcgi_params;
 		include /etc/nginx/conf.d/php_optimization.conf;
 		fastcgi_pass php-handler;
