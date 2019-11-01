@@ -2,6 +2,25 @@
 
 # configure nextcloud
 
+- name: check if config.php exists
+  stat:
+    path: '{{ nextcloud_www_dir }}/config/config.php'
+  register: config_php
+
+- name: define S3 as primary storage (only if config.php doesn't exist and 
+  template:
+    src:   'config.php.j2'
+    dest:  '{{ nextcloud_www_dir }}/config/config.php'
+    owner: '{{ web_user[ansible_distribution] }}'
+    group: '{{ web_group[ansible_distribution] }}'
+    mode:  '0640'
+    backup: true
+    force:  false
+  when: 
+    - ( objectstore_s3_key != '' )
+    - ( objectstore_s3_secret != '' )
+    - ( not config_php.stat.exists )
+
 - name: generate admin passwd if nextcloud_passwd is empty
   set_fact:
     nextcloud_passwd: "{{ lookup('password', '{{ credential_store }}/nextcloud_admin_secret chars=ascii_letters,digits length=32') }}"
@@ -24,7 +43,7 @@
     --data-dir {{ nextcloud_data_dir }}
   args:
     chdir: "{{ nextcloud_www_dir }}"
-    creates: "{{ nextcloud_www_dir }}/config/config.php"
+  when: ( not config_php.stat.exists )
   register: setup_nextcloud
 
 - debug: var=setup_nextcloud verbosity=2
