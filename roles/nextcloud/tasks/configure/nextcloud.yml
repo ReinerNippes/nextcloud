@@ -7,7 +7,7 @@
     path: '{{ nextcloud_www_dir }}/config/config.php'
   register: config_php
 
-- name: define S3 as primary storage (only if config.php doesn't exist and 
+- name: define S3 as primary storage (only if config.php doesn't exist)
   template:
     src:   'config.php.j2'
     dest:  '{{ nextcloud_www_dir }}/config/config.php'
