@@ -44,12 +44,12 @@ postgresql_packages:
     - postgresql-contrib
     - python-psycopg2
   Debian:
-    - postgresql
+    - postgresql-{{ postgresql_version }}
     - postgresql-contrib
     - libpq-dev
     - python-psycopg2
   Ubuntu:
-    - postgresql
+    - postgresql-{{ postgresql_version }}
     - postgresql-contrib
     - libpq-dev
     - python-psycopg2
