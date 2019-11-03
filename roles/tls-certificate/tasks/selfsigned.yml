@@ -1,18 +1,25 @@
 ---
 
+- name: create cert directory
+  file:
+    name: "{{ tls_cert_key | dirname }}"
+    owner: root
+    group: root
+    state: directory
+
 - name: generate an openssl private key with the default values
   openssl_privatekey:
-    path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.key'
+    path: "{{ tls_cert_key }}"
 
 - name: generate an openssl certificate signing request
   openssl_csr:
-    path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.csr'
-    privatekey_path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.key'
+    path: "{{ tls_cert_csr }}"
+    privatekey_path: "{{ tls_cert_key }}"
     common_name: "{{ nextcloud_fqdn }}"
 
 - name: generate a self signed openssl certificate
   openssl_certificate:
-    path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.crt'
-    privatekey_path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.key'
-    csr_path: '{{ certificates_path }}/{{ nextcloud_fqdn }}.csr'
+    path: "{{ tls_cert_file }}"
+    privatekey_path: "{{ tls_cert_key }}"
+    csr_path: "{{ tls_cert_csr }}"
     provider: selfsigned

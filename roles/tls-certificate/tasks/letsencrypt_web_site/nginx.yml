@@ -1,0 +1,21 @@
+---
+
+- name: create letsencrypt web directory
+  file:
+    name: /var/www/letsencrypt/.well-known
+    owner: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+    group: "{{ web_group[nextcloud_webserver_type][ansible_os_family] }}"
+    mode: 0750
+    state: directory
+
+- name: define location /.well-known/acme-challenge in nginx default page
+  copy:
+    src: nginx/default.conf
+    dest: /etc/nginx/conf.d/default.conf
+  register: default_page
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+  when: default_page.changed 

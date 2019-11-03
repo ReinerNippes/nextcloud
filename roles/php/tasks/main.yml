@@ -32,3 +32,9 @@
     name: "{{ php_service_name[ansible_distribution] }}"
     state: started
     enabled: true
+
+- name: enable apache php conf
+  command: a2enconf php{{ php_version }}-fpm
+  when: 
+    - nextcloud_webserver_type == 'apache' 
+    - ansible_os_family == 'Debian'

@@ -29,18 +29,20 @@ redis_tcp:
 # Some common variables used in more then roles
  
 web_user:
-  CentOS: "nginx"
-  Fedora: "nginx"
-  Amazon: "nginx"
-  Ubuntu: "www-data"
-  Debian: "www-data"
+  apache:
+    RedHat: "apache"
+    Debian: "www-data"
+  nginx:
+    RedHat: "nginx"
+    Debian: "nginx"
 
 web_group:
-  CentOS: "nginx"
-  Fedora: "nginx"
-  Amazon: "nginx"
-  Ubuntu: "www-data"
-  Debian: "www-data"
+  apache:
+    RedHat: "apache"
+    Debian: "www-data"
+  nginx:
+    RedHat: "nginx"
+    Debian: "nginx"
 
 systemd_service_path:
   CentOS: '/usr/lib/systemd/system'
@@ -49,6 +51,13 @@ systemd_service_path:
   Ubuntu: '/lib/systemd/system'
   Debian: '/lib/systemd/system'
 
-# temporary defined here
-# needed by webserver and onlyoffice
-certificates_path: '/etc/ssl/nextcloud'
+# needed by tls-certificate, webserver and onlyoffice
+tls_certificates_directory: "/etc/ssl/private"
+tls_key_length: ec-256
+tls_cert_file: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/{{ nextcloud_fqdn }}.cer"
+tls_cert_key: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/{{ nextcloud_fqdn }}.key"
+tls_cert_fullchain: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/fullchain.cer"
+tls_cert_csr: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/fullchain.csr"
+tls_cert_ca: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/ca.cer"
+
+tls_test: false

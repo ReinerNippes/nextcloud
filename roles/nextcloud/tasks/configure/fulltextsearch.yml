@@ -3,7 +3,7 @@
 # tasks to configure fulltextsearch
 
 - name: install fulltextsearch apps
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: 'php occ app:install {{ item }}'
@@ -18,7 +18,7 @@
   register: fulltextsearch_app_installed
 
 - name: enable fulltextsearch apps
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: 'php occ app:enable {{ item }}'
@@ -32,7 +32,7 @@
   when: fulltextsearch_app_installed is changed
 
 - name: configure fulltextsearch app
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: 'php occ {{ item }}'
@@ -60,7 +60,7 @@
     - config:app:set files_fulltextsearch_tesseract tesseract_pdf --value="1"
 
 - name: create fulltextsearch index
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: 'php occ fulltextsearch:index'

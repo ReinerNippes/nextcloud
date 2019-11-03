@@ -59,6 +59,9 @@ nextcloud_mail_smtppwd      =
 # Allways get the latest version of Nextcloud
 nextcloud_archive           = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
+# webserver type nginx or apache
+nextcloud_webserver_type    = nginx
+
 # php version
 php_version                 = '7.3'
 

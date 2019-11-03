@@ -1,8 +1,8 @@
 ---
-# handlers file for nginx
+# handlers file for webserver
 
-- name: restart nginx
+- name: restart webserver
   systemd:
-    name: nginx
+    name: "{{ webserver_service_name[nextcloud_webserver_type][ansible_os_family] }}"
     state: restarted
   listen: "restart web services"

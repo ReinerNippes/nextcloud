@@ -73,6 +73,7 @@
       uri:
         url: https://{{ nextcloud_fqdn }}/status.php
         return_content: yes
+        validate_certs: "{% if (ssl_certificate_type == 'selfsigned') or tls_test %}no{% else %}yes{% endif %}"
       register: nextcloud_status
 
     - name: We are ready

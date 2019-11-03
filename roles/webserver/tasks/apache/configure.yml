@@ -1,0 +1,112 @@
+---
+
+- name: enable apache mods
+  apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy_fcgi
+    - setenvif
+    - rewrite
+    - headers
+    - env
+    - dir
+    - mime
+    - authz_core
+    - alias
+    - ssl
+  notify: restart webserver
+
+- name: configure apache on debian family
+  block:
+  - name: disable apache mods
+    apache2_module:
+      name: "{{ item }}"
+      state: absent
+    loop: 
+      - mpm_prefork
+  
+  - name: apache listen http port
+    template:
+      dest: "{{ apache_server_root[ansible_os_family] }}/ports.conf"
+      src: "apache/ports.conf.j2"
+    notify: restart webserver
+  
+  - name: set parameter in security.conf
+    lineinfile:
+      dest: "{{ apache_server_root[ansible_os_family] }}/conf-enabled/security.conf"
+      regexp: "^{{ item.key }}.*"
+      line: "{{ item.key }} {{ item.value }}"
+      insertafter: ".*{{ item.key }}.*"
+      state: present
+      backup: true
+    loop:
+      - key: ServerSignature
+        value: "Off"
+      - key: ServerTokens
+        value: Prod
+    notify: restart webserver
+  
+  - name: add nextcloud vhosts configuration
+    template:
+      src: "apache/nextcloud.conf.j2"
+      dest: "{{ apache_server_root[ansible_os_family] }}/sites-available/nextcloud.conf"
+      owner: root
+      group: root
+      mode: 0644
+    notify: restart webserver
+  
+  - name: add vhost symlink in sites-enabled
+    file:
+      src: "{{ apache_server_root[ansible_os_family] }}/sites-available/nextcloud.conf"
+      dest: "{{ apache_server_root[ansible_os_family] }}/sites-enabled/nextcloud.conf"
+      state: link
+    notify: restart webserver
+  
+  - name: Remove default vhost in sites-enabled.
+    file:
+      path: "{{ apache_server_root[ansible_os_family] }}/sites-enabled/{{ apache_default_vhost_filename }}"
+      state: absent
+    notify: restart webserver
+    when: apache_remove_default_vhost|bool
+  when: ansible_os_family == 'Debian'
+
+- name: configure apache on redhat family
+  block:
+  - name: apache php-fpm config
+    template:
+      dest: "{{ apache_conf_path[ansible_os_family] }}/php.conf"
+      src: "apache/php.conf.j2"
+    notify: restart webserver
+
+  - name: apache load php-fpm module
+    copy:
+      dest: "{{ apache_server_root[ansible_os_family] }}/conf.modules.d/00-mpm.conf"
+      src: "apache/00-mpm.conf"
+    notify: restart webserver
+
+  - name: set parameter in security.conf
+    lineinfile:
+      dest: "{{ apache_conf_path[ansible_os_family] }}/security.conf"
+      regexp: "^{{ item.key }}.*"
+      line: "{{ item.key }} {{ item.value }}"
+      insertafter: ".*{{ item.key }}.*"
+      state: present
+      backup: true
+      create: true
+    loop:
+      - key: ServerSignature
+        value: "Off"
+      - key: ServerTokens
+        value: Prod
+    notify: restart webserver
+  
+  - name: add nextcloud vhosts configuration
+    template:
+      src: "apache/nextcloud.conf.j2"
+      dest: "{{ apache_conf_path[ansible_os_family] }}/nextcloud.conf"
+      owner: root
+      group: root
+      mode: 0644
+    notify: restart webserver
+  when: ansible_os_family == 'RedHat'

@@ -21,3 +21,22 @@ php_socket:
   'Fedora': '/run/php-fpm/php{{ php_version }}-fpm.sock'
   'Ubuntu': '/run/php/php{{ php_version }}-fpm.sock'
   'Debian': '/run/php/php{{ php_version }}-fpm.sock'
+
+webserver_service_name:
+  nginx:
+    RedHat: nginx
+    Debian: nginx
+  apache:
+    RedHat: httpd
+    Debian: apache2
+
+apache_server_root:
+  Debian: /etc/apache2
+  RedHat: /etc/httpd
+  
+apache_conf_path: 
+  Debian: /etc/apache2
+  RedHat: /etc/httpd/conf.d
+  
+apache_default_vhost_filename: 000-default.conf
+

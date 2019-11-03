@@ -4,7 +4,7 @@ Nextcloud (Latest)
 Ansible Playbook to install
 
 * Nextcloud (Latest) - <https://nextcloud.com/>
-* nginx 1.17 - <https://nginx.org/>
+* nginx 1.17 - <https://nginx.org/> or Apache 2.4 <https://httpd.apache.org/>
 * PHP 7.x - <http://www.php.net/>
 * MariaDB 10.4 - <https://mariadb.org/> or PostgreSQL 10/11 <https://www.postgresql.org/>
 * redis - <https://redis.io/>
@@ -24,6 +24,8 @@ Visit his page for all details: <https://www.c-rieger.de/>
 > **WARNING**: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian, Fedora and CentOS machines. So backup of your existing configuration is a good advice.
 
 > **WARNING**: This playbook is not compatible with older versions. Do not run this version on older installations.
+
+> **WARNING**: This branch is work in progress. Not all combinations are tested. Some don't work yet.
 
 Requirements
 ------------
@@ -135,6 +137,9 @@ nextcloud_mail_smtppwd      =
 
 # Allways get the latest version of Nextcloud
 nextcloud_archive           = https://download.nextcloud.com/server/releases/latest.tar.bz2
+
+# webserver type nginx or apache
+nextcloud_webserver_type    = nginx
 
 # php Version
 php_version                 = '7.3'
