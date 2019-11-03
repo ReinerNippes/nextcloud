@@ -2,9 +2,9 @@
 
 # create ssl certificates
 
-- name: ensure "{{ certificates_path }}" exists
+- name: ensure "{{ tls_certificates_directory }}" exists
   file:
-    name: "{{ certificates_path }}"
+    name: "{{ tls_certificates_directory }}"
     owner: root
     group: root
     mode: 0755
@@ -12,7 +12,7 @@
 
 - name: use the pre-defined DH groups ffdhe4096 recommended by the IETF in [RFC 7919 https://tools.ietf.org/html/rfc7919]
   copy:
-    dest: '{{ certificates_path }}/dhparam.pem'
+    dest: '{{ tls_certificates_directory }}/dhparam.pem'
     owner: root
     group: root
     mode:  0644
@@ -33,12 +33,12 @@
 
 - name: certificate exists
   stat:
-    path: "{{ certificates_path }}/{{ nextcloud_fqdn }}.crt"
+    path: "{{ tls_cert_file }}"
   register: cert_file
 
 - name: check if certificate is expired
   openssl_certificate_info:
-    path: "{{ certificates_path }}/{{ nextcloud_fqdn }}.crt"
+    path: "{{ tls_cert_file }}"
   register: cert_info
   when: cert_file.stat.exists
   

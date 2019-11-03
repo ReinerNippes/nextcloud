@@ -15,8 +15,8 @@
     src: /tmp/nextcloud.tar.bz2
     dest: /var/www
     remote_src: true
-    owner: "{{ web_user[ansible_distribution] }}"
-    group: "{{ web_group[ansible_distribution] }}"
+    owner: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+    group: "{{ web_group[nextcloud_webserver_type][ansible_os_family] }}"
     mode:  "o-rwx"
     creates: "{{ nextcloud_www_dir }}/occ"
 
@@ -37,17 +37,17 @@
   cron:
     name: nextcloud cronjob
     minute: '*/15'
-    user: "{{ web_user[ansible_distribution] }}"
+    user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
     job: "php -f {{ nextcloud_www_dir }}/cron.php > /dev/null 2>&1"
 
 - name: run nextcloud cronjob
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: php -f {{ nextcloud_www_dir }}/cron.php
   args:
     chdir: "{{ nextcloud_www_dir }}"
-  when: setup_nextcloud is changed
+  when: first_setup_nextcloud is changed
 
 - name: configure fulltextsearch
   include_tasks: configure/fulltextsearch.yml

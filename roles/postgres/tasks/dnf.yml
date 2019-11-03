@@ -5,7 +5,6 @@
   dnf:
     name: "{{ postgresql_yum_repo_rpm[ansible_distribution] }}"
     state: present
-  when: ansible_distribution in ['Fedora','CentOS']
 
 - name: install postgres server
   dnf:

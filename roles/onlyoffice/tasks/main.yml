@@ -21,9 +21,9 @@
       JWT_ENABLED:  'true'
       JWT_SECRET:   "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
     volumes:
-    - '{{ certificates_path }}/{{ nextcloud_fqdn }}.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro'
-    - '{{ certificates_path }}/{{ nextcloud_fqdn }}.crt:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro'
-    - '{{ certificates_path }}/dhparam.pem:/var/www/onlyoffice/Data/certs/dhparam.pem:ro'
+    - "{{ tls_cert_key }}:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro"
+    - "{{ tls_cert_file }}:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro"
+    - "{{ tls_certificates_directory }}/dhparam.pem:/var/www/onlyoffice/Data/certs/dhparam.pem:ro"
 
 - name: open special web server ports
   ufw:

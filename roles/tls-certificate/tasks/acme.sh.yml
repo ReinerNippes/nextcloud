@@ -4,11 +4,14 @@
 
 - name: check acme.sh is installed
   stat:
-    path: "{{ certificates_acmesh_dir }}"
+    path: "{{ certificates_acmesh_dir }}/acme.sh"
   register: acme
 
 - name: install acme.sh
   block:
+  - name: pkg manager spefic tasks
+    include_tasks: "{{ ansible_pkg_mgr }}.yml"
+
   - name: git clone acme.sh
     git:
       repo: 'https://github.com/Neilpang/acme.sh.git'
@@ -17,55 +20,39 @@
       version: master
 
   - name: install acme.sh
-    command: ./acme.sh --install --home "{{ certificates_acmesh_dir }}"
+    command: |
+      ./acme.sh
+        --install
+        --home "{{ certificates_acmesh_dir }}" 
+        --config-home {{ certificates_acmesh_dir }}/conf
+        --cert-home {{ tls_certificates_directory }}
     args:
       chdir: "{{ certificates_acmesh_git_dir }}"
-      creates: "{{ certificates_acmesh_dir }}"
+      creates: "{{ certificates_acmesh_dir }}/acme.sh"
   when: not acme.stat.exists
 
-- name: install acme.sh certificate
-  block:
-  - name: create fake site for first setup
-    template:
-      src: fakesite.conf.j2
-      dest: /etc/nginx/conf.d/fakesite.conf
-    register: fake_site
+- name: preinstall web server tasks
+  include_tasks: letsencrypt_web_site/{{ nextcloud_webserver_type }}.yml
 
-  - name: restart nginx
-    service:
-      name: nginx
-      state: restarted
-    when: fake_site.changed 
+- name: get certificates
+  command: |
+    ./acme.sh
+      --issue
+      --home {{ certificates_acmesh_dir }}
+      --config-home {{ certificates_acmesh_dir }}/conf
+      --domain {{ nextcloud_fqdn }}
+      --keylength {{ tls_key_length }}
+      --cert-home {{ tls_certificates_directory }}
+      --webroot /var/www/letsencrypt
+      --reloadcmd "systemctl restart {{ webserver_service_name[nextcloud_webserver_type][ansible_os_family] }}"
+      {% if tls_test %}--test --debug{% endif %}
+  args:
+    chdir: "{{ certificates_acmesh_dir }}"
+    creates: "{{ tls_cert_file }}"
+  register: acme_get
+  failed_when: acme_get.rc != 0 and acme_get.rc != 2
+  notify: restart web services
 
-  - name: get certificates
-    command: |
-      ./acme.sh
-        --home {{ certificates_acmesh_dir }}
-        --issue -d {{ nextcloud_fqdn }}
-        --nginx
-    args:
-      chdir: "{{ certificates_acmesh_dir }}"
-      creates: "{{ certificates_acmesh_dir }}/{{ nextcloud_fqdn }}/{{ nextcloud_fqdn }}.key"
-    register: acme_get
-    failed_when: acme_get.rc != 0 and acme_get.rc != 2
+- debug: var=acme_get
+  when: tls_test
 
-  - name: install certificates
-    command: |
-      ./acme.sh
-        --home {{ certificates_acmesh_dir }}
-        --install-cert -d {{ nextcloud_fqdn }}
-        --fullchain-file {{ certificates_path }}/{{ nextcloud_fqdn }}.crt
-        --key-file {{ certificates_path }}/{{ nextcloud_fqdn }}.key
-        --reloadcmd "systemctl restart nginx"
-    args:
-      chdir: "{{ certificates_acmesh_dir }}"
-      creates: "{{ certificates_path }}/{{ nextcloud_fqdn }}.key"
-    when: acme_get.changed 
-    notify: restart web services
-
-  always:
-  - name: remove fakesite
-    file:
-      name: /etc/nginx/conf.d/fakesite.conf
-      state: absent
-    notify: restart web services

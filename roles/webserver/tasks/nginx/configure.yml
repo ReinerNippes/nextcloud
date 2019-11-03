@@ -2,7 +2,7 @@
 
 - name: bring /etc/nginx/nginx.conf in place
   template:
-    src: nginx.conf.j2
+    src: nginx/nginx.conf.j2
     dest: /etc/nginx/nginx.conf
     owner: root
     group: root
@@ -12,7 +12,7 @@
 
 - name: nginx nextcloud config
   template:
-    src: nextcloud.conf.j2
+    src: nginx/nextcloud.conf.j2
     dest: /etc/nginx/conf.d/nextcloud.conf
     owner: root
     group: root
@@ -21,7 +21,7 @@
 
 - name: nginx header config
   template:
-    src: header.conf.j2
+    src: nginx/header.conf.j2
     dest: /etc/nginx/conf.d/header.conf
     owner: root
     group: root
@@ -30,7 +30,7 @@
 
 - name: nginx config for ssl
   template:
-    src: ssl.conf.j2
+    src: nginx/ssl.conf.j2
     dest: /etc/nginx/conf.d/ssl.conf
     owner: root
     group: root
@@ -39,7 +39,7 @@
 
 - name: copy some nginx config file
   copy:
-    src: "{{ item }}"
+    src: "nginx/{{ item }}"
     dest: "/etc/nginx/conf.d/{{ item }}"
     owner: root
     group: root
@@ -50,3 +50,9 @@
     - php_optimization.conf
     - proxy.conf
   notify: restart web services
+
+- name: nginx started and enabled
+  systemd:
+    name: nginx
+    state: started
+    enabled: true

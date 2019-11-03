@@ -1,0 +1,12 @@
+---
+# apt related OS tasks
+
+- name: install additional packages
+  apt:
+    name:
+      - apache2
+      - apache2-utils
+      - openssl
+      - python-openssl
+    autoremove: true
+    state: latest

@@ -7,10 +7,10 @@ export RESTIC_PASSWORD="{{ restic_backup_secret }}"
 set -e
 
 # Make sure nextcloud is enabled when we are done
-trap "sudo -u {{ web_user[ansible_distribution] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off" EXIT
+trap "sudo -u {{ web_user[nextcloud_webserver_type][ansible_os_family] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off" EXIT
 
 # set nextcloud to maintenance mode
-sudo -u {{ web_user[ansible_distribution] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --on
+sudo -u {{ web_user[nextcloud_webserver_type][ansible_os_family] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --on
 
 # unlock restic to keep automatic backup going
 {{ restic_install_path }}/restic unlock --cleanup-cache
@@ -26,7 +26,7 @@ sudo -u postgres pg_dump -c -U postgres {{ nextcloud_db }} | {{ restic_install_p
 {{ restic_install_path }}/restic backup {{ nextcloud_data_dir }} {{ nextcloud_www_dir }}
 
 # turn maintenance mode off
-sudo -u {{ web_user[ansible_distribution] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off
+sudo -u {{ web_user[nextcloud_webserver_type][ansible_os_family] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off
 
 # delete trap
 trap "" EXIT

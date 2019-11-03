@@ -1,9 +1,9 @@
 [www]
-user = {{ web_user[ansible_distribution] }}
-group = {{ web_group[ansible_distribution] }}
+user = {{ web_user[nextcloud_webserver_type][ansible_os_family] }}
+group = {{ web_group[nextcloud_webserver_type][ansible_os_family] }}
 listen = {{ php_socket[ansible_distribution] }}
-listen.owner = {{ web_user[ansible_distribution] }}
-listen.group = {{ web_group[ansible_distribution] }}
+listen.owner = {{ web_user[nextcloud_webserver_type][ansible_os_family] }}
+listen.group = {{ web_group[nextcloud_webserver_type][ansible_os_family] }}
 pm = dynamic
 pm.max_children = 240
 pm.start_servers = 20

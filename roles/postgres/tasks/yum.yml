@@ -5,7 +5,7 @@
   yum:
     name: "{{ postgresql_yum_repo_rpm[ansible_distribution] }}"
     state: present
-  when: ansible_distribution in ['Fedora','CentOS']
+  when: ansible_distribution in ['CentOS']
 
 - name: add amazon postgres repo
   shell: amazon-linux-extras install postgresql{{ postgresql_version }}

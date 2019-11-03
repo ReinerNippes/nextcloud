@@ -15,9 +15,9 @@
     backup: true
   notify: restart redis-server
 
-- name: add user {{ web_user[ansible_distribution] }} to group redis if running togehter with webserver
+- name: add user {{ web_user[nextcloud_webserver_type][ansible_os_family] }} to group redis if running togehter with webserver
   user:
-   name:   "{{ web_user[ansible_distribution] }}"
+   name:   "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
    groups: redis
   when: groups['redis'] == groups['webserver']
 

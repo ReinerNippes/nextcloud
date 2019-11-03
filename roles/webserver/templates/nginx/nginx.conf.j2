@@ -1,4 +1,4 @@
-user {{ web_user[ansible_distribution] }};
+user {{ web_user[nextcloud_webserver_type][ansible_os_family] }};
 worker_processes auto;
 error_log /var/log/nginx/error.log warn;
 pid /var/run/nginx.pid;

@@ -9,10 +9,10 @@
 
 - name: define S3 as primary storage (only if config.php doesn't exist)
   template:
-    src:   'config.php.j2'
+    src:   'objectstore_s3_config.php.j2'
     dest:  '{{ nextcloud_www_dir }}/config/config.php'
-    owner: '{{ web_user[ansible_distribution] }}'
-    group: '{{ web_group[ansible_distribution] }}'
+    owner: '{{ web_user[nextcloud_webserver_type][ansible_os_family] }}'
+    group: '{{ web_group[nextcloud_webserver_type][ansible_os_family] }}'
     mode:  '0640'
     backup: true
     force:  false
@@ -27,7 +27,7 @@
   when: nextcloud_passwd == ''
 
 - name: first setup nextcloud
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: >
@@ -44,31 +44,32 @@
   args:
     chdir: "{{ nextcloud_www_dir }}"
   when: ( not config_php.stat.exists )
-  register: setup_nextcloud
+  register: first_setup_nextcloud
 
-- debug: var=setup_nextcloud verbosity=2
+- debug: var=first_setup_nextcloud verbosity=2
 
 - name: set nextcloud domain config.php values
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: php occ config:system:set {{ item }}
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop: "{{ nextcloud_config }}"
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) )
 
 - name: set nextcloud mail config.php values
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: php occ config:system:set {{ item }}
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop: "{{ nextcloud_mail_config }}"
-  when: nextcloud_configure_mail|bool
+  when: nextcloud_configure_mail|bool and ( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) )
 
 - name: backup jobs, upgrade apps and database tuning
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: php occ {{ item }}
@@ -80,9 +81,10 @@
     - db:add-missing-indices
     - db:convert-filecache-bigint
     - app:update --all
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) )
 
 - name: install apps
-  become_user: "{{ web_user[ansible_distribution] }}"
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
   shell: |
@@ -91,3 +93,5 @@
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop: "{{ nextcloud_app_config }}"
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) )
+  

@@ -58,7 +58,7 @@ prepare_centos() {
 }
 
 prepare_fedora() {
-        $SUDO dnf install git vim mc curl facter libselinux-python python3 python3-dnf python3-pip python3-libselinux python3-bcrypt python3-passlib ansible -y
+        $SUDO dnf install git vim mc curl facter python3 python3-dnf python3-pip python3-libselinux python3-bcrypt python3-passlib ansible -y
         $SUDO dnf update -y
 
         set +x

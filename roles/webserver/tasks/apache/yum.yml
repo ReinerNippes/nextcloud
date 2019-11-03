@@ -1,0 +1,11 @@
+---
+# yum related tasks
+
+- name: install needed centos packages 
+  yum:
+    name:
+      - httpd
+      - httpd-devel
+      - mod_ssl
+      - openssh
+    state: latest
