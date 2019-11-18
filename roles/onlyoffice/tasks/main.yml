@@ -1,9 +1,15 @@
 ---
 # tasks file for onlyoffice installation
 
-- name: create tls certificate (onlyoffice)
-  include_role: 
-    name: tls-certificate
+- name: build onlyoffice docker image for selfsigned certificates
+  docker_image:
+    source: build
+    name:   onlyoffice/documentserver
+    build:
+      path: "{{ role_path }}/docker"
+      pull: yes
+    rm:     true
+  when: (tls_certificate_type == 'selfsigned') or tls_certificate_test
 
 - name: start a onlyoffice container
   docker_container:
@@ -17,18 +23,25 @@
     ports:
      - "{{ onlyoffice_ssl_port }}:443"
     env:
-      ONLYOFFICE_HTTPS_HSTS_ENABLED: 'false'
+      ONLYOFFICE_HTTPS_HSTS_ENABLED: "{% if (tls_certificate_type == 'selfsigned') or tls_certificate_test %}false{% else %}true{% endif %}"
+      SSL_SELFSIGNED_CERTIFICATE: "{% if (tls_certificate_type == 'selfsigned') or tls_certificate_test %}true{% else %}false{% endif %}"
       JWT_ENABLED:  'true'
       JWT_SECRET:   "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
     volumes:
-    - "{{ tls_cert_key }}:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro"
-    - "{{ tls_cert_file }}:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro"
-    - "{{ tls_certificates_directory }}/dhparam.pem:/var/www/onlyoffice/Data/certs/dhparam.pem:ro"
+    - "{{ tls_certificate_key }}:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro"
+    - "{{ tls_certificate_file }}:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro"
+    - "{{ tls_certificate_fullchain }}:/var/www/onlyoffice/Data/certs/ca-certificates.pem:ro"
+    - "{{ tls_certificate_directory }}/dhparam.pem:/var/www/onlyoffice/Data/certs/dhparam.pem:ro"
+
+- name: prune container and images
+  docker_prune:
+    containers: true
+    images: true
 
 - name: open special web server ports
   ufw:
     rule: allow
-    port: "{{ onlyoffice_ssl_port }}"
+    port: "'{{ onlyoffice_ssl_port }}'"
     proto: tcp
   when: ansible_os_family == 'Debian'
 

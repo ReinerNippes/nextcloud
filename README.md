@@ -17,9 +17,9 @@ or
 
 In less than 20 minutes.
 
-Most of the settings are recommentations from C. Rieger
+Most of the settings are recommentations from C. Rieger (nginx) or Daniel Hansson (apache)
 
-Visit his page for all details: <https://www.c-rieger.de/>
+Visit his page for all details: <https://www.c-rieger.de/> or <https://www.hanssonit.se/>
 
 > **WARNING**: Your existing nginx/php/mariadb setup will be over written. Up to now I tested this only on newly installed AWS EC2 Ubuntu, Dedian, Fedora and CentOS machines. So backup of your existing configuration is a good advice.
 
@@ -56,15 +56,15 @@ vim inventory
 # on debian use sudo
 sudo ./nextcloud.yml
 
-# on Fedora use
+# on Fedora 30 use
 ./nextcloud.yml -e 'ansible_python_interpreter=/usr/bin/python3'
 
 # if your are fine with the defaults in the inventory (e.g. db version) just provide the ssl parameter
-./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e ssl_certificate_type=letsencrypt -e 'cert_email=nc@example.org'
+./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e nextcloud_certificate_type=letsencrypt -e 'nextcloud_cert_email=nc@example.org'
 or
-./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e ssl_certificate_type=selfsigned
+./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e nextcloud_certificate_type=selfsigned
 or
-./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e ssl_certificate_type=selfsigned -e nextcloud_db_type=mysql
+./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e nextcloud_certificate_type=selfsigned -e nextcloud_db_type=mysql
 ```
 
 > **WARNING**: Remember to update the inventory file if you want to run the playbook later again. E.g. to update the system. If you don't the defaults in the inventory file will be apply during the second run.
@@ -85,13 +85,13 @@ All variables are defined in inventory file.
 nextcloud_fqdn          = nextcloud.toplevel.domain
 
 # Selfsigned Certificate are Default
-# ssl_certificate_type  = 'selfsigned'
+# nextcloud_certificate_type  = 'selfsigned'
 
 # Letsencrypt Certificate provided with acme.sh (https://github.com/Neilpang/acme.sh)
-ssl_certificate_type  = 'acme.sh'
+nextcloud_certificate_type  = 'acme.sh'
 
 # Your email Addresse for Letsencrypt
-# ssl_cert_email = nc@example.org
+# nextcloud_cert_email = nc@example.org
 
 #
 # Nextcloud varibales

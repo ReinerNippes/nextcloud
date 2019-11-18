@@ -2,9 +2,9 @@
 
 # create ssl certificates
 
-- name: ensure "{{ tls_certificates_directory }}" exists
+- name: ensure "{{ tls_certificate_directory }}" exists
   file:
-    name: "{{ tls_certificates_directory }}"
+    name: "{{ tls_certificate_directory }}"
     owner: root
     group: root
     mode: 0755
@@ -12,7 +12,7 @@
 
 - name: use the pre-defined DH groups ffdhe4096 recommended by the IETF in [RFC 7919 https://tools.ietf.org/html/rfc7919]
   copy:
-    dest: '{{ tls_certificates_directory }}/dhparam.pem'
+    dest: '{{ tls_certificate_directory }}/dhparam.pem'
     owner: root
     group: root
     mode:  0644
@@ -33,15 +33,15 @@
 
 - name: certificate exists
   stat:
-    path: "{{ tls_cert_file }}"
+    path: "{{ tls_certificate_file }}"
   register: cert_file
 
 - name: check if certificate is expired
   openssl_certificate_info:
-    path: "{{ tls_cert_file }}"
+    path: "{{ tls_certificate_file }}"
   register: cert_info
   when: cert_file.stat.exists
   
 - name: include certifictes tasks
-  include_tasks: '{{ ssl_certificate_type }}.yml'
+  include_tasks: '{{ tls_certificate_type }}.yml'
   when: ( not cert_file.stat.exists ) or ( cert_info.expired )

@@ -1,0 +1,26 @@
+---
+# yum related OS tasks
+
+- name: import collabora rpm key
+  rpm_key:
+    state: present
+    key: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int }}/repodata/repomd.xml.key
+
+- name: add collabora repo
+  yum_repository:
+    name: collabora-repo
+    description: Collabora repository for CentOS {{ ansible_distribution_major_version|int }}.x packages
+    baseurl: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int }}
+    gpgkey: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int }}/repodata/repomd.xml.key
+    gpgcheck: yes
+    enabled: 1
+
+- name: install needed collabora packages
+  yum:
+    name: 
+      - loolwsd 
+      - CODE-brand
+      - python-lxml
+      - collaboraoffice6.0-dict* 
+      - collaboraofficebasis6.0*
+    state: latest

@@ -51,13 +51,14 @@ systemd_service_path:
   Ubuntu: '/lib/systemd/system'
   Debian: '/lib/systemd/system'
 
-# needed by tls-certificate, webserver and onlyoffice
-tls_certificates_directory: "/etc/ssl/private"
-tls_key_length: ec-256
-tls_cert_file: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/{{ nextcloud_fqdn }}.cer"
-tls_cert_key: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/{{ nextcloud_fqdn }}.key"
-tls_cert_fullchain: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/fullchain.cer"
-tls_cert_csr: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/fullchain.csr"
-tls_cert_ca: "{{ tls_certificates_directory }}/{{ nextcloud_fqdn }}{% if tls_key_length is search('^ec-') | bool %}_ecc{% endif %}/ca.cer"
+# define tls-certificate for nextcloud webserver and onlyoffice
 
-tls_test: false
+nextcloud_certificate_directory: "/etc/ssl/private"
+nextcloud_certificate_common_name: "{{ nextcloud_fqdn }}"
+nextcloud_certificate_key_length: ec-256
+nextcloud_certificate_file: "{{ nextcloud_certificate_directory }}/{{ nextcloud_certificate_common_name }}/{{ nextcloud_certificate_common_name }}.crt"
+nextcloud_certificate_key: "{{ nextcloud_certificate_directory }}/{{ nextcloud_certificate_common_name }}/{{ nextcloud_certificate_common_name }}.key"
+nextcloud_certificate_fullchain: "{{ nextcloud_certificate_directory }}/{{ nextcloud_certificate_common_name }}/fullchain.crt"
+nextcloud_certificate_csr: "{{ nextcloud_certificate_directory }}/{{ nextcloud_certificate_common_name }}/{{ nextcloud_certificate_common_name }}.csr"
+nextcloud_certificate_ca: "{{ nextcloud_certificate_directory }}/{{ nextcloud_certificate_common_name }}/ca.crt"
+nextcloud_certificate_test: false

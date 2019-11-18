@@ -2,6 +2,17 @@
 
 # create letsencrypt certificates with acme.sh
 
+- name: create cert directory
+  file:
+    name: "{{ item }}"
+    owner: root
+    group: root
+    mode:  0755
+    state: directory
+  loop:
+    - "{{ tls_certificate_file | dirname }}"
+    - "{{ tls_certificate_directory }}" 
+
 - name: check acme.sh is installed
   stat:
     path: "{{ certificates_acmesh_dir }}/acme.sh"
@@ -25,7 +36,7 @@
         --install
         --home "{{ certificates_acmesh_dir }}" 
         --config-home {{ certificates_acmesh_dir }}/conf
-        --cert-home {{ tls_certificates_directory }}
+        --cert-home {{ certificates_acmesh_dir }}/certs
     args:
       chdir: "{{ certificates_acmesh_git_dir }}"
       creates: "{{ certificates_acmesh_dir }}/acme.sh"
@@ -40,19 +51,23 @@
       --issue
       --home {{ certificates_acmesh_dir }}
       --config-home {{ certificates_acmesh_dir }}/conf
-      --domain {{ nextcloud_fqdn }}
-      --keylength {{ tls_key_length }}
-      --cert-home {{ tls_certificates_directory }}
+      --domain {{ tls_certificate_common_name }}
+      --keylength {{ tls_certificate_key_length | default('4096') }}
+      --cert-home {{ certificates_acmesh_dir }}/certs
+      --cert-file {{ tls_certificate_file }}
+      --key-file {{ tls_certificate_key }}
+      --ca-file {{ tls_certificate_ca }}
+      --fullchain-file {{ tls_certificate_fullchain }}
       --webroot /var/www/letsencrypt
       --reloadcmd "systemctl restart {{ webserver_service_name[nextcloud_webserver_type][ansible_os_family] }}"
-      {% if tls_test %}--test --debug{% endif %}
+      {% if tls_certificate_test %}--test --debug{% endif %}
   args:
     chdir: "{{ certificates_acmesh_dir }}"
-    creates: "{{ tls_cert_file }}"
+    creates: "{{ tls_certificate_file }}"
   register: acme_get
   failed_when: acme_get.rc != 0 and acme_get.rc != 2
   notify: restart web services
 
 - debug: var=acme_get
-  when: tls_test
+  when: tls_certificate_test
 

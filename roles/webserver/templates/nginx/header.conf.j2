@@ -1,4 +1,4 @@
-{% if (ssl_certificate_type != 'selfsigned') or (not tls_test) %}
+{% if (tls_certificate_type != 'selfsigned') or (not tls_certificate_test) %}
 add_header Strict-Transport-Security "max-age=15552000; includeSubDomains; preload;";
 {% endif %}
 add_header Referrer-Policy "no-referrer" always;

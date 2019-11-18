@@ -1,19 +1,19 @@
-ssl_certificate_key {{ tls_cert_key }};
-{% if ssl_certificate_type != 'selfsigned' %}
-ssl_certificate {{ tls_cert_fullchain }};
-ssl_trusted_certificate {{ tls_cert_ca }};
+ssl_certificate_key {{ tls_certificate_key }};
+{% if tls_certificate_type != 'selfsigned' %}
+ssl_certificate {{ tls_certificate_fullchain }};
+ssl_trusted_certificate {{ tls_certificate_ca }};
 {% else %}
-ssl_certificate {{ tls_cert_file }};
+ssl_certificate {{ tls_certificate_file }};
 {% endif %}
-ssl_dhparam {{ tls_certificates_directory }}/dhparam.pem;
+ssl_dhparam {{ tls_certificate_directory }}/dhparam.pem;
 ssl_session_timeout 1d;
 ssl_session_cache shared:SSL:50m;
 ssl_session_tickets off;
 ssl_protocols TLSv1.3 TLSv1.2;
-ssl_ciphers 'TLS-CHACHA20-POLY1305-SHA256:TLS-AES-256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384';
+ssl_ciphers 'TLS-CHACHA20-POLY1305-SHA256:TLS-AES-256-GCM-SHA384:HIGH';
 ssl_prefer_server_ciphers on;
-ssl_ecdh_curve prime256v1:secp384r1;
-{% if ssl_certificate_type != 'selfsigned' %}
+ssl_ecdh_curve X448:secp521r1:secp384r1:prime256v1;
+{% if tls_certificate_type != 'selfsigned' %}
 ssl_stapling on;
 {% endif %}
 ssl_stapling_verify on;

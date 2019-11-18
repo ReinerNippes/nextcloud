@@ -22,6 +22,9 @@
   become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
   become: yes
-  shell: php occ config:app:set richdocuments wopi_url --value https://{{ nextcloud_fqdn }}:{{ nextcloud_ssl_port }}
+  shell: php occ config:app:set richdocuments {{ item }}
+  loop:
+    - "wopi_url --value https://{{ nextcloud_fqdn }}:{{ nextcloud_ssl_port }}"
+    - "disable_certificate_verification --value=yes"
   args:
     chdir: "{{ nextcloud_www_dir }}"
