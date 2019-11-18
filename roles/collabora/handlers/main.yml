@@ -1,0 +1,7 @@
+---
+# handlers file for loolwsd
+
+- name: restart loolwsd
+  systemd:
+    name: loolwsd.service
+    state: restarted

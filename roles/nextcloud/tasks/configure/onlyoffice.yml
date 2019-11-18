@@ -42,4 +42,4 @@
   shell: php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean 
   args:
     chdir: "{{ nextcloud_www_dir }}"
-  when: ssl_certificate_type  == 'selfsigned'
+  when: ( nextcloud_certificate_type  == 'selfsigned' ) or ( nextcloud_certificate_test )

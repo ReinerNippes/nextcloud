@@ -6,13 +6,13 @@
 nextcloud_fqdn          = nextcloud.example.tld
 
 # Selfsigned Certificate are Default
-ssl_certificate_type  = 'selfsigned'
+nextcloud_certificate_type  = 'selfsigned'
 
 # Letsencrypt Certificate provided with acme.sh (https://github.com/Neilpang/acme.sh)
-# ssl_certificate_type  = 'acme.sh'
+# nextcloud_certificate_type  = 'acme.sh'
 
 # Your email Addresse for Letsencrypt
-# ssl_cert_email = nc@example.org
+# nextcloud_cert_email = nc@example.org
 
 #
 # Nextcloud varibales

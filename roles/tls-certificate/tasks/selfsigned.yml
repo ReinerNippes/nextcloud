@@ -2,24 +2,67 @@
 
 - name: create cert directory
   file:
-    name: "{{ tls_cert_key | dirname }}"
+    name: "{{ item }}"
     owner: root
     group: root
+    mode:  0755
     state: directory
+  loop:
+    - "{{ tls_certificate_file | dirname }}"
+    - "{{ tls_certificate_directory }}" 
 
-- name: generate an openssl private key with the default values
+- name: generate an openssl ca key with the default values
   openssl_privatekey:
-    path: "{{ tls_cert_key }}"
+    path: "{{ tls_certificate_directory }}/root.ca.key"
 
 - name: generate an openssl certificate signing request
   openssl_csr:
-    path: "{{ tls_cert_csr }}"
-    privatekey_path: "{{ tls_cert_key }}"
-    common_name: "{{ nextcloud_fqdn }}"
+    path: "{{ tls_certificate_directory }}/root.ca.csr"
+    privatekey_path: "{{ tls_certificate_directory }}/root.ca.key"
+    common_name: "{{ tls_certificate_common_name }}"
 
 - name: generate a self signed openssl certificate
   openssl_certificate:
-    path: "{{ tls_cert_file }}"
-    privatekey_path: "{{ tls_cert_key }}"
-    csr_path: "{{ tls_cert_csr }}"
+    path: "{{ tls_certificate_ca }}"
+    privatekey_path: "{{ tls_certificate_directory }}/root.ca.key"
+    csr_path: "{{ tls_certificate_directory }}/root.ca.csr"
     provider: selfsigned
+
+# --------------
+
+- name: generate an openssl private key with the default values
+  openssl_privatekey:
+    path: "{{ tls_certificate_key }}"
+    owner: "{{ tls_certificate_owner | default('root') }}"
+    group: "{{ tls_certificate_group | default('root') }}"
+
+- name: generate an openssl certificate signing request
+  openssl_csr:
+    path: "{{ tls_certificate_csr }}"
+    privatekey_path: "{{ tls_certificate_key }}"
+    common_name: "{{ tls_certificate_common_name }}"
+
+- name: generate a self signed openssl certificate
+  openssl_certificate:
+    path: "{{ tls_certificate_file }}"
+    privatekey_path: "{{ tls_certificate_key }}"
+    csr_path: "{{ tls_certificate_csr }}"
+    ownca_path: "{{ tls_certificate_ca }}"
+    ownca_privatekey_path: "{{ tls_certificate_directory }}/root.ca.key"
+    owner: "{{ tls_certificate_owner | default('root') }}"
+    group: "{{ tls_certificate_group | default('root') }}"
+    provider: ownca
+
+- debug: msg="{{ lookup('file', tls_certificate_ca ) }}"
+- debug: msg="{{ lookup('file', tls_certificate_file ) }}"
+
+- name: create fullchain certificate
+  copy:
+    dest: "{{ tls_certificate_fullchain }}"
+    content: |
+      {{ lookup('file', tls_certificate_ca ) }}
+      
+      {{ lookup('file', tls_certificate_file ) }}
+    owner: "{{ tls_certificate_owner | default('root') }}"
+    group: "{{ tls_certificate_group | default('root') }}"
+    mode: '0644'

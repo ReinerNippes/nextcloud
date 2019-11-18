@@ -1,2 +1,10 @@
 ---
 # vars file for onlyoffice
+
+tls_certificate_type: "{{ nextcloud_certificate_type }}"
+tls_certificate_directory: "{{ nextcloud_certificate_directory }}"
+tls_certificate_file: "{{ nextcloud_certificate_file }}"
+tls_certificate_key: "{{ nextcloud_certificate_key }}"
+tls_certificate_ca: "{{ nextcloud_certificate_ca }}"
+tls_certificate_fullchain: "{{ nextcloud_certificate_fullchain }}"
+tls_certificate_test: "{{ nextcloud_certificate_test }}"

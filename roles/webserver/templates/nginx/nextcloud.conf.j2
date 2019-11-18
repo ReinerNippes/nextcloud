@@ -2,7 +2,7 @@ server {
 	listen {{ nextcloud_web_port }} default_server;
 	{% if ansible_default_ipv6.address is defined %}listen [::]:{{ nextcloud_web_port }};{% endif %}
 	server_name {{ nextcloud_fqdn }};
-{% if ssl_certificate_type != 'selfsigned' %}
+{% if tls_certificate_type != 'selfsigned' %}
 	location /.well-known/acme-challenge {
 		root /var/www/letsencrypt;
 		default_type "text/plain";

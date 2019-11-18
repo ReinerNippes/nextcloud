@@ -4,7 +4,7 @@
 </VirtualHost>
 
 <VirtualHost *:{{ nextcloud_ssl_port }}>
-{% if (ssl_certificate_type != 'selfsigned') or (not tls_test) %}
+{% if (_certificate_type != 'slfsigned') or (not tls_certificate_test) %}
     Header always set Strict-Transport-Security: "max-age=15768000;includeSubdomains; preload"
 {% endif %}
     SSLEngine on
@@ -58,12 +58,12 @@
     RequestReadTimeout body=0
     </IfModule>
 
-{% if ssl_certificate_type != 'selfsigned' %}
-    SSLCertificateChainFile {{ tls_cert_fullchain }}
+{% if tls_certificate_type != 'selfsigned' %}
+    SSLCertificateChainFile {{ tls_certificate_fullchain }}
 {% endif %}
-    SSLCertificateFile {{ tls_cert_file }}
-    SSLCertificateKeyFile {{ tls_cert_key }}
+    SSLCertificateFile {{ tls_certificate_file }}
+    SSLCertificateKeyFile {{ tls_certificate_key }}
 {% if (ansible_os_family == 'Debian') %}
-    SSLOpenSSLConfCmd DHParameters {{ tls_certificates_directory }}/dhparam.pem
+    SSLOpenSSLConfCmd DHParameters {{ tls_certificate_directory }}/dhparam.pem
 {% endif %}
 </VirtualHost>
