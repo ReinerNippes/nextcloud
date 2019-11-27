@@ -7,7 +7,7 @@ prepare_ubuntu() {
         $SUDO apt update -y
         $SUDO apt dist-upgrade -y
         $SUDO apt install software-properties-common curl git mc vim facter python python-apt python-pip python-passlib python-bcrypt aptitude ansible -y
-        $SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python-dev libffi-dev libssl-dev make -y
+        [ $(uname -m) == "aarch64" ] && $SUDO apt install gcc python-dev libffi-dev libssl-dev make -y
         $SUDO pip install ansible -U
 
         set +x
@@ -21,7 +21,7 @@ prepare_debian() {
         $SUDO apt update -y
         $SUDO apt dist-upgrade -y
         $SUDO apt install dirmngr curl git mc vim facter python python-pip python-apt python-passlib python-bcrypt aptitude ansible -y
-        $SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python-dev libffi-dev libssl-dev make -y
+        [ $(uname -m) == "aarch64" ] && $SUDO apt install gcc python-dev libffi-dev libssl-dev make -y
         $SUDO pip install ansible -U
 
         set +x
