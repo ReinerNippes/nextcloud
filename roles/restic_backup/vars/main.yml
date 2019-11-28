@@ -1,5 +1,10 @@
 ---
 # vars file for restic_backup
 
-restic_download_url: 'https://github.com/restic/restic/releases/download/v{{ restic_version }}/restic_{{ restic_version }}_linux_amd64.bz2'
-rclone_download_url: 'https://downloads.rclone.org/rclone-current-linux-amd64'
+pkg_architekture: 
+  'x86_64':  amd64
+  'armv7l':  arm
+  'aarch64': arm64
+
+restic_download_url: 'https://github.com/restic/restic/releases/download/v{{ restic_version }}/restic_{{ restic_version }}_linux_{{ pkg_architekture[ansible_architecture] }}.bz2'
+rclone_download_url: 'https://downloads.rclone.org/rclone-current-linux-{{ pkg_architekture[ansible_architecture] }}'
