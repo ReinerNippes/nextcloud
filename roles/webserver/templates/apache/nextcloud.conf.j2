@@ -4,7 +4,7 @@
 </VirtualHost>
 
 <VirtualHost *:{{ nextcloud_ssl_port }}>
-{% if (_certificate_type != 'slfsigned') or (not tls_certificate_test) %}
+{% if (tls_certificate_type != 'slfsigned') or (not tls_certificate_test) %}
     Header always set Strict-Transport-Security: "max-age=15768000;includeSubdomains; preload"
 {% endif %}
     SSLEngine on
