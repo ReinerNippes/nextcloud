@@ -30,6 +30,9 @@ server {
 	location = /.well-known/caldav {
 		return 301 $scheme://$host:{{ nc_ssl_port }}/remote.php/dav;
 	}
+	location = /.well-known/webfinger {
+		return 301 $scheme://$host:{{ nc_ssl_port }}/public.php?service=webfinger;
+	}
 {% if install_collabora %}
 
 	location ^~ /loleaflet {
