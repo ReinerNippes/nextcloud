@@ -24,7 +24,6 @@
   apt:
     name:
     - nginx
-    - nginx-extras
     - python-pip
     - python-netaddr
     autoremove: true
