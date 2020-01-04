@@ -1,6 +1,7 @@
 server {
 	listen {{ nc_web_port }} default_server;
 	{% if ansible_default_ipv6.address is defined %}listen [::]:{{ nc_web_port }};{% endif %}
+
 	server_name {{ fqdn }};
 	#Your DDNS adress, (e.g. from desec.io or no-ip.com)
 	location ^~ /.well-known/acme-challenge {
@@ -13,6 +14,7 @@ server {
 server {
 	listen {{ nc_ssl_port }} ssl http2 default_server;
 	{% if ansible_default_ipv6.address is defined %}listen [::]:{{ nc_ssl_port }} ssl http2;{% endif %}
+
 	server_name {{ fqdn }};
 	root /var/www/nextcloud/;
 	access_log /var/log/nginx/nextcloud.access.log main;
