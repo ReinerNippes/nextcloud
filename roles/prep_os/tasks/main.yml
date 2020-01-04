@@ -53,6 +53,7 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
+  when: is_container == 'false'
 
 - name: sysctl -w net.core.somaxconn=65535
   sysctl:
@@ -61,6 +62,7 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
+  when: is_container == 'false'
 
 - name: disable transparent hugepages - copy service file
   copy:
@@ -69,12 +71,14 @@
     owner: root
     group: root
     mode: 0644
+  when: is_container == 'false'
 
 - name: enable service disable-transparent-hugepages
   service:
     name: disable-transparent-huge-pages.service
     enabled: true
     state: started
+  when: is_container == 'false'
     
 - name: create symbolic link to /usr/bin/gs
   file:

@@ -61,6 +61,12 @@ nc_mail_smtppwd      =
 # php Version
 php_version          = '7.3'
 
+# Change this to 'true' if your run nextcloud in a container, because in
+# that case we usually can't change sysctl settings.
+# Make sure to apply the necessary changes yourself on the physical machine
+# running the container.
+is_container         = false
+
 # Install turn server for Nextcloud Talk
 talk_install         = false
 
