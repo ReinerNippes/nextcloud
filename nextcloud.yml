@@ -5,7 +5,7 @@
   become: true
 
   roles:
-    - { role: prep_ufw,         when: ansible_os_family == "Debian" or ansible_os_family == "Ubuntu" }
+    - { role: prep_ufw,         when: install_ufw == 'true' and (ansible_os_family == "Debian" or ansible_os_family == "Ubuntu") }
     - prep_os
     - prep_redis
     - prep_nginx
@@ -19,7 +19,7 @@
     - { role: prep_talk,           when: talk_install == 'true' }
     - { role: prep_collabora,      when: install_collabora == 'true' }
     - { role: prep_onlyoffice,     when: install_onlyoffice == 'true' }
-    - nc_fail2ban
+    - { role: nc_fail2ban,         when: install_fail2ban == 'true' }
 
   post_tasks:
     - name: We are ready
