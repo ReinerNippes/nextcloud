@@ -10,6 +10,8 @@
     template:       template1
   become:           yes
   become_user:      postgres
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
 
 - name: generate db passwd if nextcloud_db_passwd is empty
   set_fact: 
@@ -24,6 +26,8 @@
     password:       "{{ nextcloud_db_passwd }}"
   become:           yes
   become_user:      postgres
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
 
 - name: "Grant all privileges on database {{ nextcloud_db }} to {{ nextcloud_db_user }}"
   postgresql_privs:
@@ -34,3 +38,6 @@
     role:           "{{ nextcloud_db_user }}"
   become: yes
   become_user:      postgres
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  
