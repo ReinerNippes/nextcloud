@@ -3,7 +3,6 @@
 
 - name: add apt key for nginx repo
   apt_key:
-#    url: 
     keyserver: keyserver.ubuntu.com
     id: '0xF1656F24C74CD1D8'
     state: present
@@ -20,7 +19,7 @@
     name: 
       - mariadb-server
       - mariadb-client
-      - python-pymysql
+      - python3-pymysql
     autoremove: true
     state: latest
 

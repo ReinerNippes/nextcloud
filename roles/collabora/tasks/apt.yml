@@ -19,7 +19,7 @@
     name: 
       - loolwsd
       - code-brand
-      - python-lxml
+      - python3-lxml
       - collaboraoffice6.0-dict*
       - collaboraofficebasis6.0*
     state: latest

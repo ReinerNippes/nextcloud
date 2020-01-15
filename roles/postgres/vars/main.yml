@@ -31,7 +31,7 @@ postgresql_packages:
     - postgresql{{ postgresql_version }}-server
     - postgresql{{ postgresql_version }}-libs
     - postgresql{{ postgresql_version }}-contrib
-    - python-psycopg2
+    - python3-psycopg2
   Fedora:
     - postgresql{{ postgresql_version }}
     - postgresql{{ postgresql_version }}-server
@@ -42,17 +42,17 @@ postgresql_packages:
     - postgresql-server
     - postgresql-libs
     - postgresql-contrib
-    - python-psycopg2
+    - python3-psycopg2
   Debian:
     - postgresql-{{ postgresql_version }}
     - postgresql-contrib
     - libpq-dev
-    - python-psycopg2
+    - python3-psycopg2
   Ubuntu:
     - postgresql-{{ postgresql_version }}
     - postgresql-contrib
     - libpq-dev
-    - python-psycopg2
+    - python3-psycopg2
 
 postgresql_data_dir: 
   Amazon: "/var/lib/pgsql/data"

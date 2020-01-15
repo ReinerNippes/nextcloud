@@ -33,5 +33,5 @@
   apt:
     name: 
       - docker-ce
-      - python-docker
+      - python3-docker
     state: latest
