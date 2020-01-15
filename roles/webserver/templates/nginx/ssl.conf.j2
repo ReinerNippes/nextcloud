@@ -12,7 +12,7 @@ ssl_session_tickets off;
 ssl_protocols TLSv1.3 TLSv1.2;
 ssl_ciphers 'TLS-CHACHA20-POLY1305-SHA256:TLS-AES-256-GCM-SHA384:HIGH';
 ssl_prefer_server_ciphers on;
-ssl_ecdh_curve X448:secp521r1:secp384r1:prime256v1;
+ssl_ecdh_curve secp521r1:secp384r1:prime256v1;
 {% if tls_certificate_type != 'selfsigned' %}
 ssl_stapling on;
 {% endif %}
