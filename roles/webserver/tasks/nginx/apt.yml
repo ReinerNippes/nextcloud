@@ -37,6 +37,6 @@
     name:
       - nginx
       - openssl
-      - python-openssl
+      - python3-openssl
     autoremove: true
     state: latest
