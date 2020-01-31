@@ -5,8 +5,8 @@
 
 prepare_ubuntu() {
         $SUDO apt update -y
-        $SUDO DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy dist-upgrade
-        $SUDO DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy install software-properties-common curl git mc vim facter python3 python3-setuptools python3-apt python3-pip python3-passlib python3-wheel python3-bcrypt aptitude -y
+        $SUDO apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy dist-upgrade
+        $SUDO apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy install software-properties-common curl git mc vim facter python3 python3-setuptools python3-apt python3-pip python3-passlib python3-wheel python3-bcrypt aptitude -y
         $SUDO [ $(uname -m) == "aarch64" ] && apt install gcc python3-dev libffi-dev libssl-dev make -y
         $SUDO pip3 install ansible -U
 
@@ -19,8 +19,8 @@ prepare_ubuntu() {
 
 prepare_debian() {
         $SUDO apt update -y
-        $SUDO DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy dist-upgrade
-        $SUDO DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy install dirmngr curl git mc vim facter python3 python3-pip python3-apt python3-passlib python3-bcrypt python3-wheel python3-setuptools aptitude ansible -y
+        $SUDO apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy dist-upgrade
+        $SUDO apt-get -o Dpkg::Options::="--force-confnew" --force-yes -fuy install dirmngr curl git mc vim facter python3 python3-pip python3-apt python3-passlib python3-bcrypt python3-wheel python3-setuptools aptitude ansible -y
         [ $(uname -m) == "aarch64" ] && $SUDO apt install gcc python3-dev libffi-dev libssl-dev make -y
         $SUDO pip3 install ansible -U
 
