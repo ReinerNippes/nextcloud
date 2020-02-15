@@ -10,3 +10,6 @@
       - fail2ban-server
       - fail2ban-systemd
     state: latest
+  vars:
+    ansible_python_interpreter: python2
+

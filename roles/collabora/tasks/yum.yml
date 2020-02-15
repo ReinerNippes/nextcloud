@@ -24,3 +24,6 @@
       - collaboraoffice6.0-dict* 
       - collaboraofficebasis6.0*
     state: latest
+  vars:
+    ansible_python_interpreter: python2
+
