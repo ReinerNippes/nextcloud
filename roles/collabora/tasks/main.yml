@@ -4,14 +4,12 @@
 - name: create group lool
   group:
     name: lool
-    gid: "118"
     system: true
     state: present
 
 - name: create user lool
   user:
     name: lool
-    uid: 113
     group: lool
     home: /opt/lool
     shell: /usr/sbin/nologin
