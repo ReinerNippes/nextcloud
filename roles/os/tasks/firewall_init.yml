@@ -42,6 +42,7 @@
       name:
         - nginx
       state: latest
+    vars:
+      ansible_python_interpreter: python2
   when: ansible_os_family == 'RedHat'
 
-  

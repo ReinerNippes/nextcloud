@@ -20,8 +20,13 @@
     name: '*'
     update_cache: true
     state: latest
+  vars:
+    ansible_python_interpreter: python2
 
 - name: install needed packages
   yum:
     name: elasticsearch
     state: latest
+  vars:
+    ansible_python_interpreter: python2
+

@@ -6,3 +6,6 @@
     name:
       - socat
     state: latest
+  vars:
+    ansible_python_interpreter: python2
+

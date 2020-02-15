@@ -5,6 +5,8 @@
   yum:
     name: "{{ postgresql_yum_repo_rpm[ansible_distribution] }}"
     state: present
+  vars:
+    ansible_python_interpreter: python2
   when: ansible_distribution in ['CentOS']
 
 - name: add amazon postgres repo
@@ -16,3 +18,6 @@
     name: "{{ postgresql_packages[ansible_distribution] }}"
     state: latest
     exclude: python-unversioned-command
+  vars:
+    ansible_python_interpreter: python2
+

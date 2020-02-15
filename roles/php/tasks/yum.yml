@@ -17,18 +17,24 @@
     name: '*'
     update_cache: true
     state: latest
+  vars:
+    ansible_python_interpreter: python2
 
 - name: install needed php packages
   yum:
     name: "{{ php_package_required[ansible_pkg_mgr] }}"
     state: latest
     enablerepo: "{{ php_yum_repo_name[ansible_distribution] }}"
+  vars:
+    ansible_python_interpreter: python2
 
 - name: install optional php packages
   yum:
     name: "{{ php_package_optional[ansible_pkg_mgr] }}"
     state: latest
     enablerepo: "{{ php_yum_repo_name[ansible_distribution] }}"
+  vars:
+    ansible_python_interpreter: python2
   when: php_install_optional_packages|bool
 
 - name: correct ownership /var/lib/php
@@ -63,3 +69,4 @@
     name: tmp.mount
     masked: no
   when: ansible_distribution in ['Fedora']
+

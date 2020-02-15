@@ -7,3 +7,6 @@
     name: redis
     state: latest
     enablerepo: "{{ redis_yum_repo[ansible_distribution] }}"
+  vars:
+    ansible_python_interpreter: python2
+

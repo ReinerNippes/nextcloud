@@ -22,6 +22,8 @@
         - docker-ce
       state: latest
   when: ansible_distribution in ['CentOS']
+  vars:
+    ansible_python_interpreter: python2
 
 - name: install docker on Amazon Linux 2
   block:
@@ -31,6 +33,8 @@
         - docker
       state: latest
   when: ansible_distribution in ['Amazon']
+  vars:
+    ansible_python_interpreter: python2
 
 - name: enable docker
   systemd:
