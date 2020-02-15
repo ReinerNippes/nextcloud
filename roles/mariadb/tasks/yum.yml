@@ -15,7 +15,7 @@
     name:
       - MariaDB-server
       - MariaDB-client
-      - python2-PyMySQL
+      - python3-PyMySQL
     enablerepo: mariadb 
     state: latest
   register: install_mariadb
