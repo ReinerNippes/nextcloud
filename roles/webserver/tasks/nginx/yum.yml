@@ -20,6 +20,5 @@
   yum:
     name:
       - nginx
-#      - python2-pyOpenSSL
     state: latest
     enablerepo: nginx
