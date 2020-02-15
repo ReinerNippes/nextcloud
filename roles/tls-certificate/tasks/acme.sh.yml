@@ -63,7 +63,7 @@
       {% if tls_certificate_test %}--test --debug{% endif %}
   args:
     chdir: "{{ certificates_acmesh_dir }}"
-    creates: "{{ tls_certificate_file }}"
+  when: ( not cert_file.stat.exists ) or ( cert_info.expired )
   register: acme_get
   failed_when: acme_get.rc != 0 and acme_get.rc != 2
   notify: restart web services
