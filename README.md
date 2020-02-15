@@ -56,9 +56,6 @@ vim inventory
 # on debian use sudo
 sudo ./nextcloud.yml
 
-# on Fedora 30 use
-./nextcloud.yml -e 'ansible_python_interpreter=/usr/bin/python3'
-
 # if your are fine with the defaults in the inventory (e.g. db version) just provide the ssl parameter
 ./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e nextcloud_certificate_type=letsencrypt -e 'nextcloud_cert_email=nc@example.org'
 or
@@ -142,7 +139,7 @@ nextcloud_archive           = https://download.nextcloud.com/server/releases/lat
 nextcloud_webserver_type    = nginx
 
 # php Version
-php_version                 = '7.3'
+php_version                 = '7.4'
 # optional php packages see: roles/php/var/main.yml
 php_install_optional_packages = false
 
