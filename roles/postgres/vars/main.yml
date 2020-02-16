@@ -31,7 +31,6 @@ postgresql_packages:
     - postgresql{{ postgresql_version }}-server
     - postgresql{{ postgresql_version }}-libs
     - postgresql{{ postgresql_version }}-contrib
-    - python3-psycopg2
   Fedora:
     - postgresql{{ postgresql_version }}
     - postgresql{{ postgresql_version }}-server
@@ -42,7 +41,6 @@ postgresql_packages:
     - postgresql-server
     - postgresql-libs
     - postgresql-contrib
-    - python3-psycopg2
   Debian:
     - postgresql-{{ postgresql_version }}
     - postgresql-contrib

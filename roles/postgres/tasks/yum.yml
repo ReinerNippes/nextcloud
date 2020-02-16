@@ -21,3 +21,8 @@
   vars:
     ansible_python_interpreter: python2
 
+- name: install pip psycopg2
+  pip:
+    name: psycopg2-binary
+    state: latest
+    executable: pip3
