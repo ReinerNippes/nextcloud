@@ -17,6 +17,17 @@
     - ssl
   notify: restart webserver
 
+- name: enable apache mods for collabora office
+  apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - proxy
+    - proxy_wstunnel
+    - proxy_http
+  when: install_collabora
+  notify: restart webserver
+
 - name: configure apache on debian family
   block:
   - name: disable apache mods
