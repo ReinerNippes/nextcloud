@@ -1,5 +1,10 @@
 ---
 
+- name: remove default ssl config
+  file:
+    name: /etc/httpd/conf.d/ssl.conf
+    state: absent
+
 - name: enable apache mods
   apache2_module:
     name: "{{ item }}"
@@ -25,7 +30,7 @@
     - proxy
     - proxy_wstunnel
     - proxy_http
-  when: install_collabora
+  when: install_collabora|bool
   notify: restart webserver
 
 - name: configure apache on debian family
