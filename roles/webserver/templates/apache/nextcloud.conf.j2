@@ -66,4 +66,10 @@
 {% if (ansible_os_family == 'Debian') %}
     SSLOpenSSLConfCmd DHParameters {{ tls_certificate_directory }}/dhparam.pem
 {% endif %}
+
+{% if install_collabora %}
+    # load collabora config
+    IncludeOptional conf-available/loolwsd.conf
+{% endif %}
+
 </VirtualHost>
