@@ -15,12 +15,17 @@
     name:
       - MariaDB-server
       - MariaDB-client
-      - python3-PyMySQL
     enablerepo: mariadb 
     state: latest
   vars:
     ansible_python_interpreter: python2
   register: install_mariadb
+
+- name: install pip PyMySQL
+  pip:
+    name: PyMySQL
+    state: latest
+    executable: pip3
 
 - name: open mariadb port if running on remote server
   firewalld:
