@@ -4,14 +4,14 @@
 - name: import collabora rpm key
   rpm_key:
     state: present
-    key: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int }}/repodata/repomd.xml.key
+    key: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int if (ansible_distribution == 'CentOS' ) else '7' }}/repodata/repomd.xml.key
 
 - name: add collabora repo
   yum_repository:
     name: collabora-repo
-    description: Collabora repository for CentOS {{ ansible_distribution_major_version|int }}.x packages
-    baseurl: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int }}
-    gpgkey: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int }}/repodata/repomd.xml.key
+    description: Collabora repository for CentOS {{ ansible_distribution_major_version|int if (ansible_distribution == 'CentOS' ) else '7' }}.x packages
+    baseurl: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int if (ansible_distribution == 'CentOS' ) else '7' }}
+    gpgkey: https://www.collaboraoffice.com/repos/CollaboraOnline/CODE-centos{{ ansible_distribution_major_version|int if (ansible_distribution == 'CentOS' ) else '7' }}/repodata/repomd.xml.key
     gpgcheck: yes
     enabled: 1
 
@@ -20,9 +20,14 @@
     name: 
       - loolwsd 
       - CODE-brand
-      - python3-lxml
       - collaboraoffice6.2-dict* 
       - collaboraofficebasis6.2*
     state: latest
   vars:
     ansible_python_interpreter: python2
+
+- name: install pip lxml
+  pip:
+    name: lxml
+    state: latest
+    executable: pip3
