@@ -63,7 +63,7 @@ nextcloud_archive           = https://download.nextcloud.com/server/releases/lat
 nextcloud_webserver_type    = nginx
 
 # php version
-php_version                 = '7.3'
+php_version                 = '7.4'
 
 # optional php packages see: roles/php/var/main.yml
 php_install_optional_packages = false
