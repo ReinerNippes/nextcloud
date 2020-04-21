@@ -2,7 +2,7 @@
 # vars file for prep_os
 
 imagemagick_xml_path:
-  CentOS: /etc/ImageMagick/policy.xml
+  CentOS: /etc/ImageMagick-6/policy.xml
   Fedora: /etc/ImageMagick-6/policy.xml
   Amazon: /etc/ImageMagick/policy.xml
   Ubuntu: /etc/ImageMagick-6/policy.xml
