@@ -9,6 +9,9 @@ server {
 		try_files $uri =404;
 	}
 {% endif %}
+	location / {
+		return 301 https://$server_name:{{ nextcloud_ssl_port }};
+	}
 }
 
 server {
