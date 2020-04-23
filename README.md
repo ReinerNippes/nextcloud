@@ -57,7 +57,7 @@ vim inventory
 sudo ./nextcloud.yml
 
 # if your are fine with the defaults in the inventory (e.g. db version) just provide the ssl parameter
-./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e nextcloud_certificate_type=letsencrypt -e 'nextcloud_cert_email=nc@example.org'
+./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e nextcloud_certificate_type=acme.sh -e 'nextcloud_cert_email=nc@example.org'
 or
 ./nextcloud.yml -e nextcloud_fqdn=nc.example.org -e nextcloud_certificate_type=selfsigned
 or
