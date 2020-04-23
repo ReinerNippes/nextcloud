@@ -91,6 +91,8 @@ php_package_required:
     - php-redis
     - php-opcache
     - php-pecl-imagick
+    - php-gmp
+    - php-bcmath
     - php-bz2
     - php-pecl-zip
     - php-{% if nextcloud_db_type == 'mysql' %}mysqlnd{% elif nextcloud_db_type == 'pgsql' %}pgsql{% endif %}
@@ -107,6 +109,8 @@ php_package_required:
     - php{{ php_version }}-mbstring
     - php{{ php_version }}-xml
     - php{{ php_version }}-intl
+    - php{{ php_version }}-bcmath
+    - php{{ php_version }}-gmp
     - php-apcu
     - php-redis
     - php-imagick
@@ -118,12 +122,10 @@ php_package_required:
 php_package_optional:
   yum:
     - php-smbclient
-    - php-gmp
     - php-imap
     - php-ldap
   apt:
     - php-smbclient
-    - php{{ php_version }}-gmp
     - php{{ php_version }}-ldap
     - php{{ php_version }}-imap
 
