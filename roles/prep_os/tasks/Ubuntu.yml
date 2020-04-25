@@ -15,7 +15,6 @@
       - screen
       - curl
       - ffmpeg
-      - imagemagick 
       - ghostscript
       - libfile-fcntllock-perl
       - language-pack-en-base

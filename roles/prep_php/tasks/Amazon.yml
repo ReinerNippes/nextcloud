@@ -35,6 +35,7 @@
       - php-pdo
       - php-pecl-apcu
       - php-pecl-zip
+      - ImageMagick
     state: latest
 
 - name: configure php

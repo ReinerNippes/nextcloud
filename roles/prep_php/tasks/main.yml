@@ -41,3 +41,15 @@
     name: "{{ php_service_name[ansible_distribution] }}"
     state: restarted
     enabled: true
+
+- name: change ImageMagick settings
+  lineinfile:
+    path:   '{{ imagemagick_xml_path[ansible_distribution] }}'
+    line:   '  <policy domain="coder" rights="read|write" pattern="{{ item }}" />'
+    regexp: '(.*)<policy domain="coder" rights="(.*)" pattern="{{ item }}" />(.*)'
+    insertbefore: '</policymap>'
+  loop:
+    - PS
+    - EPI
+    - PDF
+    - XPS

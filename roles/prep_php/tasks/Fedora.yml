@@ -38,6 +38,7 @@
       - php-pdo
       - php-pecl-apcu
       - php-pecl-zip
+      - ImageMagick
     state: latest
     enablerepo: remi-php73
     disablerepo: remi-php54

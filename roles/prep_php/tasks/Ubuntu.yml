@@ -39,6 +39,7 @@
       - php-imagick
       - php-smbclient
       - php-redis
+      - imagemagick
     autoremove: true
     state: latest
 

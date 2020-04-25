@@ -27,7 +27,6 @@
       - curl
       - wget
       - perl-File-FcntlLock 
-      - ImageMagick
       - ghostscript
       - postfix
       - firewalld

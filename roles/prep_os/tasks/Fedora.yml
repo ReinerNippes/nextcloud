@@ -18,7 +18,6 @@
       - wget
       - cronie
       - perl-File-FcntlLock 
-      - ImageMagick
       - ghostscript
       - postfix
       - firewalld

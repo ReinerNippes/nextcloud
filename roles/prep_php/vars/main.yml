@@ -32,3 +32,12 @@ php_www_conf_dir:
   Amazon: /etc/php-fpm.d
   Ubuntu: /etc/php/{{ php_version }}/fpm/pool.d
   Debian: /etc/php/{{ php_version }}/fpm/pool.d
+
+imagemagick_xml_path:
+  CentOS: /etc/ImageMagick-6/policy.xml
+  Fedora: /etc/ImageMagick-6/policy.xml
+  Amazon: /etc/ImageMagick/policy.xml
+  Ubuntu: /etc/ImageMagick-6/policy.xml
+  Debian: /etc/ImageMagick-6/policy.xml
+  
+
