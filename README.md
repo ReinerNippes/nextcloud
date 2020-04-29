@@ -30,7 +30,7 @@ Visit his page for all details: <https://www.c-rieger.de/> or <https://www.hanss
 Requirements
 ------------
 
-Ubuntu 16.04 und 18.04, CentOS 7, Debian 9/10 und 10, Amazon Linux 2, Fedora 30
+Ubuntu 16.04, 18.04 and 20.04 / CentOS 7 / Debian 9/10 and 10 / Amazon Linux 2 / Fedora 30
 
 Not yet tested with other versions and flavours of Linux.
 
