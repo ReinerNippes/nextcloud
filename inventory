@@ -62,6 +62,7 @@ nc_mail_smtppwd      =
 php_version          = '7.3'
 
 # Install turn server for Nextcloud Talk
+# currently broken for https://help.nextcloud.com/t/cannot-install-talk-on-fresh-nextcloud-18-install/68613
 talk_install         = false
 
 # Allways get the latest version of Nextcloud
