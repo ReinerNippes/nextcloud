@@ -3,7 +3,7 @@
 
 - name: Add an apt key by id from a keyserver
   apt_key:
-    keyserver: keyserver.ubuntu.com
+    keyserver: hkps://keyserver.ubuntu.com
     id: "{{ item }}"
   with_items:
     - 7BF576066ADA65728FC7E70A8C47BE8E75BCA694
