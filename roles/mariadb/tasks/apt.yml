@@ -3,7 +3,7 @@
 
 - name: add apt key for nginx repo
   apt_key:
-    keyserver: keyserver.ubuntu.com
+    keyserver: hkps://keyserver.ubuntu.com
     id: '0xF1656F24C74CD1D8'
     state: present
 
