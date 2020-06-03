@@ -50,7 +50,12 @@ server {
 		proxy_set_header Host $http_host;
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection "upgrade";
-	} 
+	}
+
+    location ^~ /hosting/capabilities {
+        proxy_pass https://localhost:9980;
+        proxy_set_header Host $http_host;
+    }
 {% endif %}
 
 	client_max_body_size 10240M;
