@@ -1,0 +1,22 @@
+---
+
+- name: install talk app
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ app:install spreed
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+    creates: "{{ nextcloud_www_dir }}/apps/spreed"
+
+- name: install talk app
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: yes
+  shell: php occ {{ item }}
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  loop:
+    - app:enable spreed
+    - config:app:set spreed stun_servers --value '["{{ nextcloud_fqdn }}:3478"]'
+    - config:app:set spreed turn_servers --value '[{"server":"{{ nextcloud_fqdn }}:3478","secret":"{{ lookup('password', '{{ credential_store }}/talk_secret chars=ascii_letters,digits length=32') | lower }}","protocols":"udp,tcp"}]'

@@ -60,3 +60,7 @@
 - name: configure onlyoffice
   include_tasks: configure/onlyoffice.yml
   when: install_onlyoffice|bool
+
+- name: configure talk
+  include_tasks: configure/talk.yml
+  when: install_talk|bool

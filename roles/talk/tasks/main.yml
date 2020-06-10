@@ -1,0 +1,38 @@
+---
+# tasks file for prep_talk
+
+- name: get my public ip
+  ipify_facts:
+  register: external_ip
+
+- name: include os specific tasks
+  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+
+# ensure firewalls are open
+
+- name: configure ufw firewall
+  block:
+  - name: open firewall ports 3478/tcp/udp
+    ufw:
+      rule: allow
+      port: "{{ item.port|int }}"
+      proto: "{{ item.proto }}"
+    loop: 
+      - { port: 3478, proto: tcp }
+      - { port: 3478, proto: udp }
+  when: ansible_os_family == 'Debian'
+
+- name: configure firewalld firewall
+  block:
+  - name: open firewall ports 3478/tcp/udp
+    firewalld:
+      port: "{{ item }}"
+      permanent: true
+      immediate: false
+      state: enabled
+    loop:
+      - "3478/tcp"
+      - "3478/udp"
+    vars:
+      ansible_python_interpreter: python2
+  when: ansible_os_family == 'RedHat'

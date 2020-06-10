@@ -65,6 +65,7 @@
 
   roles:
     - { role: restic_backup,  when: restic_repo != '' }
+    - { role: talk,  when: install_talk|bool }
     - nextcloud
     - fail2ban
 
