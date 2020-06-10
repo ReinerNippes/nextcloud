@@ -79,7 +79,7 @@ objectstore_s3_secret         = ''
 # objectstore_s3_use_path_style = 'true'
 
 # Install turn server for Nextcloud Talk
-talk_install         = false
+install_talk                    = false
 
 # Install restic backup tool if backup_folder is not empty
 # more info about restic: https://restic.readthedocs.io/en/latest/
