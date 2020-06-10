@@ -1,5 +1,5 @@
 ---
-# Ubuntu related OS tasks
+# apt related OS tasks
 
 - name: install coturn
   apt:
