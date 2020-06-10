@@ -58,6 +58,14 @@
   roles:
     - { role: onlyoffice,      when: install_onlyoffice|bool }
 
+- name: 'install coturn server'
+  hosts: coturn
+  become: true
+  gather_facts: false
+
+  roles:
+    - { role: talk,  when: install_talk|bool }
+
 - name: 'install nextcloud'
   hosts: nextcloud
   become: true
@@ -65,7 +73,6 @@
 
   roles:
     - { role: restic_backup,  when: restic_repo != '' }
-    - { role: talk,  when: install_talk|bool }
     - nextcloud
     - fail2ban
 
