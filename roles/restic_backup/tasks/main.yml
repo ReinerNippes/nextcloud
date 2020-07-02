@@ -4,7 +4,7 @@
 - name: install restic
   include_tasks: install_restic.yml
 
-- name: install restic
+- name: install rclone
   include_tasks: install_rclone.yml
   when: ( 'rclone' in restic_repo )
 
@@ -34,7 +34,7 @@
     - restic_init.rc != 0
     - not ( 'config already initialized' in restic_init.stderr or 'config file already exists' in restic_init.stderr )
 
-- name: cretae restic selfhosted backup script
+- name: create restic selfhosted backup script
   template:
     src:   'backup_nextcloud.sh.j2'
     dest:  '/usr/local/bin/backup_nextcloud.sh'

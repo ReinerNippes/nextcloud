@@ -23,7 +23,7 @@ sudo -u postgres pg_dump -c -U postgres {{ nc_db }} | {{ restic_install_path }}/
 {% endif %}
 
 # backup the data dir and nextcloud
-{{ restic_install_path }}/restic backup /var/nc-data /var/www/nextcloud
+{{ restic_install_path }}/restic backup {{ nc_datadir }} /var/www/nextcloud
 
 # turn maintenance mode off
 sudo -u {{ web_user[ansible_distribution] }} php /var/www/nextcloud/occ maintenance:mode --off
