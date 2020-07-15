@@ -91,6 +91,12 @@ install_collabora     = false
 install_onlyoffice    = false
 onlyoffice_ssl_port   = 8443
 
+# Install ufw
+install_ufw           = true
+
+# Install fail2ban
+install_fail2ban      = true
+
 #
 # defaults path of your generated credentials (e.g. database, talk, onlyoffice)
 credential_store      = /etc/nextcloud
