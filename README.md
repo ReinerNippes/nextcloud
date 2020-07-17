@@ -39,7 +39,7 @@ Install
 
 ```bash
 # prepare your os and install ansible
-curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud/master/prepare_system.sh | /bin/bash
+curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud/nextcloud-reloaded/prepare_system.sh | /bin/bash
 
 # clone this repo
 git clone --branch nextcloud-reloaded https://github.com/ReinerNippes/nextcloud
