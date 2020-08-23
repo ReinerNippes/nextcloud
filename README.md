@@ -162,5 +162,9 @@ install_onlyoffice    = false
 credential_store      = /etc/nextcloud
 ```
 
-If you find this Playbook helpful and want to donate something. Please go to this web page donate for childern in need. 
-https://wir-fuer-kinder-in-not.org/ aand click on "Spenden" (Donate)
+
+-----------------------
+
+If you find this Playbook helpful and want to donate something. Please go to this web page donate for children in need. 
+
+https://wir-fuer-kinder-in-not.org/ and click on "Spenden" (Donate)
