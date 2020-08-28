@@ -6,3 +6,4 @@ elasticsearch_jdk_version:
     v10: openjdk-11-jre
   Ubuntu:
     v18: openjdk-11-jre
+    v20: openjdk-11-jre
