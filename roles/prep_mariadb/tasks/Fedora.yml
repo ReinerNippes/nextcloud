@@ -27,12 +27,12 @@
   when: false
 
 - name: enable MariaDB
-  systemd:
-    name: mysql
+  service:
+    name: mariadb
     enabled: true
 
 - name: stop if installed
-  systemd:
-    name: mysql
+  service:
+    name: mariadb
     state: stopped
   when: install_mariadb is changed
