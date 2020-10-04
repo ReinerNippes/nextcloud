@@ -35,7 +35,6 @@
     --database {{ nextcloud_db_type }} 
     --database-host "{{ nextcloud_db_host }}" 
     --database-name {{ nextcloud_db }} 
-    --database-table-prefix {{ nextcloud_db_prefix }} 
     --database-user {{ nextcloud_db_user }} 
     --database-pass {{ lookup('password', '{{ credential_store }}/database_secret chars=ascii_letters,digits length=32') }} 
     --admin-user {{ nextcloud_admin }} 
