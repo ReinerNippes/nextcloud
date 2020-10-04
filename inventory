@@ -42,7 +42,6 @@ nc_db_host           = 'localhost'
 nc_db                = 'nextcloud'
 nc_db_user           = 'nextcloud'
 nc_db_passwd         = ''             # leave empty to generate random password
-nc_db_prefix         = 'oc_'
 
 # Nextcloud mail setup
 nc_configure_mail    = false
