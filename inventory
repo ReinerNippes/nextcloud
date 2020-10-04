@@ -40,7 +40,6 @@ nextcloud_db_host           = 'localhost'
 nextcloud_db                = 'nextcloud'
 nextcloud_db_user           = 'nextcloud'
 nextcloud_db_passwd         = ''
-nextcloud_db_prefix         = 'oc_'
 
 # Nextcloud Mail Setup
 nextcloud_configure_mail    = false
