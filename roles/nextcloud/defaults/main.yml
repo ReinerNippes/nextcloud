@@ -4,8 +4,8 @@
 nextcloud_config:
   - "overwrite.cli.url --value=https://{{ nextcloud_fqdn }}"
   - "trusted_domains 0 --value={{ nextcloud_fqdn }}"
-  - "redis host --value='{% if groups['redis'][0] == 'localhost' %}{{ redis_socket.path }}{% else %}{{ redis_tcp.address }}{% endif %}'"
-  - "redis port --value='{% if groups['redis'][0] == 'localhost' %}0{% else %}{{ redis_tcp.port }}{% endif %}' --type=integer"
+  - "redis host --value='{% if groups['redis'][0] == groups['webserver'][0] %}{{ redis_socket.path }}{% else %}{{ redis_tcp.address }}{% endif %}'"
+  - "redis port --value='{% if groups['redis'][0] == groups['webserver'][0] %}0{% else %}{{ redis_tcp.port }}{% endif %}' --type=integer"
   - "redis timeout --value='0' --type=integer"
   - "redis password --value='{{ lookup('password', '{{ credential_store }}/redis_secret chars=ascii_letters,digits length=32') }}'"
   - "memcache.local --value='\\OC\\Memcache\\Redis'"
