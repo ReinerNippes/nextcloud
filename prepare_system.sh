@@ -44,7 +44,7 @@ prepare_debian() {
 prepare_raspbian() {
         $SUDO apt update -y
         $SUDO apt-get -o Dpkg::Options::="--force-confold" -fuy dist-upgrade
-        $SUDO apt install dirmngr mc vim git libffi-dev curl facter python python-apt python-pip python-passlib python-bcrypt aptitude ansible -y
+        $SUDO apt install dirmngr mc vim git libffi-dev curl facter python python-apt python-pip python-passlib python-bcrypt aptitude -y
         $SUDO pip install ansible -U
 
         set +x
@@ -60,16 +60,23 @@ prepare_raspbian() {
 }
 
 prepare_centos() {
-        $SUDO yum install epel-release -y
-        $SUDO yum install git vim mc curl facter python36 python36-pip ansible -y
-        $SUDO yum update -y
-        $SUDO pip3 install ansible -U
+        if [[ $VERSION_ID -eq '7' ]]; then
+          $SUDO yum install epel-release -y
+          $SUDO yum install git vim mc curl facter python36 python36-pip -y
+          $SUDO yum update -y
+          $SUDO pip3 install ansible -U
+        elif [[ $VERSION_ID -eq '8' ]]; then
+          $SUDO yum install epel-release -y
+          $SUDO yum install git vim mc curl facter python3 python3-pip -y
+          $SUDO yum update -y
+          $SUDO pip3 install ansible -U
+        fi
 
         set +x
         echo
         echo "------------------------------------------------------"
         echo
-        echo "   CentOS System ready to install nextcloud."
+        echo "   CentOS $VERSION_ID System ready to install nextcloud."
         echo
         ansible --version
         echo
