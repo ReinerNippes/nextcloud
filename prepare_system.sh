@@ -25,7 +25,7 @@ prepare_ubuntu() {
 prepare_debian() {
         $SUDO apt update -y
         $SUDO apt-get -o Dpkg::Options::="--force-confold" -fuy dist-upgrade
-        $SUDO apt-get -o Dpkg::Options::="--force-confnew" -fuy install dirmngr curl git mc vim facter python3 python3-pip python3-apt python3-passlib python3-bcrypt python3-wheel python3-setuptools aptitude ansible -y
+        $SUDO apt-get -o Dpkg::Options::="--force-confnew" -fuy install dirmngr curl git mc vim facter python3 python3-pip python3-apt python3-passlib python3-bcrypt python3-wheel python3-setuptools aptitude -y
         [ $(uname -m) == "aarch64" ] && $SUDO apt install gcc python3-dev libffi-dev libssl-dev make -y
         $SUDO pip3 install ansible -U
 
