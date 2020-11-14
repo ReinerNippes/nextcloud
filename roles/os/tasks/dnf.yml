@@ -13,7 +13,7 @@
       - cronie
       - firewalld
       - facter
-      - policycoreutils-python
+      - python3-policycoreutils
     state: latest
     enablerepo: epel 
 
