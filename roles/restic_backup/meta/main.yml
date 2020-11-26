@@ -1,7 +1,7 @@
 galaxy_info:
   author: Reiner Nippes
   description: Installs restic backup tool
-  company: Nippes IT
+  company: nippes.it
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
@@ -52,5 +52,5 @@ galaxy_info:
     # NOTE: A tag is limited to a single word comprised of alphanumeric characters.
     #       Maximum 20 tags per role.
 
-dependencies: 
+dependencies:
   - prep_secrets
