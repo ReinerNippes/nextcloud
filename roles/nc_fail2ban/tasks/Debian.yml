@@ -1,5 +1,6 @@
 ---
-# Ubuntu related OS tasks
+
+# Debian related OS tasks
 
 - name: install fail2ban packages
   apt:
