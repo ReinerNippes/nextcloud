@@ -1,6 +1,9 @@
 galaxy_info:
   description: ReinerNippes Ansible role to deploy Nextcloud server
-  company: NoCompany
+  company: nippes.it
   min_ansible_version: 2.9
   platforms:
     - name: GenericUNIX
+    - name: Ubuntu
+      versions:
+      - 16
