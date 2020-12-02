@@ -20,7 +20,7 @@
     checksum: 'sha256:https://github.com/restic/restic/releases/download/v{{ restic_version }}/SHA256SUMS'
 
 - name: decompress the binary
-  shell: "bunzip2 --force {{ restic_install_path }}/restic.bz2"
+  command: "bunzip2 --force {{ restic_install_path }}/restic.bz2"
 
 - name: ensure permissions are correct
   file:

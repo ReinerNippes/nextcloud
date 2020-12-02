@@ -22,7 +22,7 @@
 
 - name: include selinux tasks
   include_tasks: selinux.yml
-  when: 
+  when:
     - (ansible_os_family == "RedHat")
     - ('status' in ansible_selinux)
     - (ansible_selinux.status == "enabled")
@@ -35,6 +35,6 @@
 
 - name: enable apache php conf
   command: a2enconf php{{ php_version }}-fpm
-  when: 
-    - nextcloud_webserver_type == 'apache' 
+  when:
+    - nextcloud_webserver_type == 'apache'
     - ansible_os_family == 'Debian'

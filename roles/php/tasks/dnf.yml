@@ -43,12 +43,13 @@
     backup: true
   notify: restart php-fpm
 
-- name: alias php 
+- name: alias php
   copy:
     content: |
       #!/bin/bash
       alias php="php -c /etc/php-cli.ini"
-    dest: /etc/profile.d/php-cli-ini.sh  
+    dest: /etc/profile.d/php-cli-ini.sh
+    mode: 0644
   when: false
 
 - name: unmask tmp.mount

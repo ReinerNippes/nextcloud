@@ -17,7 +17,7 @@
       rule: allow
       port: "{{ item.port|int }}"
       proto: "{{ item.proto }}"
-    loop: 
+    loop:
       - { port: 3478, proto: tcp }
       - { port: 3478, proto: udp }
   when: ansible_os_family == 'Debian'

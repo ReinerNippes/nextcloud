@@ -1,7 +1,7 @@
 ---
 # yum related tasks
 
-- name: install needed centos packages 
+- name: install needed centos packages
   yum:
     name:
       - httpd
