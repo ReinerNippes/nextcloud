@@ -5,10 +5,10 @@
     target: "{{ item }}"
     setype: httpd_sys_rw_content_t
     state: present
-  loop: 
+  loop:
     - '/tmp(/.*)?'
 
-- name: restorecon 
+- name: restorecon
   command: restorecon -Rv '{{ item }}'
   loop:
     - '/tmp'

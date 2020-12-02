@@ -2,8 +2,8 @@
 # yum related OS tasks
 
 - name: install coturn
-  yum: 
-    name: "{{ item }}" 
+  yum:
+    name: "{{ item }}"
     state: latest
   with_items:
     - "{{ role_path }}/files/centos_rpms/turnserver-4.5.0.7-0.el7.x86_64.rpm"
@@ -19,5 +19,3 @@
     mode:  0644
     force: true
   notify:  restart coturn
-
-    

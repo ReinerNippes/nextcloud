@@ -2,7 +2,7 @@
 
 - name: add php{{ php_version | replace(".","") }} repo on fedora/centos
   yum:
-    name: 'https://rpms.remirepo.net/{{ php_yum_repo_typ[ansible_distribution]}}/remi-release-{{ ansible_distribution_major_version|int }}.rpm'
+    name: 'https://rpms.remirepo.net/{{ php_yum_repo_typ[ansible_distribution] }}/remi-release-{{ ansible_distribution_major_version|int }}.rpm'
     state: present
   when: ansible_distribution in ['Fedora','CentOS']
 
@@ -43,7 +43,7 @@
     owner: "{{ item.owner }}"
     group: "{{ item.group }}"
     mode:  0770
-  loop: 
+  loop:
     - { owner:  nginx, group: nginx, name: /var/lib/php/session }
     - { owner: root,   group: nginx, name: /var/lib/php/wsdlcache }
     - { owner: root,   group: nginx, name: /var/lib/php/opcache }
@@ -56,12 +56,13 @@
     backup: true
   notify: restart php-fpm
 
-- name: alias php 
+- name: alias php
   copy:
     content: |
       #!/bin/bash
       alias php="php -c /etc/php-cli.ini"
-    dest: /etc/profile.d/php-cli-ini.sh  
+    dest: /etc/profile.d/php-cli-ini.sh
+    mode: 0644
   when: false
 
 - name: unmask tmp.mount

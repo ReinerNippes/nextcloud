@@ -11,7 +11,7 @@
     enabled: 1
 
 - name: install mariadb-server packages
-  yum: 
+  yum:
     name:
       - MariaDB-server
       - MariaDB-client

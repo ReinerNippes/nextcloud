@@ -8,7 +8,7 @@
       rule: allow
       port: "{{ item|int }}"
       proto: tcp
-    loop: 
+    loop:
       - "{{ nextcloud_web_port }}"
       - "{{ nextcloud_ssl_port }}"
 

@@ -2,13 +2,13 @@
 # install and configure rclone
 
 - name: install latest rclone debian package
-  apt: 
+  apt:
     deb: '{{ rclone_download_url }}.deb'
     state: present
   when: ansible_pkg_mgr == 'apt'
 
 - name: install latest rclone rpm package
-  yum: 
+  yum:
     name: '{{ rclone_download_url }}.rpm'
     state: present
   when: ansible_pkg_mgr == 'yum'
@@ -21,7 +21,7 @@
     mode:    '0700'
     state:   directory
 
-- name: create rclone config 
+- name: create rclone config
   blockinfile:
     content: '{{ rclone_remote }}'
     path:    '/root/.config/rclone/rclone.conf'

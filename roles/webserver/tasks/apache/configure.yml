@@ -39,15 +39,16 @@
     apache2_module:
       name: "{{ item }}"
       state: absent
-    loop: 
+    loop:
       - mpm_prefork
-  
+
   - name: apache listen http port
     template:
       dest: "{{ apache_server_root[ansible_os_family] }}/ports.conf"
       src: "apache/ports.conf.j2"
+      mode: 0644
     notify: restart webserver
-  
+
   - name: set parameter in security.conf
     lineinfile:
       dest: "{{ apache_server_root[ansible_os_family] }}/conf-enabled/security.conf"
@@ -62,7 +63,7 @@
       - key: ServerTokens
         value: Prod
     notify: restart webserver
-  
+
   - name: add nextcloud vhosts configuration
     template:
       src: "apache/nextcloud.conf.j2"
@@ -71,14 +72,14 @@
       group: root
       mode: 0644
     notify: restart webserver
-  
+
   - name: add vhost symlink in sites-enabled
     file:
       src: "{{ apache_server_root[ansible_os_family] }}/sites-available/nextcloud.conf"
       dest: "{{ apache_server_root[ansible_os_family] }}/sites-enabled/nextcloud.conf"
       state: link
     notify: restart webserver
-  
+
   - name: Remove default vhost in sites-enabled.
     file:
       path: "{{ apache_server_root[ansible_os_family] }}/sites-enabled/{{ apache_default_vhost_filename }}"
@@ -93,12 +94,14 @@
     template:
       dest: "{{ apache_conf_path[ansible_os_family] }}/php.conf"
       src: "apache/php.conf.j2"
+      mode: 0644
     notify: restart webserver
 
   - name: apache load php-fpm module
     copy:
       dest: "{{ apache_server_root[ansible_os_family] }}/conf.modules.d/00-mpm.conf"
       src: "apache/00-mpm.conf"
+      mode: 0644
     notify: restart webserver
 
   - name: set parameter in security.conf
@@ -110,13 +113,14 @@
       state: present
       backup: true
       create: true
+      mode: 0644
     loop:
       - key: ServerSignature
         value: "Off"
       - key: ServerTokens
         value: Prod
     notify: restart webserver
-  
+
   - name: add nextcloud vhosts configuration
     template:
       src: "apache/nextcloud.conf.j2"

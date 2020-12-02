@@ -21,7 +21,7 @@
     mode:  '0700'
     state: directory
   when: ( 'rclone' not in restic_repo )
-  
+
 - name: initialize repository
   command: '{{ restic_install_path }}/restic init'
   environment:
@@ -42,7 +42,7 @@
     group: 'root'
     mode:  '0750'
     force: false
-    
+
 - name: crontab entry
   cron:
     name:   "backup nextcloud"
@@ -50,4 +50,3 @@
     minute: "{{ restic_backup_minute }}"
     hour:   "{{ restic_backup_hour }}"
     job:    "{{ restic_install_path }}/backup_nextcloud.sh > /dev/null 2>&1"
-  
