@@ -36,7 +36,7 @@
 - name: add nextcloud cronjob
   cron:
     name: nextcloud cronjob
-    minute: '*/15'
+    minute: '*/5'
     user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
     job: "php -f {{ nextcloud_www_dir }}/cron.php > /dev/null 2>&1"
 
