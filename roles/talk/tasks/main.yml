@@ -25,7 +25,7 @@
 - name: configure firewalld firewall
   block:
   - name: open firewall ports 3478/tcp/udp
-    firewalld:
+    ansible.posix.firewalld:
       port: "{{ item }}"
       permanent: true
       immediate: false

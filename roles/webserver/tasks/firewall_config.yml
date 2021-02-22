@@ -37,7 +37,7 @@
 - name: configure firewalld firewall
   block:
   - name: open firewall ports {{ nextcloud_web_port }}/{{ nextcloud_ssl_port }}
-    firewalld:
+    ansible.posix.firewalld:
       port: "{{ item }}"
       permanent: true
       immediate: false
