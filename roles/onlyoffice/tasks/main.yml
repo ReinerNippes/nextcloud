@@ -36,7 +36,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: open firewall ports {{ nextcloud_web_port }}/{{ nextcloud_ssl_port }}
-  firewalld:
+  ansible.posix.firewalld:
     port: "{{ onlyoffice_ssl_port }}/tcp"
     permanent: true
     immediate: false
