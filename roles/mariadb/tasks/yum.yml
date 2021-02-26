@@ -15,7 +15,7 @@
     name:
       - MariaDB-server
       - MariaDB-client
-    enablerepo: mariadb 
+    enablerepo: mariadb
     state: latest
   vars:
     ansible_python_interpreter: python2
@@ -28,7 +28,7 @@
     executable: pip3
 
 - name: open mariadb port if running on remote server
-  firewalld:
+  ansible.posix.firewalld:
     port: "3306"
     permanent: true
     immediate: false

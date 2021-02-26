@@ -11,17 +11,17 @@
     enabled: 1
 
 - name: install mariadb-server packages
-  dnf: 
+  dnf:
     name:
       - MariaDB-server
       - MariaDB-client
       - python3-PyMySQL
-    enablerepo: mariadb 
+    enablerepo: mariadb
     state: latest
   register: install_mariadb
 
 - name: open mariadb port if running on remote server
-  firewalld:
+  ansible.posix.firewalld:
     port: "3306"
     permanent: true
     immediate: false
