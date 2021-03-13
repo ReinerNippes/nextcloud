@@ -20,7 +20,6 @@ php_yum_repo_name:
   Amazon: amzn2extra-php{{ php_version }}
   CentOS: remi-php{{ php_version | replace(".","") }}
   Fedora: remi-php{{ php_version | replace(".","") }}
-  
 
 php_db_extension:
   mysql: php{{ php_version }}-mysql
@@ -83,7 +82,7 @@ php_package_required:
     - php-curl
     - php-common
     - php-gd
-    - php-json
+    - php{% if php_version.split('.')[0] | int < 8 %}-json{% endif %}
     - php-mbstring
     - php-xml
     - php-intl
@@ -96,7 +95,6 @@ php_package_required:
     - php-bz2
     - php-pecl-zip
     - php-{% if nextcloud_db_type == 'mysql' %}mysqlnd{% elif nextcloud_db_type == 'pgsql' %}pgsql{% endif %}
-#    - php-mcrypt
     - php-pear
   apt:
     - php{{ php_version }}
@@ -105,7 +103,7 @@ php_package_required:
     - php{{ php_version }}-curl
     - php{{ php_version }}-common
     - php{{ php_version }}-gd
-    - php{{ php_version }}-json
+    - php{{ php_version }}{% if php_version.split('.')[0] | int < 8 %}-json{% endif %}
     - php{{ php_version }}-mbstring
     - php{{ php_version }}-xml
     - php{{ php_version }}-intl
@@ -128,4 +126,3 @@ php_package_optional:
     - php-smbclient
     - php{{ php_version }}-ldap
     - php{{ php_version }}-imap
-
