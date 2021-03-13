@@ -28,7 +28,7 @@
     executable: pip3
 
 - name: open mariadb port if running on remote server
-  ansible.posix.firewalld:
+  firewalld:
     port: "3306"
     permanent: true
     immediate: false
