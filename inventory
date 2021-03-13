@@ -65,8 +65,8 @@ nextcloud_webserver_type    = nginx
 # using ISO 3166-1 country codes such as DE for Germany, FR for France,
 nextcloud_default_phone_region = 'DE'
 
-# php version
-php_version                 = '7.4'
+# php version 8.0 (for nextcloud 21 and higher)
+php_version                 = '8.0'
 
 # optional php packages see: roles/php/var/main.yml
 php_install_optional_packages = false
