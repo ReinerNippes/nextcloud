@@ -135,6 +135,10 @@ nextcloud_mail_smtppwd      =
 # Allways get the latest version of Nextcloud
 nextcloud_archive           = https://download.nextcloud.com/server/releases/latest.tar.bz2
 
+# this sets the default region for phone numbers on your Nextcloud server
+# using ISO 3166-1 country codes such as DE for Germany, FR for France,
+nextcloud_default_phone_region = 'DE'
+
 # webserver type nginx or apache
 nextcloud_webserver_type    = nginx
 
