@@ -28,12 +28,21 @@ server {
 		access_log off;
 	}
 
-	location = /.well-known/carddav {
-		return 301 $scheme://$host:{{ nextcloud_ssl_port }}/remote.php/dav;
-	}
-	location = /.well-known/caldav {
-		return 301 $scheme://$host:{{ nextcloud_ssl_port }}/remote.php/dav;
-	}
+    # Make a regex exception for `/.well-known` so that clients can still
+    # access it despite the existence of the regex rule
+    # `location ~ /(\.|autotest|...)` which would otherwise handle requests
+    # for `/.well-known`.
+    location ^~ /.well-known {
+        # The following 6 rules are borrowed from `.htaccess`
+
+        location = /.well-known/carddav     { return 301 /remote.php/dav/; }
+        location = /.well-known/caldav      { return 301 /remote.php/dav/; }
+        # Anything else is dynamically handled by Nextcloud
+        location ^~ /.well-known            { return 301 /index.php$uri; }
+
+        try_files $uri $uri/ =404;
+    }
+
 {% if install_collabora %}
 
 	location ^~ /loleaflet {
