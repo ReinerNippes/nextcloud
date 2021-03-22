@@ -54,7 +54,6 @@ nextcloud_mail_config:
   - "mail_smtpmode --value={{ nextcloud_mail_smtpmode }}"
   - "mail_smtpauthtype --value={{ nextcloud_mail_smtpauthtype }}"
   - "mail_domain --value={{ nextcloud_mail_domain }}"
-  - "mail_smtpname --value={{ nextcloud_mail_smtpname }}"
   - "mail_smtpsecure --value={{ nextcloud_mail_smtpsecure }}"
   - "mail_smtpauth --value={{ nextcloud_mail_smtpauth }}"
   - "mail_smtphost --value={{ nextcloud_mail_smtphost }}"
