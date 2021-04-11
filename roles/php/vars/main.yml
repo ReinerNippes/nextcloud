@@ -109,9 +109,9 @@ php_package_required:
     - php{{ php_version }}-intl
     - php{{ php_version }}-bcmath
     - php{{ php_version }}-gmp
-    - php-apcu
-    - php-redis
-    - php-imagick
+    - php{{ php_version }}-apcu
+    - php{{ php_version }}-redis
+    - php{{ php_version }}-imagick
     - php{{ php_version }}-bz2
     - php{{ php_version }}-zip
     - "{{ php_db_extension[nextcloud_db_type] }}"
@@ -123,6 +123,6 @@ php_package_optional:
     - php-imap
     - php-ldap
   apt:
-    - php-smbclient
+    - php{{ php_version }}-smbclient
     - php{{ php_version }}-ldap
     - php{{ php_version }}-imap
