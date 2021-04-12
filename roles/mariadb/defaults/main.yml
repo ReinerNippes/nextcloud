@@ -2,6 +2,6 @@
 # defaults file for mariadb
 
 # Check version number here https://downloads.mariadb.org/mariadb/10.4.12/#os_group=rpm_package
-mariadb_version:       10.4
-mariadb_version_minor: 12
+mariadb_version: 10.5
+mariadb_version_minor: 9
 mariadb_mirror_server: mirror2.hs-esslingen.de
