@@ -1,6 +1,6 @@
 server {
     listen {{ nextcloud_ssl_port }} ssl http2 default_server;
-    {% if ansible_default_ipv6.address is defined %}listen [::]:{{ nextcloud_ssl_port }} ssl http2;{% endif %}
+{% if ansible_default_ipv6.address is defined %}    listen [::]:{{ nextcloud_ssl_port }} ssl http2;{% endif %}
     server_name {{ nextcloud_fqdn }};
 
     ssl_certificate_key {{ tls_certificate_key }};
@@ -70,6 +70,10 @@ server {
         deny all;
     }
 
+    # Make a regex exception for `/.well-known` so that clients can still
+    # access it despite the existence of the regex rule
+    # `location ~ /(\.|autotest|...)` which would otherwise handle requests
+    # for `/.well-known`.
     location ^~ /.well-known {
         # The following 6 rules are borrowed from `.htaccess`
 
@@ -105,35 +109,43 @@ server {
     }
 {% endif %}
 
+    # Rules borrowed from `.htaccess` to hide certain paths from clients
     location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)(?:$|/)  { return 404; }
-    location ~ ^/(?:\.|autotest|occ|issue|indie|db_|console)                { return 404; }
+    location ~ ^/(?:\.|autotest|occ|issue|indie|db_|console)              { return 404; }
 
+    # Ensure this block, which passes PHP files to the PHP process, is above the blocks
+    # which handle static assets (as seen below). If this block is not declared first,
+    # then Nginx will encounter an infinite rewriting loop when it prepends `/index.php`
+    # to the URI, resulting in a HTTP 500 error response.
     location ~ \.php(?:$|/) {
-        rewrite ^/(?!index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|oc[ms]-provider\/.+|.+\/richdocumentscode\/proxy) /index.php$request_uri;
         fastcgi_split_path_info ^(.+?\.php)(/.*)$;
         set $path_info $fastcgi_path_info;
+
         try_files $fastcgi_script_name =404;
+
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param PATH_INFO $path_info;
         fastcgi_param HTTPS on;
-        fastcgi_param modHeadersAvailable true;
-        fastcgi_param front_controller_active true;
+
+        fastcgi_param modHeadersAvailable true;         # Avoid sending the security headers twice
+        fastcgi_param front_controller_active true;     # Enable pretty urls
         fastcgi_pass php-handler;
+
         fastcgi_intercept_errors on;
         fastcgi_request_buffering off;
     }
 
     location ~ \.(?:css|js|svg|gif)$ {
         try_files $uri /index.php$request_uri;
-        expires 6M;
-        access_log off;
+        expires 6M;         # Cache-Control policy borrowed from `.htaccess`
+        access_log off;     # Optional: Don't log access to assets
     }
 
     location ~ \.woff2?$ {
         try_files $uri /index.php$request_uri;
-        expires 7d;
-        access_log off;
+        expires 7d;         # Cache-Control policy borrowed from `.htaccess`
+        access_log off;     # Optional: Don't log access to assets
     }
 
     location / {
