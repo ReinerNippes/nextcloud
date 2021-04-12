@@ -1,0 +1,25 @@
+upstream php-handler {
+    server unix:{{ php_socket[ansible_distribution] }};
+}
+
+{% if install_onlyoffice|bool %}
+upstream onlyoffice-docker {
+    server 127.0.0.1:{{ onlyoffice_ssl_port }};
+}
+{% endif %}
+
+server {
+    listen {{ nextcloud_web_port }} default_server;
+    {% if ansible_default_ipv6.address is defined %}listen [::]:{{ nextcloud_web_port }};{% endif %}
+    server_name {{ nextcloud_fqdn }};
+    root /var/www;
+{% if tls_certificate_type != 'selfsigned' %}
+    location ^~ /.well-known/acme-challenge {
+        default_type text/plain;
+        root /var/www/letsencrypt;
+    }
+{% endif %}
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}

@@ -1,5 +1,4 @@
 ---
-
 - name: bring /etc/nginx/nginx.conf in place
   template:
     src: nginx/nginx.conf.j2
@@ -12,44 +11,16 @@
 
 - name: nginx nextcloud config
   template:
-    src: nginx/nextcloud.conf.j2
-    dest: /etc/nginx/conf.d/nextcloud.conf
+    src: nginx/{{ item }}.conf.j2
+    dest: /etc/nginx/conf.d/{{ item }}.conf
     owner: root
     group: root
     mode: 0644
   notify: restart web services
-
-- name: nginx header config
-  template:
-    src: nginx/header.conf.j2
-    dest: /etc/nginx/conf.d/header.conf
-    owner: root
-    group: root
-    mode: 0644
-  notify: restart web services
-
-- name: nginx config for ssl
-  template:
-    src: nginx/ssl.conf.j2
-    dest: /etc/nginx/conf.d/ssl.conf
-    owner: root
-    group: root
-    mode: 0644
-  notify: restart web services
-
-- name: copy some nginx config file
-  copy:
-    src: "nginx/{{ item }}"
-    dest: "/etc/nginx/conf.d/{{ item }}"
-    owner: root
-    group: root
-    mode: 0644
-    force: true
   loop:
-    - optimization.conf
-    - php_optimization.conf
-    - proxy.conf
-  notify: restart web services
+    - default
+    - http
+    - nextcloud
 
 - name: nginx started and enabled
   systemd:
