@@ -17,15 +17,9 @@
 
 - name: add user {{ web_user[nextcloud_webserver_type][ansible_os_family] }} to group redis if running togehter with webserver
   user:
-   name:   "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
-   groups: redis
+    name: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+    groups: redis
   when: groups['redis'] == groups['webserver']
-
-- name: start and enable redis
-  systemd:
-    name:    redis
-    state:   started
-    enabled: true
 
 - name: sysctl vm.overcommit_memory=1
   sysctl:
@@ -34,3 +28,9 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
+
+- name: start and enable redis
+  systemd:
+    name: redis-server.service
+    state: started
+    enabled: true
