@@ -4,9 +4,9 @@ Nextcloud (Latest)
 Ansible Playbook to install
 
 * Nextcloud (Latest) - <https://nextcloud.com/>
-* nginx 1.17 - <https://nginx.org/> or Apache 2.4 <https://httpd.apache.org/>
-* PHP 7.x - <http://www.php.net/>
-* MariaDB 10.4 - <https://mariadb.org/> or PostgreSQL 10/11 <https://www.postgresql.org/>
+* nginx - <https://nginx.org/> or Apache <https://httpd.apache.org/>
+* PHP - <http://www.php.net/>
+* MariaDB - <https://mariadb.org/> or PostgreSQL <https://www.postgresql.org/>
 * redis - <https://redis.io/>
 * restic backup - <https://restic.readthedocs.io>
 * Nextcloud Talk
@@ -30,14 +30,15 @@ Visit his page for all details: <https://www.c-rieger.de/> or <https://www.hanss
 Requirements
 ------------
 
-Ubuntu 16.04, 18.04 and 20.04 / CentOS 7 / Debian 9/10 and 10 / Amazon Linux 2 / Fedora 30
+Ubuntu 16.04, 18.04 and 20.04 /  Debian 9/10 
+CentOS 7/8 / Amazon Linux 2 / Fedora 30 are work in progress
 
 Not yet tested with other versions and flavours of Linux.
 
 Install
 -------
 
-```bash
+```console
 # prepare your os and install ansible
 curl -s https://raw.githubusercontent.com/ReinerNippes/nextcloud/nextcloud-reloaded/prepare_system.sh | /bin/bash
 
