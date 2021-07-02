@@ -1,5 +1,4 @@
 ---
-
 # create letsencrypt certificates with acme.sh
 
 - name: create cert directory
@@ -7,11 +6,11 @@
     name: "{{ item }}"
     owner: root
     group: root
-    mode:  0755
+    mode: 0755
     state: directory
   loop:
     - "{{ tls_certificate_file | dirname }}"
-    - "{{ tls_certificate_directory }}" 
+    - "{{ tls_certificate_directory }}"
 
 - name: check acme.sh is installed
   stat:
@@ -20,26 +19,26 @@
 
 - name: install acme.sh
   block:
-  - name: pkg manager spefic tasks
-    include_tasks: "{{ ansible_pkg_mgr }}.yml"
+    - name: pkg manager spefic tasks
+      include_tasks: "{{ ansible_pkg_mgr }}.yml"
 
-  - name: git clone acme.sh
-    git:
-      repo: 'https://github.com/Neilpang/acme.sh.git'
-      dest: '{{ certificates_acmesh_git_dir }}'
-      update: no
-      version: master
+    - name: git clone acme.sh
+      git:
+        repo: "https://github.com/Neilpang/acme.sh.git"
+        dest: "{{ certificates_acmesh_git_dir }}"
+        update: no
+        version: master
 
-  - name: install acme.sh
-    command: |
-      ./acme.sh
-        --install
-        --home "{{ certificates_acmesh_dir }}" 
-        --config-home {{ certificates_acmesh_dir }}/conf
-        --cert-home {{ certificates_acmesh_dir }}/certs
-    args:
-      chdir: "{{ certificates_acmesh_git_dir }}"
-      creates: "{{ certificates_acmesh_dir }}/acme.sh"
+    - name: install acme.sh
+      command: |
+        ./acme.sh
+          --install
+          --home "{{ certificates_acmesh_dir }}" 
+          --config-home {{ certificates_acmesh_dir }}/conf
+          --cert-home {{ certificates_acmesh_dir }}/certs
+      args:
+        chdir: "{{ certificates_acmesh_git_dir }}"
+        creates: "{{ certificates_acmesh_dir }}/acme.sh"
   when: not acme.stat.exists
 
 - name: preinstall web server tasks
@@ -61,6 +60,7 @@
       --webroot /var/www/letsencrypt
       --reloadcmd "systemctl restart {{ webserver_service_name[nextcloud_webserver_type][ansible_os_family] }}"
       {% if tls_certificate_test %}--test --debug{% endif %}
+      --server letsencrypt
   args:
     chdir: "{{ certificates_acmesh_dir }}"
   when: ( not cert_file.stat.exists ) or ( cert_info.expired )
@@ -70,4 +70,3 @@
 
 - debug: var=acme_get
   when: tls_certificate_test
-
