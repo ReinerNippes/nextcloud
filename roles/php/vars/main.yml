@@ -110,6 +110,7 @@ php_package_required:
     - php{{ php_version }}-bcmath
     - php{{ php_version }}-gmp
     - php{{ php_version }}-apcu
+    - php{{ php_version }}-opcache
     - php{{ php_version }}-redis
     - php{{ php_version }}-imagick
     - php{{ php_version }}-bz2
