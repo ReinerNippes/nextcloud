@@ -1,5 +1,4 @@
 ---
-
 # apt related OS tasks
 
 - name: add apt key for php repo
@@ -38,7 +37,7 @@
     content: |
       # configuration for PHP PostgreSQL module
       extension=pgsql.so
-      
+
       [PostgresSQL]
       pgsql.allow_persistent = On
       pgsql.auto_reset_persistent = Off
@@ -59,7 +58,7 @@
     content: |
       # configuration for PHP MySQL module
       extension=pdo_mysql.so
-      
+
       [mysql]
       mysql.allow_local_infile=On
       mysql.allow_persistent=On
@@ -79,6 +78,17 @@
     backup: true
   when: nextcloud_db_type == 'mysql'
   notify: restart web services
+
+- name: configure php apcu module
+  copy:
+    dest: /etc/php/{{ php_version }}/mods-available/apcu.ini
+    content: |
+      extension=apcu.so
+      apc.enable_cli=1
+    owner: root
+    group: root
+    mode: 0644
+    backup: true
 
 - name: open redis port if remote server
   ufw:
