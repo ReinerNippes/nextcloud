@@ -53,8 +53,8 @@
     group: "{{ tls_certificate_group | default('root') }}"
     provider: ownca
 
-- debug: msg="{{ lookup('file', tls_certificate_ca ) }}"
-- debug: msg="{{ lookup('file', tls_certificate_file ) }}"
+- debug: msg="{{ lookup('file', tls_certificate_ca ) }}" verbosity=2
+- debug: msg="{{ lookup('file', tls_certificate_file ) }}" verbosity=2
 
 - name: create fullchain certificate
   copy:
