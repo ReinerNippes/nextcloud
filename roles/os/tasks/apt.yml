@@ -4,6 +4,8 @@
 - name: apt dist-upgrade
   apt:
     upgrade: dist
+    update_cache: yes
+    cache_valid_time: 3600
     autoremove: true
 
 - name: install additional packages
