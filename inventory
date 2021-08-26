@@ -72,6 +72,7 @@ php_version                 = '8.0'
 php_install_optional_packages = false
 
 # Use S3 Bucket as primary storage
+# Leave empty for disabling S3 storage
 objectstore_s3_key            = ''
 objectstore_s3_secret         = ''
 # objectstore_s3_bucket_name    = ''
