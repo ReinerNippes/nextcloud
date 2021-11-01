@@ -9,7 +9,7 @@
     name:           "{{ nc_db }}"
     state:          present
     encoding:       UTF-8
-    template:       template1
+    template:       template0
   become:           yes
   become_user:      postgres
 
