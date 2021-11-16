@@ -61,6 +61,16 @@
       JWT_SECRET:   "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
     volumes:        '{{ onlyoffice_volumes[ssl_certificate_type] }}'
 
+- name: onlyoffice container accept self-signed certificates
+  shell: |
+      docker exec onlyoffice sh -l -c "/var/www/onlyoffice/documentserver/npm/json -f /etc/onlyoffice/documentserver/default.json -I -e 'this.services.CoAuthoring.requestDefaults.rejectUnauthorized=false'"
+  when: ssl_certificate_type  == 'selfsigned'
+
+- name: onlyoffice container restart services
+  shell: |
+       docker exec onlyoffice sh -l -c "/usr/bin/supervisorctl restart all"
+  when: ssl_certificate_type  == 'selfsigned'
+
 - name: open ufw firewall
   include_role:
     name: prep_ufw
