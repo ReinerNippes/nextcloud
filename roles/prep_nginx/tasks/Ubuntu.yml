@@ -34,6 +34,6 @@
 - name: install needed packages
   apt:
     name:
-      - python-pip
-      - python-netaddr
+      - python3-pip
+      - python3-netaddr
     state: latest
