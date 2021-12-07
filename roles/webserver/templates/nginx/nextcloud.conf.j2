@@ -91,7 +91,7 @@ server {
     }
 
 {% if install_collabora|bool %}
-    location ^~ /loleaflet {
+    location ^~ /browser {
         proxy_pass https://localhost:9980;
         proxy_set_header Host $http_host;
     }
@@ -101,7 +101,7 @@ server {
         proxy_set_header Host $http_host;
     }
      
-    location ^~ /lool {
+    location ^~ /cool {
         proxy_pass https://localhost:9980;
         proxy_set_header Host $http_host;
         proxy_set_header Upgrade $http_upgrade;
