@@ -25,7 +25,7 @@
 - name: enable fail2ban
   systemd:
     name: fail2ban
-    enabled: true
+    enabled: false
 
 - name: include selinux tasks
   include_tasks: selinux.yml
