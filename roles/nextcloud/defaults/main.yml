@@ -38,6 +38,7 @@ nextcloud_config:
   - "preview_max_scale_facto --value='1' --type=integer"
   - "auth.bruteforce.protection.enabled --value=true --type=boolean"
   - "trashbin_retention_obligation --value='auto,7'"
+  - "versions_retention_obligation --value='auto,28'"
   - "skeletondirectory --value=''"
   - "defaultapp --value='file'"
   - "activity_expire_days --value='14'  --type=integer"
@@ -64,7 +65,7 @@ nextcloud_app_config:
   - name: survey_client
     state: disable
   - name: firstrunwizard
-    state: disable
+    state: enable
   - name: admin_audit
     state: enable
   - name: files_pdfviewer
