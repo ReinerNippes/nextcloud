@@ -48,6 +48,8 @@ nextcloud_config:
   - "theme --value=''"
   - "default_phone_region --value='{{ nextcloud_default_phone_region }}'"
   - "maintenance --value=false --type=boolean"
+  - "upgrade.disable-web --value=true --type=boolean"
+  - "updatechecker --value=false --type=boolean"
 
 nextcloud_mail_config:
   - "mail_from_address --value={{ nextcloud_mail_from }}"
