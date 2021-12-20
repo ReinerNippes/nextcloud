@@ -5,7 +5,7 @@
 # Red Hat uses firewalld?!
 default_system_firewall: ufw
 
-# /etc/defaut/ufw settings
+# /etc/default/ufw settings
 ufw_ipv6: "yes"
 ufw_default_input_policy: DROP
 ufw_default_output_policy: ACCEPT
