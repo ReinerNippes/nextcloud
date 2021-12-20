@@ -13,3 +13,9 @@ redis_conf_path:
   Ubuntu: '/etc/redis'
   Debian: '/etc/redis' 
   
+redis_log_path:
+  CentOS: '/var/log/redis/redis-server.log'
+  Fedora: '/var/log/redis/redis-server.log'
+  Amazon: '/var/log/redis/redis-server.log'
+  Ubuntu: '/var/log/redis/redis-server.log'
+  Debian: '/var/log/redis/redis-server.log'
