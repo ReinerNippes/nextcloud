@@ -5,6 +5,7 @@ nextcloud_fqdn: ""
 
 # dns resolver (nginx reverse ip lookup) set to your nameserver in /etc/resolv.conf
 # see http://blog.zorinaq.com/nginx-resolver-vulns/
-nginx_resolver: "{{ lookup('file', '/etc/resolv.conf')|regex_findall('nameserver (.+)') | first | default('8.8.8.8') }}"
+# Commented because it is moved to the task configure.yml
+# nginx_resolver: "{{ lookup('file', '/etc/resolv.conf')|regex_findall('nameserver (.+)') | first | default('8.8.8.8') }}"
 
 apache_remove_default_vhost: true
