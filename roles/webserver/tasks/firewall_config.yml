@@ -46,5 +46,5 @@
         - "{{ nextcloud_web_port }}/tcp"
         - "{{ nextcloud_ssl_port }}/tcp"
       vars:
-        ansible_python_interpreter: python2
-  when: ansible_os_family == 'RedHat'
+        ansible_python_interpreter: python3
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'Suse'
