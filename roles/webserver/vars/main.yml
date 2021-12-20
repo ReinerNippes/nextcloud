@@ -26,22 +26,25 @@ nginx_yum_repo_url:
   Amazon: http://nginx.org/packages/mainline/centos/7/$basearch/
   CentOS: http://nginx.org/packages/mainline/centos/{{ ansible_distribution_major_version|int }}/$basearch/
 
-
 webserver_service_name:
   nginx:
     RedHat: nginx
     Debian: nginx
+    Suse: nginx
   apache:
     RedHat: httpd
     Debian: apache2
+    Suse: apache2
 
 apache_server_root:
   Debian: /etc/apache2
   RedHat: /etc/httpd
-  
+  Suse: /etc/apache2 # Not sure and not tested
+
 apache_conf_path: 
   Debian: /etc/apache2
   RedHat: /etc/httpd/conf.d
-  
+  Suse: /etc/conf.d # Not sure and not tested
+
 apache_default_vhost_filename: 000-default.conf
 

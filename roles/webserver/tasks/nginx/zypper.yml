@@ -1,0 +1,21 @@
+---
+# zypper related OS tasks
+
+- name: install additional packages
+  zypper:
+    name:
+      - nginx
+      - openssl
+      # - python3-openssl # -> Opensuse Leap 15.2: python3-pyOpenSSL ? No offical package for Opensuse Leap 15.3 and Tumbleweed
+    state: latest
+    
+# TBD: Problem on Opensuse Leap: zypper in nginx does not create group  nor user for nginx, even so -U is given in the useradd command...
+# Zusätzliche rpm-Ausgabe:
+# useradd -r -s /sbin/nologin -c "User for nginx" -U -d /var/lib/nginx nginx
+# warning: group nginx does not exist - using root
+
+- name: Ensure group "nginx" exists on Opensuse Leap (because of problems with zypper in nginx?)
+  group:
+    name: "{{ web_group[nextcloud_webserver_type][ansible_os_family] }}"
+    state: present
+  when: ansible_distribution == "openSUSE Leap"
