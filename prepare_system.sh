@@ -121,10 +121,26 @@ prepare_amzn() {
         echo
 }
 
+prepare_opensuse-leap() {
+        $SUDO zypper install --no-confirm git vim mc curl python3 python3-pip python3-bcrypt python3-passlib ansible
+        $SUDO zypper update --no-confirm
+
+        set +x
+        echo
+        echo "------------------------------------------------------"
+        echo
+        echo "   OpenSuSE System ready to install nextcloud."
+        echo
+        ansible --version
+        echo
+        echo "------------------------------------------------------"
+        echo
+}
+
 usage() {
         echo
         echo "Linux distribution not detected."
-        echo "Use: ID=[ubuntu|debian|centos|raspbian|amzn|fedora] prepare_system.sh"
+        echo "Use: ID=[ubuntu|debian|centos|raspbian|amzn|fedora|opensuse-leap] prepare_system.sh"
         echo "Other distributions not yet supported."
         echo
 }
@@ -161,7 +177,9 @@ case $ID in
         'amzn')
                 prepare_amzn
         ;;
-
+        'opensuse-leap')
+                prepare_opensuse-leap
+        ;;
         *)
                 usage
         ;;
