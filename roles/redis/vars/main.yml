@@ -13,6 +13,12 @@ redis_conf_path:
   Ubuntu: '/etc/redis'
   Debian: '/etc/redis' 
   
+redis_service_name:
+  CentOS: 'redis-server'
+  Fedora: 'redis-server'
+  Amazon: 'redis-server'
+  Ubuntu: 'redis-server'
+  Debian: 'redis-server'
 redis_pid_path:
   CentOS: '/var/run/redis/redis-server.pid'
   Fedora: '/var/run/redis/redis-server.pid'

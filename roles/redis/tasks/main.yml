@@ -31,6 +31,6 @@
 
 - name: start and enable redis
   systemd:
-    name: redis-server.service
+    name: '{{ redis_service_name[ansible_distribution] }}.service'
     state: started
     enabled: true
