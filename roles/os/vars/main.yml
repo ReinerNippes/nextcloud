@@ -2,6 +2,8 @@
 # vars file for os
 
 # ufw defaults
+# Red Hat uses firewalld?!
+default_system_firewall: ufw
 
 # /etc/defaut/ufw settings
 ufw_ipv6: "yes"
