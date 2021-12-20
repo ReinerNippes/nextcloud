@@ -12,11 +12,11 @@ server {
     listen {{ nextcloud_web_port }} default_server;
     {% if ansible_default_ipv6.address is defined %}listen [::]:{{ nextcloud_web_port }};{% endif %}
     server_name {{ nextcloud_fqdn }};
-    root /var/www;
+    root {{ www_dir }};
 {% if tls_certificate_type != 'selfsigned' %}
     location ^~ /.well-known/acme-challenge {
         default_type text/plain;
-        root /var/www/letsencrypt;
+        root {{ www_dir }}/letsencrypt;
     }
 {% endif %}
     location / {
