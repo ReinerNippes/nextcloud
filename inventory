@@ -21,7 +21,10 @@ nextcloud_certificate_type  = 'selfsigned'
 nextcloud_web_port          = 80
 nextcloud_ssl_port          = 443
 
-# Nextcloud Web Root
+# Web Root
+www_dir                     = /var/www
+
+# Nextcloud Web Root (Should depend on www_dir)
 nextcloud_www_dir           = /var/www/nextcloud
 
 # Nextcloud Data Dir

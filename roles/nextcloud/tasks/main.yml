@@ -13,7 +13,7 @@
 - name: install nextcloud
   unarchive: 
     src: /tmp/nextcloud.tar.bz2
-    dest: /var/www
+    dest: "{{ www_dir }}"
     remote_src: true
     owner: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
     group: "{{ web_group[nextcloud_webserver_type][ansible_os_family] }}"
