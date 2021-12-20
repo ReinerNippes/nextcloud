@@ -22,12 +22,12 @@
 
 - name: install needed php packages
   apt:
-    name: "{{ php_package_required[ansible_pkg_mgr] }}"
+    name: "{{ php_package_required }}"
     state: latest
 
 - name: install optional php packages
   apt:
-    name: "{{ php_package_optional[ansible_pkg_mgr] }}"
+    name: "{{ php_package_optional }}"
     state: latest
   when: php_install_optional_packages|bool
 

@@ -1,0 +1,27 @@
+---
+php_package_required:
+  - php{{ php_version }}
+  - php{{ php_version }}-cli
+  - php{{ php_version }}-fpm
+  - php{{ php_version }}-curl
+  - php{{ php_version }}-common
+  - php{{ php_version }}-gd
+  - php{{ php_version }}{% if php_version.split('.')[0] | int < 8 %}-json{% endif %}
+  - php{{ php_version }}-mbstring
+  - php{{ php_version }}-xml
+  - php{{ php_version }}-intl
+  - php{{ php_version }}-bcmath
+  - php{{ php_version }}-gmp
+  - php{{ php_version }}-apcu
+  - php{{ php_version }}-opcache
+  - php{{ php_version }}-redis
+  - php{{ php_version }}-imagick
+  - php{{ php_version }}-bz2
+  - php{{ php_version }}-zip
+  - "{{ php_db_extension[nextcloud_db_type] }}"
+  - php-pear
+
+php_package_optional:
+  - php{{ php_version }}-smbclient
+  - php{{ php_version }}-ldap
+  - php{{ php_version }}-imap

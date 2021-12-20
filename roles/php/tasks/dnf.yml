@@ -13,13 +13,13 @@
 
 - name: install needed php packages
   dnf:
-    name: "{{ php_package_required['yum'] }}"
+    name: "{{ php_package_required }}"
     state: latest
     enablerepo: "{{ php_yum_repo_name[ansible_distribution] }}"
 
 - name: install optional php packages
   dnf:
-    name: "{{ php_package_optional['yum'] }}"
+    name: "{{ php_package_optional }}"
     state: latest
     enablerepo: "{{ php_yum_repo_name[ansible_distribution] }}"
   when: php_install_optional_packages|bool
