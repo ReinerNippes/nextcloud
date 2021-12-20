@@ -1,0 +1,68 @@
+---
+# apt related OS tasks
+
+- name: Perform a dist-upgrade on openSUSE Tumbleweed systems
+  zypper:
+    name: '*'
+    state: dist-upgrade
+  when: ansible_distribution == 'openSUSE Tumbleweed'
+
+- name: Perform an update on openSUSE Leap systems
+  zypper:
+    name: '*'
+    state: latest
+  when: ansible_distribution == 'openSUSE Leap'
+  
+- name: install additional packages
+  zypper:
+    name:
+      - zip
+      - unzip
+      - bzip2
+      # - software-properties-common
+      # - facter
+      - lsb-release 
+      # - ssl-cert 
+      - ca-certificates 
+      # - apt-transport-https 
+      - htop    # live process viewer
+    state: latest
+
+## The following tasks were added, because somehow the nextcloud install php call via the occ command always failed due to a wrong password, even though it was correct. Unfortunately, "notify: Reboot server" is needed, because the change to allow the group wheel for passwordless sudo is only active after reboot. (When directly adding the user instead of the users admin group, the effect is active immediately)
+- name: Make sure we have a 'wheel' group
+  group:
+    name: wheel
+    state: present
+
+- name: Add sudoers users to wheel group
+  user:
+    name: "{{ ansible_user }}"
+    groups: wheel
+    append: yes
+    state: present
+    createhome: yes
+  notify: Reboot server
+
+- name: Allow 'wheel' group to use (passwordless) sudo
+  template:
+    src: sudo_administrators.j2
+    dest: /etc/sudoers.d/sudo_administrators
+    owner: root
+    group: root  
+    mode: 0440
+    validate: 'visudo -cf %s'
+  notify: Reboot server
+
+- name: Disallow all users to use sudo
+  replace:
+    path: /etc/sudoers
+    regexp : '^\s*(ALL.*)'
+    replace: '# \1'
+  notify: Reboot server
+
+- name: Configure sudoers to use use users password for sudo commands instead of the root password
+  replace:
+    path: /etc/sudoers
+    regexp : '^\s*(Defaults\s*targetpw.*)'
+    replace: '# Defaults targetpw'
+  notify: Reboot server

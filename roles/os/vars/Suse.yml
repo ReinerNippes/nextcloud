@@ -1,0 +1,13 @@
+---
+default_system_firewall: firewalld
+firewall_default_zone: "public"
+# No need to open http and https here because it will be opened in the webserver role?!
+firewall_allowed_services:
+  - ssh
+  - http
+  - https
+firewall_allowed_ports: []
+firewall_allowed_forward_ports: []
+firewall_rich_rules: []
+
+passwordless_sudo: yes  # if set to yes, no password is needed for users which belong to the group wheel when using sudo.
