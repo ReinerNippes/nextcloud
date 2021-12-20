@@ -22,8 +22,8 @@ php_yum_repo_name:
   Fedora: remi-php{{ php_version | replace(".","") }}
 
 php_db_extension:
-  mysql: php{{ php_version }}-mysql
-  pgsql: php{{ php_version }}-pgsql
+  mysql: php{% if ansible_os_family == "Suse" %}{{php_version.split('.')[0]}}{% else %}{{php_version}}{% endif %}-mysql
+  pgsql: php{% if ansible_os_family == "Suse" %}{{php_version.split('.')[0]}}{% else %}{{php_version}}{% endif %}-pgsql
 
 php_service_name:
   CentOS: php-fpm
@@ -31,6 +31,8 @@ php_service_name:
   Amazon: php-fpm
   Ubuntu: php{{ php_version }}-fpm
   Debian: php{{ php_version }}-fpm
+  openSUSE Tumbleweed: php-fpm
+  openSUSE Leap: php-fpm
 
 php_php_conf:
   CentOS: /etc/php.ini
@@ -38,6 +40,8 @@ php_php_conf:
   Amazon: /etc/php.ini
   Ubuntu: /etc/php/{{ php_version }}/fpm/php.ini
   Debian: /etc/php/{{ php_version }}/fpm/php.ini
+  openSUSE Tumbleweed: /etc/php{{ php_version.split('.')[0] }}/fpm/php.ini
+  openSUSE Leap: /etc/php{{ php_version.split('.')[0] }}/fpm/php.ini
 
 php_fpm_conf:
   CentOS: /etc/php-fpm.conf
@@ -45,6 +49,8 @@ php_fpm_conf:
   Amazon: /etc/php-fpm.conf
   Ubuntu: /etc/php/{{ php_version }}/fpm/php-fpm.conf
   Debian: /etc/php/{{ php_version }}/fpm/php-fpm.conf
+  openSUSE Tumbleweed: /etc/php{{ php_version.split('.')[0] }}/fpm/php-fpm.conf
+  openSUSE Leap: /etc/php{{ php_version.split('.')[0] }}/fpm/php-fpm.conf
 
 php_cli_conf:
   CentOS: /etc/php-cli.ini
@@ -52,6 +58,8 @@ php_cli_conf:
   Amazon: /etc/php-cli.ini
   Ubuntu: /etc/php/{{ php_version }}/cli/php.ini
   Debian: /etc/php/{{ php_version }}/cli/php.ini
+  openSUSE Tumbleweed: /etc/php{{ php_version.split('.')[0] }}/cli/php.ini
+  openSUSE Leap: /etc/php{{ php_version.split('.')[0] }}/cli/php.ini
 
 php_www_conf:
   CentOS: /etc/php-fpm.d/www.conf
@@ -59,6 +67,8 @@ php_www_conf:
   Amazon: /etc/php-fpm.d/www.conf
   Ubuntu: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
   Debian: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+  openSUSE Tumbleweed: /etc/php{{ php_version.split('.')[0] }}/fpm/php-fpm.d/www.conf
+  openSUSE Leap: /etc/php{{ php_version.split('.')[0] }}/fpm/php-fpm.d/www.conf
 
 php_pid:
   CentOS: /run/php-fpm/php{{ php_version }}-fpm.pid
@@ -66,3 +76,5 @@ php_pid:
   Amazon: /run/php-fpm/php{{ php_version }}-fpm.pid
   Ubuntu: /run/php/php{{ php_version }}-fpm.pid
   Debian: /run/php/php{{ php_version }}-fpm.pid
+  openSUSE Tumbleweed: /run/php-fpm/php{{ php_version.split('.')[0] }}-fpm.pid
+  openSUSE Leap: /run/php-fpm/php{{ php_version.split('.')[0] }}-fpm.pid

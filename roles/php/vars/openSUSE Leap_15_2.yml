@@ -1,0 +1,32 @@
+---
+php_package_required:
+  - "php{{ php_version.split('.')[0] }}"
+  # - "php{{ php_version.split('.')[0] }}-cli"
+  - "php{{ php_version.split('.')[0] }}-fpm"
+  - "php{{ php_version.split('.')[0] }}-curl"
+  # - php{{ php_version.split('.')[0] }}-common" # paket not known on Opensuse
+  - "php{{ php_version.split('.')[0] }}-gd"
+  - 2php{{ php_version.split('.')[0] }}{% if php_version.split('.')[0] | int < 8 %}-json{% endif %}" # No offical paket available on Opensuse Leap 15.3. Only available on Opensuse Tumbleweed and Opensuse Leap 15.2 (Last checked on 29.11.2021)
+  - "php{{ php_version.split('.')[0] }}-mbstring"
+  - "php{{ php_version.split('.')[0] }}-xmlreader" # just phpX-xml on Ubuntu?
+  - "php{{ php_version.split('.')[0] }}-xmlwriter" # just phpX-xml on Ubuntu?
+  - "php{{ php_version.split('.')[0] }}-intl"
+  - "php{{ php_version.split('.')[0] }}-bcmath"
+  - "php{{ php_version.split('.')[0] }}-gmp"
+  - "php{{ php_version.split('.')[0] }}-APCu"
+  - "php{{ php_version.split('.')[0] }}-opcache"
+  - "php{{ php_version.split('.')[0] }}-redis"
+  - "php{{ php_version.split('.')[0] }}-imagick"
+  - "php{{ php_version.split('.')[0] }}-bz2"
+  - "php{{ php_version.split('.')[0] }}-zip"
+  - "{{ php_db_extension[nextcloud_db_type] }}"
+  - "php{{ php_version.split('.')[0] }}-pear"
+  - "php{{ php_version.split('.')[0] }}-posix"      # Needed for occ maintenance:install commmand
+  - "php{{ php_version.split('.')[0] }}-pcntl"      # Needed for occ maintenance:install commmand
+  - "php{{ php_version.split('.')[0] }}-zlib"       # Needed for occ maintenance:install commmand
+  - "php{{ php_version.split('.')[0] }}-openssl"    # Needed for occ maintenance:install commmand
+
+php_package_optional:
+  - php{{ php_version.split('.')[0] }}-smbclient
+  - php{{ php_version.split('.')[0] }}-ldap
+  # - php{{ php_version.split('.')[0] }}-imap # No offical paket available on Opensuse
