@@ -53,16 +53,28 @@
     group: "{{ tls_certificate_group | default('root') }}"
     provider: ownca
 
-- debug: msg="{{ lookup('file', tls_certificate_ca ) }}" verbosity=2
-- debug: msg="{{ lookup('file', tls_certificate_file ) }}" verbosity=2
+# https://stackoverflow.com/a/54373284
+# Lookups occur on the local computer, not on the remote computer.
+# Therefore, if this playbook uses different hosts than localhost, it will throw an error
+# - debug: msg="{{ lookup('file', tls_certificate_ca ) }}" verbosity=2
+# - debug: msg="{{ lookup('file', tls_certificate_file ) }}" verbosity=2
+- name: get content of file {{ tls_certificate_ca }}
+  command: "cat {{ tls_certificate_ca }}"
+  register: tls_certificate_ca_content
+  changed_when: False
+  
+- name: get content of file {{ tls_certificate_file }}
+  command: "cat {{ tls_certificate_file }}"
+  register: tls_certificate_file_content
+  changed_when: False
 
 - name: create fullchain certificate
   copy:
     dest: "{{ tls_certificate_fullchain }}"
     content: |
-      {{ lookup('file', tls_certificate_ca ) }}
+      {{ tls_certificate_ca_content.stdout }}
       
-      {{ lookup('file', tls_certificate_file ) }}
+      {{ tls_certificate_file_content.stdout }}
     owner: "{{ tls_certificate_owner | default('root') }}"
     group: "{{ tls_certificate_group | default('root') }}"
     mode: '0644'
