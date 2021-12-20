@@ -26,12 +26,6 @@ nginx_yum_repo_url:
   Amazon: http://nginx.org/packages/mainline/centos/7/$basearch/
   CentOS: http://nginx.org/packages/mainline/centos/{{ ansible_distribution_major_version|int }}/$basearch/
 
-php_socket:
-  'CentOS': '/run/php-fpm/php{{ php_version }}-fpm.sock'
-  'Amazon': '/run/php-fpm/php{{ php_version }}-fpm.sock'
-  'Fedora': '/run/php-fpm/php{{ php_version }}-fpm.sock'
-  'Ubuntu': '/run/php/php{{ php_version }}-fpm.sock'
-  'Debian': '/run/php/php{{ php_version }}-fpm.sock'
 
 webserver_service_name:
   nginx:

@@ -67,12 +67,6 @@ php_pid:
   Ubuntu: /run/php/php{{ php_version }}-fpm.pid
   Debian: /run/php/php{{ php_version }}-fpm.pid
 
-php_socket:
-  CentOS: /run/php-fpm/php{{ php_version }}-fpm.sock
-  Fedora: /run/php-fpm/php{{ php_version }}-fpm.sock
-  Amazon: /run/php-fpm/php{{ php_version }}-fpm.sock
-  Ubuntu: /run/php/php{{ php_version }}-fpm.sock
-  Debian: /run/php/php{{ php_version }}-fpm.sock
 
 php_package_required:
   yum:
