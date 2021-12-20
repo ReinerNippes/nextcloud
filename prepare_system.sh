@@ -121,10 +121,46 @@ prepare_amzn() {
         echo
 }
 
+prepare_opensuse_tumbleweed() {
+        $SUDO zypper dup -y
+        $SUDO zypper install -y git vim mc curl python3 python3-setuptools python3-pip python3-passlib python3-wheel python3-bcrypt
+        # $SUDO zypper install -y git vim mc curl facter python3 python3-setuptools python3-pip python3-passlib python3-wheel python3-bcrypt
+        $SUDO pip3 install ansible==2.9.18 -U
+
+        set +x
+        echo
+        echo "------------------------------------------------------"
+        echo
+        echo "   Suse Tumbleweed ready to install nextcloud."
+        echo
+        ansible --version
+        echo
+        echo "------------------------------------------------------"
+        echo
+}
+
+prepare_opensuse_leap() {
+        $SUDO zypper up -y
+        $SUDO zypper install -y git vim mc curl python3 python3-setuptools python3-pip python3-passlib python3-wheel python3-bcrypt
+        # $SUDO zypper install -y git vim mc curl facter python3 python3-setuptools python3-pip python3-passlib python3-wheel python3-bcrypt
+        $SUDO pip3 install ansible==2.9.18 -U
+
+        set +x
+        echo
+        echo "------------------------------------------------------"
+        echo
+        echo "   Suse Leap ready to install nextcloud."
+        echo
+        ansible --version
+        echo
+        echo "------------------------------------------------------"
+        echo
+}
+
 usage() {
         echo
         echo "Linux distribution not detected."
-        echo "Use: ID=[ubuntu|debian|centos|raspbian|amzn|fedora] prepare_system.sh"
+        echo "Use: ID=[ubuntu|debian|centos|raspbian|amzn|fedora|opensuse-tumbleweed|opensuse-leap] prepare_system.sh"
         echo "Other distributions not yet supported."
         echo
 }
@@ -160,6 +196,12 @@ case $ID in
         ;;
         'amzn')
                 prepare_amzn
+        ;;
+        'opensuse-tumbleweed')
+                prepare_opensuse_tumbleweed
+        ;;
+        'opensuse-leap')
+                prepare_opensuse_leap
         ;;
 
         *)
