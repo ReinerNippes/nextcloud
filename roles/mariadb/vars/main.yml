@@ -7,6 +7,8 @@ mariadb_conf_dir:
   Fedora: /etc/my.cnf.d
   Ubuntu: /etc/mysql/mariadb.conf.d/
   Debian: /etc/mysql/mariadb.conf.d/
+  openSUSE Tumbleweed: /etc/my.cnf.d
+  openSUSE Leap: /etc/my.cnf.d
 
 mariadb_socket:
   Amazon: /var/lib/mysql/mysql.sock
@@ -14,6 +16,8 @@ mariadb_socket:
   Fedora: /var/lib/mysql/mysql.sock
   Ubuntu: /var/run/mysqld/mysqld.sock
   Debian: /var/run/mysqld/mysqld.sock
+  openSUSE Tumbleweed: /run/mysql/mysql.sock
+  openSUSE Leap: /run/mysql/mysql.sock
 
 mariadb_yum_repopath:
   Amazon: http://{{ mariadb_mirror_server }}/mariadb/mariadb-{{ mariadb_version }}.{{ mariadb_version_minor }}/yum/centos7-amd64

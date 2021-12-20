@@ -1,0 +1,32 @@
+---
+# apt related OS tasks
+
+- name: install mariadb-server packages
+  zypper:
+    name:
+      - mariadb
+      # - mariadb-client
+      # - python3-pymysql
+    state: latest
+
+# TBD: remove ufw task here and activate the firewalld task below (and do it right!)
+- name: open mariadb port if running on remote server
+  ufw:
+    rule: "allow"
+    port: "3306"
+    proto: "tcp"
+    from: "{{ hostvars[groups['nextcloud'][0]].ansible_default_ipv4.address }}"
+  when: groups['database'] != groups['webserver']
+
+# # TBD: Testing needed
+# - name: open mariadb port if running on remote server
+  # block:
+    # - name: open firewall ports
+      # firewalld:
+        # port: "3306/tcp"
+        # permanent: true
+        # immediate: false
+        # state: enabled
+      # vars:
+        # ansible_python_interpreter: python3
+  # when: groups['database'] != groups['webserver']
