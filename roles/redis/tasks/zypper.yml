@@ -1,0 +1,15 @@
+---
+# Zypper related OS tasks
+
+- name: install additional packages
+  zypper:
+    name: redis
+    state: latest
+
+# Needed because on Suse systems "Type" defaults to "notify".
+- name: Set systemd service to Type=forking
+  lineinfile:
+    path: /usr/lib/systemd/system/redis@.service
+    regexp : '^Type=.*'
+    line: 'Type=forking'
+  when: ansible_os_family == "Suse"
