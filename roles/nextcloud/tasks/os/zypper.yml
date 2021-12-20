@@ -1,0 +1,17 @@
+---
+# zypper related tasks on nextcloud server
+
+- name: install additional packages
+  zypper:
+    name:
+      - zip
+      - unzip
+      - bzip2
+      # - gnupg2
+      - ffmpeg-4
+      - ImageMagick 
+      - ImageMagick-config-7-SUSE # instead of the less save upstream configuration
+      - ghostscript
+      # - libfile-fcntllock-perl
+      - perl-File-FcntlLock # added as replacement for "libfile-fcntllock-perl"
+    state: latest
