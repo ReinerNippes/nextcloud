@@ -94,3 +94,28 @@
         ansible_python_interpreter: python3
   when: groups['redis'][0] != groups['webserver'][0]
   delegate_to: redis
+
+# No restart of service or machine required when removing a profile from apparmor.
+# When adding the profile again to apparmor ( rm -rf /etc/apparmor.d/disable/php-fpm && apparmor_parser -a /etc/apparmor.d/php-fpm) then "systemctl restart php-fpm.service" is required
+# When the following three tasks are not executed, you can monitor with
+# tail -f /var/log/audit/audit.log | grep --line-buffered DENIED
+# if the apparmor profile is triggered, when loading the nextcloud web page in a browser
+# In parallel you can use 
+# tail -f /var/log/nginx/error.log
+# to see the "Permission denied in Unknown on line 0Unable to open primary script" error.
+# TBD: Modify the apparmor profile instead of deactivating it?!
+- name: Check if apparmor php-fpm profile is disabled
+  stat:
+    path: /etc/apparmor.d/disable/php-fpm
+  register: stat_result
+
+- name: Unload apparmor php-fpm profile because of problems for nginx to access the php socket
+  command: apparmor_parser -R /etc/apparmor.d/php-fpm
+  when: not stat_result.stat.exists
+
+- name: Create a symbolic link to disable apparmor php-fpm profile
+  ansible.builtin.file:
+    src: /etc/apparmor.d/php-fpm
+    dest: /etc/apparmor.d/disable/php-fpm
+    state: link
+  when: not stat_result.stat.exists
