@@ -44,7 +44,6 @@
 - name: preinstall web server tasks
   include_tasks: letsencrypt_web_site/{{ nextcloud_webserver_type }}.yml
 
-# TBD: replace /var/www by {{ nextcloud_www_dir }}. (Also TBD in some other apache and nginx configuration files!)
 - name: get certificates
   command: |
     ./acme.sh
@@ -58,7 +57,7 @@
       --key-file {{ tls_certificate_key }}
       --ca-file {{ tls_certificate_ca }}
       --fullchain-file {{ tls_certificate_fullchain }}
-      --webroot /var/www/letsencrypt
+      --webroot {{ www_dir }}/letsencrypt
       --reloadcmd "systemctl restart {{ webserver_service_name[nextcloud_webserver_type][ansible_os_family] }}"
       {% if tls_certificate_test %}--test --debug{% endif %}
       --server letsencrypt
