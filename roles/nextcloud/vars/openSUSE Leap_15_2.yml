@@ -1,0 +1,11 @@
+---
+additional_required_packages:
+    - zip
+    - unzip
+    - bzip2
+    - gpg2 # added as replacement for "gnupg2"
+    - ffmpeg-3
+    - ImageMagick 
+    - ImageMagick-config-7-SUSE # instead of the less save upstream configuration "ImageMagick-config-7-upstream"
+    - ghostscript
+    - perl-File-FcntlLock # added as replacement for "libfile-fcntllock-perl"
