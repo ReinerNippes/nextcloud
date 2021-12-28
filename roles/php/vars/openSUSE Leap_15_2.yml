@@ -1,12 +1,12 @@
 ---
 php_package_required:
   - "php{{ php_version.split('.')[0] }}"
-  # - "php{{ php_version.split('.')[0] }}-cli"
+  # - "php{{ php_version.split('.')[0] }}-cli" # Not available
   - "php{{ php_version.split('.')[0] }}-fpm"
   - "php{{ php_version.split('.')[0] }}-curl"
   # - php{{ php_version.split('.')[0] }}-common" # paket not known on Opensuse
   - "php{{ php_version.split('.')[0] }}-gd"
-  - 2php{{ php_version.split('.')[0] }}{% if php_version.split('.')[0] | int < 8 %}-json{% endif %}" # No offical paket available on Opensuse Leap 15.3. Only available on Opensuse Tumbleweed and Opensuse Leap 15.2 (Last checked on 29.11.2021)
+  - "php{{ php_version.split('.')[0] }}-json"
   - "php{{ php_version.split('.')[0] }}-mbstring"
   - "php{{ php_version.split('.')[0] }}-xmlreader" # just phpX-xml on Ubuntu?
   - "php{{ php_version.split('.')[0] }}-xmlwriter" # just phpX-xml on Ubuntu?

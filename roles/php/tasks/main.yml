@@ -9,7 +9,8 @@
    - "{{ ansible_distribution }}.yml"
    - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
    - "{{ ansible_os_family }}.yml"
-   
+   - "default.yml"
+
 - name: pkg manager spefic tasks
   include_tasks: "{{ ansible_pkg_mgr }}.yml"
 
