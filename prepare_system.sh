@@ -203,7 +203,6 @@ case $ID in
         'opensuse-leap')
                 prepare_opensuse_leap
         ;;
-
         *)
                 usage
         ;;
