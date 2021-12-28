@@ -108,14 +108,23 @@
   stat:
     path: /etc/apparmor.d/disable/php-fpm
   register: stat_result
+  when: >-
+    (ansible_distribution == 'openSUSE Tumbleweed' or 
+    (ansible_distribution == 'openSUSE Leap' and ansible_distribution_major_version == '15' and ansible_distribution_release == '4'))
 
 - name: Unload apparmor php-fpm profile because of problems for nginx to access the php socket
   command: apparmor_parser -R /etc/apparmor.d/php-fpm
-  when: not stat_result.stat.exists
+  when: >-
+    (ansible_distribution == 'openSUSE Tumbleweed' or 
+    (ansible_distribution == 'openSUSE Leap' and ansible_distribution_major_version == '15' and ansible_distribution_release == '4')) and
+    not stat_result.stat.exists
 
 - name: Create a symbolic link to disable apparmor php-fpm profile
   ansible.builtin.file:
     src: /etc/apparmor.d/php-fpm
     dest: /etc/apparmor.d/disable/php-fpm
     state: link
-  when: not stat_result.stat.exists
+  when: >-
+    (ansible_distribution == 'openSUSE Tumbleweed' or 
+    (ansible_distribution == 'openSUSE Leap' and ansible_distribution_major_version == '15' and ansible_distribution_release == '4')) and
+    not stat_result.stat.exists
