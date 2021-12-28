@@ -7,7 +7,7 @@
 - name: configure redis
   template:
     src: redis.conf.j2
-    dest: "{{ redis_conf_path[ansible_distribution] }}/{{ redis_conf_file_name[ansible_distribution] }}.conf"  # Maybe also use ansible_os_family instead of ansible_distribution here?
+    dest: "{{ redis_conf_path[ansible_distribution] }}/{{ redis_conf_file_name[ansible_distribution] }}.conf"
     owner: redis
     group: redis
     mode: 0600
