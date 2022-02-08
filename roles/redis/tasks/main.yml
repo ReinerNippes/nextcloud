@@ -21,6 +21,10 @@
     groups: redis
   when: groups['redis'] == groups['webserver']
 
+- name: check for virtualization
+  ansible.builtin.shell: "systemd-detect-virt -c"
+  register: virtualization_type
+
 - name: sysctl vm.overcommit_memory=1
   sysctl:
     name: vm.overcommit_memory
@@ -28,6 +32,7 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
+  when: virtualization_type is none
 
 - name: start and enable redis
   systemd:
