@@ -1,10 +1,6 @@
 ---
 # performance and sercurity tuning
 
-- name: check for virtualization
-  ansible.builtin.shell: "systemd-detect-virt -c"
-  register: virtualization_type
-
 - name: sysctl vm.overcommit_memory=1
   sysctl: 
     name: vm.overcommit_memory
@@ -12,7 +8,7 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
-  when: virtualization_type is none
+  when: ansible_virtualization_type not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
 
 - name: sysctl -w net.core.somaxconn=65535
   sysctl:
@@ -21,13 +17,13 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
-  when: virtualization_type is none
+  when: ansible_virtualization_type not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
 
 - name: check /sys/kernel/mm/transparent_hugepage/enabled 
   stat:
     path: /sys/kernel/mm/transparent_hugepage/enabled
   register: hugepage_enabled
-  when: virtualization_type is none
+  when: ansible_virtualization_type not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
 
 - name: disable transparent hugepages
   block:
