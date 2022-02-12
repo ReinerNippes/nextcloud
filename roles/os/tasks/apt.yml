@@ -11,6 +11,8 @@
 - name: install additional packages
   apt:
     name:
+      - gnupg
+      - sudo
       - zip
       - unzip
       - bzip2
