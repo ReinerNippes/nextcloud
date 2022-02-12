@@ -8,6 +8,7 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
+  when: ansible_virtualization_type not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ] 
 
 - name: sysctl -w net.core.somaxconn=65535
   sysctl:
@@ -16,11 +17,13 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
+  when: ansible_virtualization_type not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
 
 - name: check /sys/kernel/mm/transparent_hugepage/enabled 
   stat:
     path: /sys/kernel/mm/transparent_hugepage/enabled
   register: hugepage_enabled
+  when: ansible_virtualization_type not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
 
 - name: disable transparent hugepages
   block:
