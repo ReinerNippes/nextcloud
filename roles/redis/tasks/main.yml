@@ -28,6 +28,7 @@
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
+  when: ansible_virtualization_type not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
 
 - name: start and enable redis
   systemd:
