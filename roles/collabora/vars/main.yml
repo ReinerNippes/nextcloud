@@ -10,4 +10,4 @@ tls_certificate_fullchain: "{{ tls_certificate_directory }}/ca-chain.cert.pem"
 tls_certificate_ca: "{{ tls_certificate_directory }}/ca.pem"
 tls_certificate_owner: lool
 tls_certificate_group: lool
-tls_certificate_type: selfsigned
+tls_certificate_type: "{{ nextcloud_certificate_type }}"
