@@ -18,9 +18,19 @@ credential_store: ~/.nextcloud
 #      storage_class = STANDARD_IA
 
 # redis config
-# if inventory_name is localhost unix socket will be useed
+redis_conf_file_name:
+  CentOS: 'redis'
+  Fedora: 'redis'
+  Amazon: 'redis'
+  Ubuntu: 'redis'
+  Debian: 'redis'
+  openSUSE Tumbleweed: 'nextcloud'
+  openSUSE Leap: 'nextcloud'
+
+# if inventory_name is localhost unix socket will be used
+# Also use a dictionary for redis_socket to be able to configure different path for different systems?
 redis_socket:
-  path:    "/var/run/redis/redis.sock"
+  path:    "/var/run/redis/{{ redis_conf_file_name[ansible_distribution] }}.sock"
   perm:    "770"
 redis_tcp:
   address: "{{ hostvars[groups['redis'][0]].ansible_default_ipv4.address }}"
@@ -32,17 +42,21 @@ web_user:
   apache:
     RedHat: "apache"
     Debian: "www-data"
+    Suse: "wwwrun" # Not tested
   nginx:
     RedHat: "nginx"
     Debian: "nginx"
+    Suse: "nginx"
 
 web_group:
   apache:
     RedHat: "apache"
     Debian: "www-data"
+    Suse: "www" # Not tested
   nginx:
     RedHat: "nginx"
     Debian: "nginx"
+    Suse: "nginx"
 
 systemd_service_path:
   CentOS: '/usr/lib/systemd/system'
@@ -50,6 +64,14 @@ systemd_service_path:
   Amazon: '/usr/lib/systemd/system'
   Ubuntu: '/lib/systemd/system'
   Debian: '/lib/systemd/system'
+php_socket:
+  'CentOS': '/run/php-fpm/php{{ php_version }}-fpm.sock'
+  'Amazon': '/run/php-fpm/php{{ php_version }}-fpm.sock'
+  'Fedora': '/run/php-fpm/php{{ php_version }}-fpm.sock'
+  'Ubuntu': '/run/php/php{{ php_version }}-fpm.sock'
+  'Debian': '/run/php/php{{ php_version }}-fpm.sock'
+  'openSUSE Tumbleweed': "/run/php-fpm/php{{ php_version.split('.')[0] }}-fpm.sock" 
+  'openSUSE Leap': "/run/php-fpm/php{{ php_version.split('.')[0] }}-fpm.sock"
 
 # define tls-certificate for nextcloud webserver and onlyoffice
 

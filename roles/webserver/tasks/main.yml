@@ -2,7 +2,7 @@
 # tasks file for nginx
 
 
-- name: pkg manager spefic tasks
+- name: pkg manager specific tasks
   include_tasks: "{{ nextcloud_webserver_type }}/{{ ansible_pkg_mgr }}.yml"
 
 - name: create some folders

@@ -1,0 +1,139 @@
+---
+# tasks file for ansible-role-firewalld
+
+- name: Ensure firewalld is installed.
+  package: 
+    name: firewalld 
+    state: present
+  become: true
+
+- name: Ensure firewalld is enabled and started.
+  service: 
+    name: firewalld 
+    enabled: yes 
+    state: started
+  become: true
+
+- name: Ensure the 'lo' interface is in the 'trusted' zone.
+  command: firewall-cmd --zone=trusted --list-interfaces
+  changed_when: false
+  register: result_firewalld_trusted_interfaces
+  become: true
+
+- name: Ensure the 'lo' interface is in the 'trusted' zone.
+  command: firewall-cmd --zone=trusted --add-interface=lo --permanent
+  when: "'lo' not in result_firewalld_trusted_interfaces.stdout"
+  notify: Reload firewalld
+  become: true
+
+- name: Ensure 'public' is the default firewalld zone.
+  command: firewall-cmd --get-default-zone
+  changed_when: false
+  register: result_firewall_default_zone
+  become: true
+
+- name: Set 'public' as the default firewalld zone.
+  command: firewall-cmd --set-default-zone={{ firewall_default_zone }}
+  when: "result_firewall_default_zone.stdout != firewall_default_zone"
+  become: true
+
+- name: Get current firewalld allowed services.
+  shell: >
+    firewall-cmd --zone={{ firewall_default_zone }} --list-services | tr " " "\n"
+  changed_when: false
+  register: result_firewall_allowed_services
+  become: true
+
+- name: Disable unreferenced firewalld services.
+  command: firewall-cmd --zone={{ firewall_default_zone }} --remove-service={{ item }} --permanent
+  when: item not in firewall_allowed_services
+  with_items: "{{ result_firewall_allowed_services.stdout_lines }}"
+  notify: Reload firewalld
+  become: true
+
+- name: Get current firewalld allowed ports.
+  shell: >
+    firewall-cmd --zone={{ firewall_default_zone }} --list-ports | tr " " "\n"
+  changed_when: false
+  register: result_firewall_allowed_ports
+  become: true
+
+- name: Disable unreferenced firewalld ports.
+  command: firewall-cmd --zone={{ firewall_default_zone }} --remove-port={{ item }} --permanent
+  when: item not in firewall_allowed_ports
+  with_items: "{{ result_firewall_allowed_ports.stdout_lines }}"
+  notify: Reload firewalld
+  become: true
+
+- name: Get current firewalld allowed forward ports.
+  shell: >
+    firewall-cmd --zone={{ firewall_default_zone }} --list-forward-ports
+  changed_when: false
+  register: result_firewall_allowed_forward_ports
+  become: true
+
+- name: Disable unreferenced firewalld forward ports.
+  command: firewall-cmd --zone={{ firewall_default_zone }} --remove-forward-port={{ item }} --permanent
+  when: item not in firewall_allowed_forward_ports
+  with_items: "{{ result_firewall_allowed_forward_ports.stdout_lines }}"
+  notify: Reload firewalld
+  become: true
+
+- name: Get current firewalld rich rules.
+  shell: >
+    firewall-cmd --zone={{ firewall_default_zone }} --list-rich-rules
+  changed_when: false
+  register: result_firewall_rich_rules
+  become: true
+
+- name: Disable unreferenced firewalld rich rules.
+  command: >
+    firewall-cmd --zone={{ firewall_default_zone }} --remove-rich-rule='{{ item }}' --permanent
+  when: item not in firewall_rich_rules
+  with_items: "{{ result_firewall_rich_rules.stdout_lines }}"
+  notify: Reload firewalld
+  become: true
+
+- name: Configure firewalld allowed services.
+  command: >
+    firewall-cmd
+    --zone={{ firewall_default_zone }}
+    --add-service={{ item }}
+    --permanent
+  when: item not in result_firewall_allowed_services.stdout_lines
+  with_items: "{{ firewall_allowed_services }}"
+  notify: Reload firewalld
+  become: true
+
+- name: Configure firewalld allowed ports.
+  command: >
+    firewall-cmd
+    --zone={{ firewall_default_zone }}
+    --add-port={{ item }}
+    --permanent
+  when: item not in result_firewall_allowed_ports.stdout_lines
+  with_items: "{{ firewall_allowed_ports }}"
+  notify: Reload firewalld
+  become: true
+
+- name: Configure firewalld allowed forward ports.
+  command: >
+    firewall-cmd
+    --zone={{ firewall_default_zone }}
+    --add-forward-port={{ item }}
+    --permanent
+  when: item not in result_firewall_allowed_forward_ports.stdout_lines
+  with_items: "{{ firewall_allowed_forward_ports }}"
+  notify: Reload firewalld
+  become: true
+
+- name: Configure firewalld rich rules.
+  command: >
+    firewall-cmd
+    --zone={{ firewall_default_zone }}
+    --add-rich-rule='{{ item }}'
+    --permanent
+  when: item not in result_firewall_rich_rules.stdout_lines
+  with_items: "{{ firewall_rich_rules }}"
+  notify: Reload firewalld
+  become: true

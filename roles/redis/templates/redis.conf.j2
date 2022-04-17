@@ -1,6 +1,6 @@
 requirepass {{ lookup('password', '{{ credential_store }}/redis_secret chars=ascii_letters,digits length=32') }}
 daemonize yes
-pidfile /var/run/redis/redis-server.pid
+pidfile {{ redis_pid_path[ansible_distribution] }}
 {% if groups['redis'] == groups['webserver'] %}
 bind 127.0.0.1
 port 0
@@ -14,7 +14,7 @@ tcp-backlog 511
 timeout 0
 tcp-keepalive 0
 loglevel notice
-logfile /var/log/redis/redis-server.log
+logfile {{ redis_log_path[ansible_distribution] }}
 databases 16
 save 900 1
 save 300 10

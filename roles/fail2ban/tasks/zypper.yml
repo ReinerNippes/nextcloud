@@ -1,0 +1,7 @@
+---
+# Ubuntu related OS tasks
+
+- name: install fail2ban packages
+  zypper:
+    name: fail2ban
+    state: latest

@@ -2,7 +2,7 @@
 
 - name: create letsencrypt web directory
   file:
-    name: /var/www/letsencrypt/.well-known
+    name: "{{ www_dir }}/letsencrypt/.well-known"
     owner: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
     group: "{{ web_group[nextcloud_webserver_type][ansible_os_family] }}"
     mode: 0750

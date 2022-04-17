@@ -22,7 +22,7 @@
 
 - name: install needed php packages
   yum:
-    name: "{{ php_package_required[ansible_pkg_mgr] }}"
+    name: "{{ php_package_required }}"
     state: latest
     enablerepo: "{{ php_yum_repo_name[ansible_distribution] }}"
   vars:
@@ -30,7 +30,7 @@
 
 - name: install optional php packages
   yum:
-    name: "{{ php_package_optional[ansible_pkg_mgr] }}"
+    name: "{{ php_package_optional }}"
     state: latest
     enablerepo: "{{ php_yum_repo_name[ansible_distribution] }}"
   vars:

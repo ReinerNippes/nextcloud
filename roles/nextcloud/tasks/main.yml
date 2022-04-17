@@ -1,5 +1,14 @@
 ---
 # tasks file for nextcloud
+- name: include os specific vars
+  include_vars: '{{ item }}'
+  with_first_found:
+       - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}_{{ansible_distribution_release}}.yml"
+       - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml"
+       - "{{ ansible_distribution }}.yml"
+       - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
+       - "{{ ansible_os_family }}.yml"
+       - "default.yml"
 
 - name: include os specific tasks
   include_tasks: 'os/main.yml'
@@ -13,12 +22,22 @@
 - name: install nextcloud
   unarchive: 
     src: /tmp/nextcloud.tar.bz2
-    dest: /var/www
+    dest: "{{ www_dir }}"
     remote_src: true
     owner: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
     group: "{{ web_group[nextcloud_webserver_type][ansible_os_family] }}"
     mode:  "o-rwx"
     creates: "{{ nextcloud_www_dir }}/occ"
+
+# https://github.com/nextcloud/server/issues/25436
+# https://github.com/nextcloud/server/pull/25474#issuecomment-773134487
+- name: Modify nextcloud code
+  replace:
+    path: "{{ nextcloud_www_dir }}/lib/private/DB/ConnectionFactory.php"
+    regexp : ^(\s*\'row_format\' => \')compressed(\',)
+    replace: \1dynamic\2
+  # when: nextcloud_db_type == "mysql" and mariadb_version >=10.6 and nextcloud_version <=23
+  when: nextcloud_db_type == "mysql"
 
 - name: include selinux tasks
   include_tasks: selinux.yml

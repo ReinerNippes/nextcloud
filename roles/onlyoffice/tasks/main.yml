@@ -18,10 +18,10 @@
       JWT_ENABLED: "true"
       JWT_SECRET: "{{ lookup('password', '{{ credential_store }}/onlyoffice_secret chars=ascii_letters,digits length=32') }}"
     volumes:
-      - "{{ tls_certificate_key }}:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro"
-      - "{{ tls_certificate_file }}:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro"
-      - "{{ tls_certificate_fullchain }}:/var/www/onlyoffice/Data/certs/ca-certificates.pem:ro"
-      - "{{ tls_certificate_directory }}/dhparam.pem:/var/www/onlyoffice/Data/certs/dhparam.pem:ro"
+      - "{{ tls_certificate_key }}:{{ www_dir }}/onlyoffice/Data/certs/onlyoffice.key:ro"
+      - "{{ tls_certificate_file }}:{{ www_dir }}/onlyoffice/Data/certs/onlyoffice.crt:ro"
+      - "{{ tls_certificate_fullchain }}:{{ www_dir }}/onlyoffice/Data/certs/ca-certificates.pem:ro"
+      - "{{ tls_certificate_directory }}/dhparam.pem:{{ www_dir }}/onlyoffice/Data/certs/dhparam.pem:ro"
 
 - name: prune container and images
   docker_prune:

@@ -3,6 +3,6 @@
 
 - name: restart redis-server
   systemd:
-    name: redis-server.service
+    name: '{{ redis_service_name[ansible_distribution] }}.service'
     state: restarted
-  listen: "restart web services"
+  listen: "restart redis-server"

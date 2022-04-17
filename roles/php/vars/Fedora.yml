@@ -1,0 +1,27 @@
+---
+php_package_required:
+  - php
+  - php-cli
+  - php-fpm
+  - php-curl
+  - php-common
+  - php-gd
+  - php{% if php_version.split('.')[0] | int < 8 %}-json{% endif %}
+  - php-mbstring
+  - php-xml
+  - php-intl
+  - php-pecl-apcu
+  - php-redis
+  - php-opcache
+  - php-pecl-imagick
+  - php-gmp
+  - php-bcmath
+  - php-bz2
+  - php-pecl-zip
+  - php-{% if nextcloud_db_type == 'mysql' %}mysqlnd{% elif nextcloud_db_type == 'pgsql' %}pgsql{% endif %}
+  - php-pear
+
+php_package_optional:
+  - php-smbclient
+  - php-imap
+  - php-ldap

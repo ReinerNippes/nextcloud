@@ -57,7 +57,7 @@
       --key-file {{ tls_certificate_key }}
       --ca-file {{ tls_certificate_ca }}
       --fullchain-file {{ tls_certificate_fullchain }}
-      --webroot /var/www/letsencrypt
+      --webroot {{ www_dir }}/letsencrypt
       --reloadcmd "systemctl restart {{ webserver_service_name[nextcloud_webserver_type][ansible_os_family] }}"
       {% if tls_certificate_test %}--test --debug{% endif %}
       --server letsencrypt

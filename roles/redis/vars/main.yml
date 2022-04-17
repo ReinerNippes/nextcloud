@@ -11,5 +11,33 @@ redis_conf_path:
   Fedora: '/etc'
   Amazon: '/etc'
   Ubuntu: '/etc/redis'
-  Debian: '/etc/redis' 
-  
+  Debian: '/etc/redis'
+  openSUSE Tumbleweed: '/etc/redis'
+  openSUSE Leap: '/etc/redis'
+
+redis_service_name:
+  CentOS: 'redis-server'
+  Fedora: 'redis-server'
+  Amazon: 'redis-server'
+  Ubuntu: 'redis-server'
+  Debian: 'redis-server'
+  openSUSE Tumbleweed: 'redis@{{ redis_conf_file_name[ansible_distribution] }}'
+  openSUSE Leap: 'redis@{{ redis_conf_file_name[ansible_distribution] }}'
+
+redis_pid_path:
+  CentOS: '/var/run/redis/redis-server.pid'
+  Fedora: '/var/run/redis/redis-server.pid'
+  Amazon: '/var/run/redis/redis-server.pid'
+  Ubuntu: '/var/run/redis/redis-server.pid'
+  Debian: '/var/run/redis/redis-server.pid'
+  openSUSE Tumbleweed: '/run/redis/{{ redis_conf_file_name[ansible_distribution] }}.pid'
+  openSUSE Leap: '/var/run/redis/{{ redis_conf_file_name[ansible_distribution] }}.pid'
+
+redis_log_path:
+  CentOS: '/var/log/redis/redis-server.log'
+  Fedora: '/var/log/redis/redis-server.log'
+  Amazon: '/var/log/redis/redis-server.log'
+  Ubuntu: '/var/log/redis/redis-server.log'
+  Debian: '/var/log/redis/redis-server.log'
+  openSUSE Tumbleweed: '/var/log/redis/{{ redis_conf_file_name[ansible_distribution] }}.log'
+  openSUSE Leap: '/var/log/redis/{{ redis_conf_file_name[ansible_distribution] }}.log'

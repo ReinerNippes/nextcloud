@@ -7,4 +7,5 @@ imagemagick_xml_path:
   Amazon: /etc/ImageMagick/policy.xml
   Ubuntu: /etc/ImageMagick-6/policy.xml
   Debian: /etc/ImageMagick-6/policy.xml
-  
+  openSUSE Tumbleweed: /etc/ImageMagick-7-SUSE/policy.xml
+  openSUSE Leap: /etc/ImageMagick-7-SUSE/policy.xml

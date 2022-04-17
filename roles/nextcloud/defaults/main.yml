@@ -4,6 +4,7 @@
 nextcloud_config:
   - "overwrite.cli.url --value=https://{{ nextcloud_fqdn }}"
   - "trusted_domains 0 --value={{ nextcloud_fqdn }}"
+  - "trusted_domains 1 --value={{ ansible_default_ipv4['address'] }}"
   - "redis host --value='{% if groups['redis'][0] == groups['webserver'][0] %}{{ redis_socket.path }}{% else %}{{ redis_tcp.address }}{% endif %}'"
   - "redis port --value='{% if groups['redis'][0] == groups['webserver'][0] %}0{% else %}{{ redis_tcp.port }}{% endif %}' --type=integer"
   - "redis timeout --value='0' --type=integer"

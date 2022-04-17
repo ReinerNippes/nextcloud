@@ -1,0 +1,8 @@
+---
+# zypper related tasks on nextcloud server
+
+- name: install additional packages
+  zypper:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ additional_required_packages }}"

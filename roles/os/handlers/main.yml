@@ -1,7 +1,20 @@
 ---
 # handlers file for os
+- name: restart firewall
+  service: 
+    name: firewall 
+    state: restarted
+  become: true
+
+- name: Reload firewalld
+  command: firewall-cmd --reload
+  become: true
 
 - name: reload ufw
   ufw:
     state: reloaded
   when: ufw_state == 'enabled'
+
+- name: Reboot server
+  reboot:
+  become: true
