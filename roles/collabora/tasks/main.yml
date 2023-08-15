@@ -1,17 +1,17 @@
 ---
 # tasks file for collabora installation
 
-- name: create group lool
+- name: create group cool
   group:
-    name: lool
+    name: cool
     system: true
     state: present
 
-- name: create user lool
+- name: create user cool
   user:
-    name: lool
-    group: lool
-    home: /opt/lool
+    name: cool
+    group: cool
+    home: /opt/cool
     shell: /usr/sbin/nologin
     system: true
     state: present
