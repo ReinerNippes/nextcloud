@@ -17,9 +17,9 @@
 - name: install collabora
   apt:
     name: 
-      - "loolwsd"
+      - "coolwsd"
       - "code-brand"
       - "python3-lxml"
-      - "collaboraoffice6.4-dict*"
-      - "collaboraofficebasis6.4*"
+      - "collaboraoffice-dict-*"
+      - "collaboraofficebasis-*"
     state: latest
