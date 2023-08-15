@@ -1,24 +1,24 @@
 ---
 # tasks file for collabora installation
 
-- name: create group lool
+- name: create group cool
   group:
-    name: lool
+    name: cool
     system: true
     state: present
 
-- name: create user lool
+- name: create user cool
   user:
-    name: lool
-    group: lool
-    home: /opt/lool
+    name: cool
+    group: cool
+    home: /opt/cool
     shell: /usr/sbin/nologin
     system: true
     state: present
 
-- name: create /etc/loolwsd
+- name: create /etc/coolwsd
   file:
-    path: /etc/loolwsd
+    path: /etc/coolwsd
     owner: root
     group: root
     mode:  0755
@@ -33,28 +33,31 @@
 
 - name: set allow domain {{ nextcloud_fqdn | regex_replace('\\.', '\\.') }}
   xml:
-    path: /etc/loolwsd/loolwsd.xml
+    path: /etc/coolwsd/coolwsd.xml
     xpath: /config/storage/wopi
     attribute: allow
     set_children:
       - host: "{{ nextcloud_fqdn | regex_replace('\\.', '\\.') }}"
     backup: yes
-  notify: restart loolwsd
+  notify: restart coolwsd
 
-- name: loolwsd.xml add attribute allow domain {{ nextcloud_fqdn | regex_replace('\\.', '\\.') }}
+- name: coolwsd.xml add attribute allow domain {{ nextcloud_fqdn | regex_replace('\\.', '\\.') }}
   xml:
-    path: /etc/loolwsd/loolwsd.xml
+    path: /etc/coolwsd/coolwsd.xml
     xpath: /config/storage/wopi/host[text()="{{ item }}"]
     attribute: allow
     value: 'true'
     backup: yes
   loop:
     - "{{ nextcloud_fqdn | regex_replace('\\.', '\\.') }}"
-  notify: restart loolwsd
+  notify: restart coolwsd
 
-- name: start loolwsd
+- name: Return motd to registered var
+  ansible.builtin.command: sudo coolconfig set ssl.enable false && sudo coolconfig set ssl.termination true && sudo coolconfig set storage.wopi.host ooyetu.irdidoes.tech
+
+- name: start coolwsd
   systemd:
-    name: loolwsd.service
+    name: coolwsd.service
     state: started
     enabled: true
 
