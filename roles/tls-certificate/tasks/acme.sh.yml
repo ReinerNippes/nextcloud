@@ -1,72 +1,161 @@
 ---
-# create letsencrypt certificates with acme.sh
 
-- name: create cert directory
-  file:
-    name: "{{ item }}"
+- name: Build domain list, reloadcmd and decide on deploy hook usage
+  ansible.builtin.set_fact:
+    cert_domains_args: "{{ ([tls_certificate_common_name] + (additional_certificate_fqdns | default([])))
+                          | map('regex_replace', '^(.*)$', '-d \\1')
+                          | join(' ') }}"
+    tls_use_deploy_hook: true
+    tls_use_letsencrypt_staging_roots: >-
+      {{
+        (tls_certificate.acme_ca | default('')) is search('acme-staging-v02.api.letsencrypt.org')
+        or (tls_certificate.acme_ca | default('')) == 'letsencrypt_test'
+      }}
+    tls_letsencrypt_staging_roots:
+      - name: letsencrypt-stg-root-x1
+        url: https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem
+      - name: letsencrypt-stg-root-x2
+        url: https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x2.pem
+      - name: letsencrypt-stg-root-ye
+        url: https://letsencrypt.org/certs/staging/gen-y/root-ye.pem
+      - name: letsencrypt-stg-root-yr
+        url: https://letsencrypt.org/certs/staging/gen-y/root-yr.pem
+    tls_reload_services: >-
+      {{
+        (
+          (inventory_hostname in groups['nextcloud']
+          or inventory_hostname in groups['signal'])
+          | ternary([ tls_service_map.webserver ], [])
+        )
+        +
+        (
+          (inventory_hostname in groups['coturn'])
+          | ternary([ tls_service_map.coturn ], [])
+        )
+        +
+        (
+          (inventory_hostname in groups['redis']
+           and not inventory_hostname in groups['nextcloud'])
+          | ternary([ tls_service_map.redis ], [])
+        )
+        +
+        (
+          (inventory_hostname in groups['database']
+           and not inventory_hostname in groups['nextcloud'])
+          | ternary([ tls_service_map.database ], [])
+        )
+      }}
+    tls_restart_containers: >-
+      {{
+        (
+          (inventory_hostname in groups.get('onlyoffice', []))
+          | ternary(['onlyoffice'], [])
+        )
+      }}
+
+- name: Build reload command
+  ansible.builtin.set_fact:
+    tls_reloadcmd: >-
+      {{
+        (
+          (
+            tls_reload_services
+            | map('regex_replace', '^(.*)$',
+                  'systemctl reload \1 || systemctl restart \1 || true')
+            | list
+          )
+          +
+          (
+            tls_restart_containers
+            | map('regex_replace', '^(.*)$',
+                  'docker restart \1 || true')
+            | list
+          )
+        ) | join(' ; ')
+      }}
+
+- name: Install Let's Encrypt staging root certificates on Debian
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "/usr/local/share/ca-certificates/{{ item.name }}.crt"
     owner: root
     group: root
-    mode: 0755
-    state: directory
-  loop:
-    - "{{ tls_certificate_file | dirname }}"
-    - "{{ tls_certificate_directory }}"
+    mode: "0644"
+  loop: "{{ tls_letsencrypt_staging_roots }}"
+  when:
+    - tls_use_letsencrypt_staging_roots
+    - ansible_facts['os_family'] == 'Debian'
 
-- name: check acme.sh is installed
-  stat:
-    path: "{{ certificates_acmesh_dir }}/acme.sh"
-  register: acme
+- name: Update trusted CA store on Debian
+  ansible.builtin.command: update-ca-certificates
+  register: tls_debian_update_ca
+  changed_when: "'0 added, 0 removed' not in tls_debian_update_ca.stdout"
+  when:
+    - tls_use_letsencrypt_staging_roots
+    - ansible_facts['os_family'] == 'Debian'
 
-- name: install acme.sh
-  block:
-    - name: pkg manager spefic tasks
-      include_tasks: "{{ ansible_pkg_mgr }}.yml"
+- name: Install Let's Encrypt staging root certificates on RedHat
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ item.name }}.pem"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ tls_letsencrypt_staging_roots }}"
+  when:
+    - tls_use_letsencrypt_staging_roots
+    - ansible_facts['os_family'] == 'RedHat'
 
-    - name: git clone acme.sh
-      git:
-        repo: "https://github.com/Neilpang/acme.sh.git"
-        dest: "{{ certificates_acmesh_git_dir }}"
-        update: no
-        version: master
+- name: Update trusted CA store on RedHat
+  ansible.builtin.command: update-ca-trust extract
+  changed_when: false
+  when:
+    - tls_use_letsencrypt_staging_roots
+    - ansible_facts['os_family'] == 'RedHat'
 
-    - name: install acme.sh
-      command: |
-        ./acme.sh
-          --install
-          --home "{{ certificates_acmesh_dir }}" 
-          --config-home {{ certificates_acmesh_dir }}/conf
-          --cert-home {{ certificates_acmesh_dir }}/certs
-      args:
-        chdir: "{{ certificates_acmesh_git_dir }}"
-        creates: "{{ certificates_acmesh_dir }}/acme.sh"
-  when: not acme.stat.exists
+- name: Install deploy hook script
+  ansible.builtin.copy:
+    src: fixperms.sh
+    dest: /etc/acme.sh/deploy/fixperms.sh
+    mode: "0755"
+  when: tls_use_deploy_hook
 
-- name: preinstall web server tasks
-  include_tasks: letsencrypt_web_site/{{ nextcloud_webserver_type }}.yml
-
-- name: get certificates
-  command: |
-    ./acme.sh
+- name: Issue certificate with acme.sh
+  ansible.builtin.command:
+    cmd: |
+      /opt/acme.sh/acme.sh
       --issue
-      --home {{ certificates_acmesh_dir }}
-      --config-home {{ certificates_acmesh_dir }}/conf
-      --domain {{ tls_certificate_common_name }}
-      --keylength {{ tls_certificate_key_length | default('4096') }}
-      --cert-home {{ certificates_acmesh_dir }}/certs
-      --cert-file {{ tls_certificate_file }}
-      --key-file {{ tls_certificate_key }}
-      --ca-file {{ tls_certificate_ca }}
-      --fullchain-file {{ tls_certificate_fullchain }}
-      --webroot /var/www/letsencrypt
-      --reloadcmd "systemctl restart {{ webserver_service_name[nextcloud_webserver_type][ansible_os_family] }}"
-      {% if tls_certificate_test %}--test --debug{% endif %}
-      --server letsencrypt
+      --home /opt/acme.sh
+      --config-home /etc/acme.sh
+      --{{ (inventory_hostname in groups['nextcloud']
+          or inventory_hostname in groups['signal'])
+          | ternary(nextcloud_webserver_type, 'standalone') }}
+      --reloadcmd "{{ tls_reloadcmd }}"
+      --server {{ tls_certificate.acme_ca }}
+      {{ cert_domains_args }}
+      {% if tls_use_deploy_hook %}
+      --post-hook /etc/acme.sh/deploy/fixperms.sh
+      {% endif %}
   args:
-    chdir: "{{ certificates_acmesh_dir }}"
-  when: ( not cert_file.stat.exists ) or ( cert_info.expired )
-  register: acme_get
-  failed_when: acme_get.rc != 0 and acme_get.rc != 2
-  notify: restart web services
+    creates: "{{ tls_certificate_file }}"
+  register: acme_issue_result
+  environment:
+    CERT_GROUP: "{{ tls_certificate_group | default('ssl-cert') }}"
+  changed_when: acme_issue_result.rc == 0 and 'Cert success' in acme_issue_result.stdout
+  failed_when: acme_issue_result.rc != 0
 
-- debug: var=acme_get
-  when: tls_certificate_test
+- name: Deploy acme-sh.service
+  ansible.builtin.template:
+    src: "etc/systemd/system/acme-sh.service.j2"
+    dest: "/etc/systemd/system/acme-sh.service"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy acme-sh.timer
+  ansible.builtin.template:
+    src: "etc/systemd/system/acme-sh.timer.j2"
+    dest: "/etc/systemd/system/acme-sh.timer"
+    owner: root
+    group: root
+    mode: "0644"

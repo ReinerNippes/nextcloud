@@ -1,0 +1,13 @@
+---
+# apt related OS tasks
+
+- name: Install coturn
+  ansible.builtin.apt:
+    name: "coturn"
+    state: latest
+
+- name: Make sure turnserver user is in the ssl-cert group to read the certificate and key files
+  ansible.builtin.user:
+    name: turnserver
+    groups: "{{ tls_certificate_group | default('ssl-cert') }}"
+    append: true

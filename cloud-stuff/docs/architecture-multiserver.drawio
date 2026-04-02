@@ -1,0 +1,156 @@
+<mxfile host="65bd71144e">
+    <diagram name="Multi-Server Topology" id="multiserver-topology">
+        <mxGraphModel dx="469" dy="415" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="bg-compute" value="Compute Provider" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=center;verticalAlign=top;spacingTop=4;fontSize=11;fontStyle=1;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="350" y="140" width="180" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="bg-net" value="Private Network&#xa;(nextcloud-net)" style="text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=center;verticalAlign=top;spacingTop=4;fontSize=10;fontStyle=2;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="440" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="internet" value="Internet" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="290" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="dns" value="DNS Zone" style="shape=mxgraph.cisco.servers.standard_server;html=1;pointerEvents=1;dashed=0;fillColor=#fff2cc;strokeColor=#d6b656;sketch=0;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="295" width="80" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="nc" value="nextcloud" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="180" width="120" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="oo" value="onlyoffice" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="310" width="120" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="sig" value="signal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="390" width="120" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="db" value="PostgreSQL / MariaDB" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="110" width="150" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="redis" value="Redis" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="185" width="150" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="coturn" value="coturn&#xa;(STUN/TURN)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="260" width="150" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="hapr" value="HAProxy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="324" width="150" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="oods" value="OnlyOffice&#xa;Document Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="388" width="150" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="hpb" value="HPB (signaling)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="452" width="150" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="rec" value="recording service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="516" width="150" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="internet" target="dns" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="dns" target="nc" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="dns" target="oo" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="dns" target="sig" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="nc" target="db" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="nc" target="redis" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="nc" target="coturn" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="nc" target="hapr" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="oo" target="oods" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="sig" target="hpb" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="sig" target="rec" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram name="Provisioning Flow" id="provisioning-flow">
+        <mxGraphModel dx="556" dy="451" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="lane-user" value="User" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="40" width="120" height="660" as="geometry"/>
+                </mxCell>
+                <mxCell id="u1" value="pulumi up" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="lane-user" vertex="1">
+                    <mxGeometry x="10" y="80" width="100" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="u2" value="stack outputs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="lane-user" vertex="1">
+                    <mxGeometry x="10" y="360" width="100" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="u3" value="ansible-playbook&#xa;nextcloud.yml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="lane-user" vertex="1">
+                    <mxGeometry x="10" y="510" width="100" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-pulumi" value="Pulumi" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="170" y="40" width="120" height="660" as="geometry"/>
+                </mxCell>
+                <mxCell id="p1" value="resolve config&#xa;+ spec" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="lane-pulumi" vertex="1">
+                    <mxGeometry x="10" y="140" width="100" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-compute" value="Compute Provider" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="40" width="130" height="660" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1" value="create servers,&#xa;network, firewalls" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="lane-compute" vertex="1">
+                    <mxGeometry x="10" y="210" width="110" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-dns" value="DNS Provider" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="460" y="40" width="130" height="660" as="geometry"/>
+                </mxCell>
+                <mxCell id="d1" value="create DNS records" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="lane-dns" vertex="1">
+                    <mxGeometry x="10" y="290" width="110" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-inv" value="Dynamic Inventory" style="swimlane;startSize=30;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="610" y="40" width="140" height="660" as="geometry"/>
+                </mxCell>
+                <mxCell id="i1" value="build from&#xa;cloud labels/tags" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" parent="lane-inv" vertex="1">
+                    <mxGeometry x="10" y="430" width="120" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-ansible" value="Ansible" style="swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="770" y="40" width="130" height="660" as="geometry"/>
+                </mxCell>
+                <mxCell id="a1" value="configure hosts&#xa;via SSH" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="lane-ansible" vertex="1">
+                    <mxGeometry x="10" y="570" width="110" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="fe1" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="u1" target="p1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="fe2" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="p1" target="c1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="fe3" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="p1" target="d1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="fe4" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" parent="1" source="p1" target="u2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="fe5" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="u2" target="i1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="fe6" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="u2" target="u3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="fe7" style="edgeStyle=orthogonalEdgeStyle;" parent="1" source="u3" target="a1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

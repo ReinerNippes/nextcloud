@@ -1,0 +1,20 @@
+# Managed by Ansible — do not edit manually
+127.0.0.1   localhost
+
+# IPv6
+::1         localhost ip6-localhost ip6-loopback
+ff02::1     ip6-allnodes
+ff02::2     ip6-allrouters
+
+{% set host_fqdn = inventory_hostname %}
+{% set host_short = inventory_hostname.split('.')[0] %}
+{% if not _hosts_use_dhcp %}
+# Static IP — map FQDN to primary address
+{% if host_fqdn != host_short %}
+{{ ansible_facts['default_ipv4']['address'] }}   {{ host_fqdn }}   {{ host_short }}
+{% else %}
+{{ ansible_facts['default_ipv4']['address'] }}   {{ host_short }}
+{% endif %}
+{% else %}
+# DHCP detected — hostname resolution via DNS only
+{% endif %}

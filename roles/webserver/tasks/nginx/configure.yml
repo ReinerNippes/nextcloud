@@ -1,29 +1,14 @@
 ---
-- name: bring /etc/nginx/nginx.conf in place
-  template:
-    src: nginx/nginx.conf.j2
-    dest: /etc/nginx/nginx.conf
-    owner: root
-    group: root
-    mode: 0644
-    force: true
+
+- name: Set server_name in /etc/nginx/default.conf for acme.sh certificate issuance
+  ansible.builtin.replace:
+    path: /etc/nginx/conf.d/default.conf
+    regexp: '^\s*server_name\s+.*;'
+    replace: "    server_name {{ ([inventory_hostname] + (additional_certificate_fqdns | default([]))) | join(' ') }};"
   notify: restart web services
 
-- name: nginx nextcloud config
-  template:
-    src: nginx/{{ item }}.conf.j2
-    dest: /etc/nginx/conf.d/{{ item }}.conf
-    owner: root
-    group: root
-    mode: 0644
-  notify: restart web services
-  loop:
-    - default
-    - http
-    - nextcloud
-
-- name: nginx started and enabled
-  systemd:
+- name: Nginx started and enabled
+  ansible.builtin.systemd:
     name: nginx
     state: started
     enabled: true

@@ -1,68 +1,164 @@
 ---
 
-- name: create cert directory
-  file:
-    name: "{{ item }}"
+- name: Define shared selfsigned CA source host
+  ansible.builtin.set_fact:
+    tls_selfsigned_ca_source_host: "{{ (groups['nextcloud'] | default([]) | first) | default(inventory_hostname) }}"
+  run_once: true
+
+- name: Read shared CA paths from source host
+  ansible.builtin.set_fact:
+    tls_selfsigned_ca_directory: "{{ hostvars[tls_selfsigned_ca_source_host].tls_certificate_directory }}"
+    tls_selfsigned_ca_file: "{{ hostvars[tls_selfsigned_ca_source_host].tls_certificate_ca }}"
+  run_once: true
+
+- name: Generate shared openssl CA key on source host
+  community.crypto.openssl_privatekey:
+    path: "{{ tls_selfsigned_ca_directory }}/root.ca.key"
+    mode: "0600"
+  delegate_to: "{{ tls_selfsigned_ca_source_host }}"
+  run_once: true
+
+- name: Generate shared openssl CA CSR on source host
+  community.crypto.openssl_csr:
+    path: "{{ tls_selfsigned_ca_directory }}/root.ca.csr"
+    privatekey_path: "{{ tls_selfsigned_ca_directory }}/root.ca.key"
+    common_name: "{{ hostvars[tls_selfsigned_ca_source_host].tls_certificate_common_name }} Local Root CA"
+    basic_constraints_critical: true
+    basic_constraints:
+      - CA:TRUE
+    key_usage_critical: true
+    key_usage:
+      - keyCertSign
+      - cRLSign
+  delegate_to: "{{ tls_selfsigned_ca_source_host }}"
+  run_once: true
+
+- name: Generate shared self signed CA certificate on source host
+  community.crypto.x509_certificate:
+    path: "{{ tls_selfsigned_ca_file }}"
+    privatekey_path: "{{ tls_selfsigned_ca_directory }}/root.ca.key"
+    csr_path: "{{ tls_selfsigned_ca_directory }}/root.ca.csr"
+    provider: selfsigned
+    selfsigned_not_after: "+3650d"
+  delegate_to: "{{ tls_selfsigned_ca_source_host }}"
+  run_once: true
+
+- name: Read shared CA key from source host
+  ansible.builtin.slurp:
+    src: "{{ tls_selfsigned_ca_directory }}/root.ca.key"
+  delegate_to: "{{ tls_selfsigned_ca_source_host }}"
+  run_once: true
+  register: tls_selfsigned_ca_key_slurp
+
+- name: Read shared CA certificate from source host
+  ansible.builtin.slurp:
+    src: "{{ tls_selfsigned_ca_file }}"
+  delegate_to: "{{ tls_selfsigned_ca_source_host }}"
+  run_once: true
+  register: tls_selfsigned_ca_cert_slurp
+
+- name: Copy shared CA key to current host
+  ansible.builtin.copy:
+    dest: "{{ tls_certificate_directory }}/root.ca.key"
+    content: "{{ tls_selfsigned_ca_key_slurp.content | b64decode }}"
     owner: root
     group: root
-    mode:  0755
-    state: directory
-  loop:
-    - "{{ tls_certificate_file | dirname }}"
-    - "{{ tls_certificate_directory }}" 
+    mode: "0600"
 
-- name: generate an openssl ca key with the default values
-  openssl_privatekey:
-    path: "{{ tls_certificate_directory }}/root.ca.key"
-
-- name: generate an openssl certificate signing request
-  openssl_csr:
-    path: "{{ tls_certificate_directory }}/root.ca.csr"
-    privatekey_path: "{{ tls_certificate_directory }}/root.ca.key"
-    common_name: "{{ tls_certificate_common_name }}"
-
-- name: generate a self signed openssl certificate
-  openssl_certificate:
-    path: "{{ tls_certificate_ca }}"
-    privatekey_path: "{{ tls_certificate_directory }}/root.ca.key"
-    csr_path: "{{ tls_certificate_directory }}/root.ca.csr"
-    provider: selfsigned
+- name: Copy shared CA certificate to current host
+  ansible.builtin.copy:
+    dest: "{{ tls_certificate_ca }}"
+    content: "{{ tls_selfsigned_ca_cert_slurp.content | b64decode }}"
+    owner: root
+    group: root
+    mode: "0644"
 
 # --------------
 
-- name: generate an openssl private key with the default values
-  openssl_privatekey:
+- name: Generate an openssl private key with the default values
+  community.crypto.openssl_privatekey:
     path: "{{ tls_certificate_key }}"
     owner: "{{ tls_certificate_owner | default('root') }}"
-    group: "{{ tls_certificate_group | default('root') }}"
+    group: "{{ tls_certificate_group | default('ssl-cert') }}"
+    mode: "0640"
 
-- name: generate an openssl certificate signing request
-  openssl_csr:
+- name: Generate an openssl certificate signing request
+  community.crypto.openssl_csr:
     path: "{{ tls_certificate_csr }}"
     privatekey_path: "{{ tls_certificate_key }}"
     common_name: "{{ tls_certificate_common_name }}"
+    subject_alt_name: >-
+      {{
+        ['DNS:' ~ tls_certificate_common_name]
+        + ((additional_certificate_fqdns | default([]))
+           | map('regex_replace', '^(.*)$', 'DNS:\\1')
+           | list)
+      }}
+    key_usage_critical: true
+    key_usage:
+      - digitalSignature
+      - keyEncipherment
+    extended_key_usage_critical: true
+    extended_key_usage:
+      - serverAuth
 
-- name: generate a self signed openssl certificate
-  openssl_certificate:
+- name: Generate a self signed openssl certificate
+  community.crypto.x509_certificate:
     path: "{{ tls_certificate_file }}"
     privatekey_path: "{{ tls_certificate_key }}"
     csr_path: "{{ tls_certificate_csr }}"
     ownca_path: "{{ tls_certificate_ca }}"
     ownca_privatekey_path: "{{ tls_certificate_directory }}/root.ca.key"
     owner: "{{ tls_certificate_owner | default('root') }}"
-    group: "{{ tls_certificate_group | default('root') }}"
+    group: "{{ tls_certificate_group | default('ssl-cert') }}"
     provider: ownca
+    ownca_not_after: "+825d"
 
-- debug: msg="{{ lookup('file', tls_certificate_ca ) }}" verbosity=2
-- debug: msg="{{ lookup('file', tls_certificate_file ) }}" verbosity=2
+- name: Read server certificate from remote
+  ansible.builtin.slurp:
+    src: "{{ tls_certificate_file }}"
+  register: server_cert
 
-- name: create fullchain certificate
-  copy:
+- name: Read CA certificate from remote
+  ansible.builtin.slurp:
+    src: "{{ tls_certificate_ca }}"
+  register: ca_cert
+
+- name: Create fullchain certificate
+  ansible.builtin.copy:
     dest: "{{ tls_certificate_fullchain }}"
-    content: |
-      {{ lookup('file', tls_certificate_ca ) }}
-      
-      {{ lookup('file', tls_certificate_file ) }}
+    content: "{{ server_cert.content | b64decode }}{{ ca_cert.content | b64decode }}"
     owner: "{{ tls_certificate_owner | default('root') }}"
-    group: "{{ tls_certificate_group | default('root') }}"
+    group: "{{ tls_certificate_group | default('ssl-cert') }}"
     mode: '0644'
+
+- name: Install local selfsigned CA on Debian
+  ansible.builtin.copy:
+    src: "{{ tls_certificate_ca }}"
+    dest: "/usr/local/share/ca-certificates/{{ tls_certificate_common_name }}-local-ca.crt"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: true
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Update trusted CA store on Debian
+  ansible.builtin.command: update-ca-certificates
+  register: tls_selfsigned_debian_update_ca
+  changed_when: "'0 added, 0 removed' not in tls_selfsigned_debian_update_ca.stdout"
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Install local selfsigned CA on RedHat
+  ansible.builtin.copy:
+    src: "{{ tls_certificate_ca }}"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ tls_certificate_common_name }}-local-ca.crt"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: true
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Update trusted CA store on RedHat
+  ansible.builtin.command: update-ca-trust extract
+  changed_when: false
+  when: ansible_facts['os_family'] == 'RedHat'

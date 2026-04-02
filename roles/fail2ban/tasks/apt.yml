@@ -1,8 +1,0 @@
----
-# Ubuntu related OS tasks
-
-- name: install fail2ban packages
-  apt:
-    name: fail2ban
-    autoremove: true
-    state: latest

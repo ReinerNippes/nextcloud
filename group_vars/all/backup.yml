@@ -1,0 +1,16 @@
+---
+
+# Install restic backup tool if backup_folder is not empty
+# more info about restic: https://restic.readthedocs.io/en/latest/
+# to use a local directory as a restic repository (not a good idea anyway)
+# restic_repo: []
+
+# use rclone to backup a cloud storage, see https://rclone.org for more details
+# configure also rclone_remote in group_vars/all.yml
+# restic_repo: "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"
+
+# crontab setings for the backup script - default daily at 3pm
+restic_backup:
+  day: "*"
+  minute: "0"
+  hour: "3"

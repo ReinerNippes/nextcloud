@@ -1,0 +1,32 @@
+---
+all:
+  vars:
+    ansible_connection: local
+
+nextcloud:
+  hosts:
+    localhost:
+
+redis:
+  hosts:
+    localhost:
+
+database:
+  hosts:
+    localhost:
+
+webserver:
+  hosts:
+    localhost:
+
+elasticsearch:
+  hosts:
+    localhost:
+
+nextcloudoffice:
+  hosts:
+    localhost:
+
+onlyoffice:
+  hosts:
+    localhost:

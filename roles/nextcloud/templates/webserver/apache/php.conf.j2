@@ -1,0 +1,10 @@
+# Managed by Ansible (Nextcloud role)
+# Keep php-fpm integration explicit on RedHat-family Apache.
+
+<IfModule !proxy_module>
+    LoadModule proxy_module modules/mod_proxy.so
+</IfModule>
+
+<IfModule !proxy_fcgi_module>
+    LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
+</IfModule>

@@ -1,5 +1,2 @@
 ---
 # defaults file for acme.sh
-
-certificates_acmesh_git_dir: "/opt/acme/git"
-certificates_acmesh_dir:     "/opt/acme/sh"

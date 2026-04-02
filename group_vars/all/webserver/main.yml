@@ -1,0 +1,54 @@
+---
+
+# OS user and group for webserver, used in multiple roles
+web_user:
+  apache:
+    RedHat: "apache"
+    Debian: "www-data"
+  nginx:
+    RedHat: "nginx"
+    Debian: "www-data"
+
+web_group:
+  apache:
+    RedHat: "apache"
+    Debian: "www-data"
+  nginx:
+    RedHat: "nginx"
+    Debian: "www-data"
+
+# OS service name for webserver, used in multiple roles
+webserver_service_name:
+  nginx:
+    RedHat: nginx.service
+    Debian: nginx.service
+  apache:
+    RedHat: httpd.service
+    Debian: apache2.service
+
+php_socket:
+  'RedHat': '/run/php-fpm/php{{ php_version }}-fpm.sock'
+  'Debian': '/run/php/php{{ php_version }}-fpm.sock'
+
+apache_server_root:
+  Debian: /etc/apache2
+  RedHat: /etc/httpd
+
+apache_conf_path:
+  Debian: /etc/apache2
+  RedHat: /etc/httpd/conf.d
+
+apache_log_dir:
+  Debian: /var/log/apache2
+  RedHat: /var/log/httpd
+
+apache_access_log_file:
+  Debian: access.log
+  RedHat: access_log
+
+apache_error_log_file:
+  Debian: error.log
+  RedHat: error_log
+
+apache_default_vhost_filename: 000-default.conf
+apache_remove_default_vhost: true

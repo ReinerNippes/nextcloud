@@ -1,17 +1,25 @@
 ---
 # tasks file for fulltextsearch
 
-- name: include os specific tasks
-  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: install ingest-attachment
-  command: /usr/share/elasticsearch/bin/elasticsearch-plugin install ingest-attachment --batch
-  args:
-    creates: /usr/share/elasticsearch/plugins/ingest-attachment
-  notify: restart elasticsearch
-  
-- name: enable elasticsearch
-  systemd:
+- name: Configure elasticsearch
+  ansible.builtin.lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    # backrefs: true
+    # backup: true
+  loop:
+    - regexp: "^#network.host: .*$"
+      line: "network.host: 127.0.0.1"
+    - regexp: "xpack.security.enabled: true"
+      line: "xpack.security.enabled: false"
+  notify: Restart elasticsearch
+
+- name: Enable elasticsearch
+  ansible.builtin.systemd:
     name: elasticsearch
     state: started
     enabled: true

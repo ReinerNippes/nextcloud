@@ -1,0 +1,21 @@
+---
+# apt related OS tasks
+
+- name: Install postgresql-{{ postgresql_version }} with update
+  ansible.builtin.apt:
+    name: "{{ postgresql_packages[ansible_facts['os_family']] }}"
+    state: latest
+    update_cache: true
+
+- name: Ensure all configured locales are present.
+  community.general.locale_gen:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ postgresql_locales }}"
+  register: locale_gen_result
+
+- name: Force-restart postgresql after new locales are generated.
+  ansible.builtin.systemd:
+    name: "{{ postgresql_daemon_service_name }}.service"
+    state: restarted
+  when: locale_gen_result.changed

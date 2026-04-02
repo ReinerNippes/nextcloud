@@ -1,6 +1,6 @@
 #!/usr/bin/env ansible-playbook
 
-- name: update os
+- name: Prepare the OS
   hosts: all
   become: true
   gather_facts: true
@@ -8,7 +8,14 @@
   roles:
     - os
 
-- name: 'install redis'
+- name: Pre-flight configuration checks
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - precheck
+
+- name: Install redis or valkey
   hosts: redis
   become: true
   gather_facts: false
@@ -16,81 +23,133 @@
   roles:
     - redis
 
-- name: 'install webserver'
+- name: Install webserver
   hosts: webserver
   become: true
   gather_facts: false
 
   roles:
     - webserver
-    - php
 
-- name: 'install database'
+- name: Install tls certificates
+  hosts: nextcloud, coturn, signal, onlyoffice
+  become: true
+  gather_facts: false
+
+  roles:
+    - tls-certificate
+
+- name: Install database server
   hosts: database
   become: true
   gather_facts: false
 
   roles:
-    - { role: mariadb,  when: (nextcloud_db_type == 'mysql') }
-    - { role: postgres, when: (nextcloud_db_type == 'pgsql') }
+    - role: mariadb
+      when: (nextcloud_db.type == 'mysql')
+    - role: postgres
+      when: (nextcloud_db.type == 'pgsql')
 
-- name: 'install elasticsearch'
+- name: Install Docker
+  hosts: docker
+  become: true
+  gather_facts: false
+
+  roles:
+    - docker
+
+- name: Install HaPR für exAPPs
+  hosts: hapr
+  become: true
+  gather_facts: false
+
+  roles:
+    - role: exapp_hapr
+      when: nextcloud_install.hapr|bool
+
+- name: Install elasticsearch
   hosts: elasticsearch
   become: true
   gather_facts: false
 
   roles:
-    - { role: fulltextsearch, when: install_fulltextsearch|bool }
+    - role: fulltextsearch
+      when: nextcloud_install.fulltextsearch|bool
 
-- name: 'install collabora'
-  hosts: collabora
+- name: Install nextcloudoffice
+  hosts: nextcloudoffice
   become: true
   gather_facts: false
 
   roles:
-    - { role: collabora,      when: install_collabora|bool }
+    - role: nextcloudoffice
+      when: nextcloud_install.nextcloudoffice|bool
 
-- name: 'install onlyoffice'
+- name: Install OnlyOffice
   hosts: onlyoffice
   become: true
   gather_facts: false
 
   roles:
-    - { role: onlyoffice,      when: install_onlyoffice|bool }
+    - role: onlyoffice
+      when: nextcloud_install.onlyoffice|bool
 
-- name: 'install coturn server'
+- name: Install coturn server
   hosts: coturn
   become: true
   gather_facts: false
 
   roles:
-    - { role: talk,  when: install_talk|bool }
+    - role: coturn
+      when: nextcloud_install.talk|bool
 
-- name: 'install nextcloud'
+- name: Install signal server
+  hosts: signal
+  become: true
+  gather_facts: false
+
+  roles:
+    - role: signal
+      when: nextcloud_install.hpb|bool
+
+- name: Start Docker containers
+  hosts: docker
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Start Docker containers
+      ansible.builtin.include_tasks: roles/docker/tasks/compose_up.yml
+
+- name: Install nextcloud
   hosts: nextcloud
   become: true
   gather_facts: false
 
   roles:
-    - { role: restic_backup,  when: restic_repo != '' }
+    - role: restic_backup
+      when: restic_repo != []
+    - php
     - nextcloud
-    - fail2ban
+    - role: postgres_analyzer
+      when: nextcloud_db.type == 'pgsql'
+    - php_fpm_analyser
 
   post_tasks:
-    - name: check install status
-      uri:
+    - name: Check install status
+      ansible.builtin.uri:
         url: https://{{ nextcloud_fqdn }}/status.php
-        return_content: yes
-        validate_certs: "{% if (nextcloud_certificate_type == 'selfsigned') or nextcloud_certificate_test %}no{% else %}yes{% endif %}"
+        return_content: true
+        validate_certs: "{% if (tls_certificate.type == 'selfsigned') or tls_certificate_test %}no{% else %}yes{% endif %}"
       register: nextcloud_status
 
     - name: We are ready
-      assert:
+      ansible.builtin.assert:
         that: nextcloud_status.json.installed
-        fail_msg: 
+        fail_msg:
           - "Upss. Something went wrong."
           - "Your Nextcloud at https://{{ nextcloud_fqdn }} is down."
-        success_msg: 
+        success_msg:
           - "Your Nextcloud {{ nextcloud_status.json.version }} at https://{{ nextcloud_fqdn }} is ready."
-          - "Login with user: {{ nextcloud_admin }} and password: {{ nextcloud_passwd }} "
-          - "Other secrets you'll find in the directory {{ credential_store }} "
+          - "Login with user: {{ nextcloud_admin }} and password: {{ passwords.nextcloud_admin }}"
+          - "Other secrets you'll find in the {{ password_file }}."

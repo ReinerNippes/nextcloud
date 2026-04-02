@@ -1,0 +1,18 @@
+---
+# apt related OS tasks
+
+- name: Remove debian repo docker if present
+  ansible.builtin.apt:
+    name:
+      - docker
+      - docker-engine
+      - docker.io
+    state: absent
+
+- name: Install docker
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-compose-plugin
+      - python3-docker
+    state: latest

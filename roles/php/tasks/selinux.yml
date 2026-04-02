@@ -1,20 +1,20 @@
 ---
 
-- name: selinux targets
-  sefcontext:
+- name: Selinux targets
+  community.general.sefcontext:
     target: "{{ item }}"
     setype: httpd_sys_rw_content_t
     state: present
   loop:
     - '/tmp(/.*)?'
 
-- name: restorecon
-  command: restorecon -Rv '{{ item }}'
+- name: Restorecon
+  ansible.builtin.command: restorecon -Rv '{{ item }}'
   loop:
     - '/tmp'
 
-- name: setfacl -R -m u:nginx:rwx
-  command: setfacl -R -m u:nginx:rwx {{ item }}
+- name: Setfacl -R -m u:nginx:rwx
+  ansible.builtin.command: setfacl -R -m u:nginx:rwx {{ item }}
   loop:
     - /var/lib/php/opcache/
     - /var/lib/php/session/

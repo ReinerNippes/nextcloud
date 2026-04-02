@@ -1,0 +1,6 @@
+<IfModule mod_ssl.c>
+    Listen {{ nextcloud_ssl_port }} https
+    SSLPassPhraseDialog builtin
+    SSLSessionCache shmcb:/run/httpd/sslcache(512000)
+    SSLSessionCacheTimeout 300
+</IfModule>

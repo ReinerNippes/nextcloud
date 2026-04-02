@@ -1,0 +1,12 @@
+---
+
+# dnf related tasks
+
+- name: Install {{ redis_package_name[ansible_facts['os_family']] }} packages
+  ansible.builtin.dnf:
+    name: "{{ redis_package_name[ansible_facts['os_family']] }}"
+    state: latest
+    enablerepo: "{{ redis_yum_repo[ansible_facts['distribution']] }}"
+  retries: 5
+  register: result
+  until: result is succeeded

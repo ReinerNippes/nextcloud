@@ -1,0 +1,155 @@
+---
+# Validate inventory configuration
+
+- name: Ensure nextcloud group exists
+  ansible.builtin.assert:
+    that:
+      - "groups.get('nextcloud', []) | length > 0"
+    fail_msg: |
+      ─────────────────────────────────────────────────────────────────────────────
+      🚫 ERROR: Invalid inventory configuration
+      ─────────────────────────────────────────────────────────────────────────────
+      
+      The 'nextcloud' inventory group is missing or empty!
+      
+      Please ensure your inventory has at least one 'nextcloud' group:
+      
+        nextcloud:
+          hosts:
+            nextcloud.example.com:
+      
+      ─────────────────────────────────────────────────────────────────────────────
+    success_msg: "✓ Inventory validation: nextcloud group found with {{ groups.get('nextcloud', []) | length }} host(s)"
+  run_once: true
+  delegate_to: localhost
+
+- name: Ensure database group exists (when collocated with nextcloud)
+  ansible.builtin.assert:
+    that:
+      - "groups.get('database', []) | length > 0"
+    fail_msg: |
+      ─────────────────────────────────────────────────────────────────────────────
+      🚫 ERROR: Invalid inventory configuration
+      ─────────────────────────────────────────────────────────────────────────────
+      
+      The 'database' inventory group is missing or empty!
+      
+      If you are running your own database server, please ensure your inventory
+      has at least one 'database' group:
+      
+        database:
+          hosts:
+            nextcloud.example.com:
+      
+      If you are using a managed database service, leave the group empty or omit it.
+      
+      ─────────────────────────────────────────────────────────────────────────────
+    success_msg: "✓ Inventory validation: database group found with {{ groups.get('database', []) | length }} host(s)"
+  when: nextcloud_db.host | default('localhost') in ['localhost', '127.0.0.1']
+  run_once: true
+  delegate_to: localhost
+
+- name: Ensure redis group exists (when collocated with nextcloud)
+  ansible.builtin.assert:
+    that:
+      - "groups.get('redis', []) | length > 0"
+    fail_msg: |
+      ─────────────────────────────────────────────────────────────────────────────
+      🚫 ERROR: Invalid inventory configuration
+      ─────────────────────────────────────────────────────────────────────────────
+      
+      The 'redis' inventory group is missing or empty!
+      
+      If you are running your own Redis server, please ensure your inventory
+      has at least one 'redis' group:
+      
+        redis:
+          hosts:
+            nextcloud.example.com:
+      
+      If you are using a managed Redis service, leave the group empty or omit it.
+      
+      ─────────────────────────────────────────────────────────────────────────────
+    success_msg: "✓ Inventory validation: redis group found with {{ groups.get('redis', []) | length }} host(s)"
+  when: groups.get('redis', []) | length > 0
+  run_once: true
+  delegate_to: localhost
+
+- name: Ensure single-server groups have at most one host (HA/LB not yet supported)
+  ansible.builtin.assert:
+    that:
+      - "(groups.get(item, []) | length) <= 1"
+    fail_msg: |
+      ─────────────────────────────────────────────────────────────────────────────
+      🚫 ERROR: Multiple hosts in '{{ item }}' group
+      ─────────────────────────────────────────────────────────────────────────────
+      
+      The '{{ item }}' group contains {{ (groups.get(item, []) | length) }} hosts,
+      but only one host per group is currently supported.
+      
+      Multiple hosts per group will be interpreted as HA/load-balanced clusters
+      in future versions. This is not yet implemented.
+      
+      ─────────────────────────────────────────────────────────────────────────────
+    success_msg: "✓ Inventory validation: '{{ item }}' group has {{ (groups.get(item, []) | length) }} host(s) — OK"
+  loop:
+    - nextcloud
+  when: groups.get(item) is not none
+  run_once: true
+  delegate_to: localhost
+
+- name: Ensure collocated database/redis groups have at most one host
+  ansible.builtin.assert:
+    that:
+      - "(groups.get(item, []) | length) <= 1"
+    fail_msg: |
+      ─────────────────────────────────────────────────────────────────────────────
+      🚫 ERROR: Multiple hosts in '{{ item }}' group
+      ─────────────────────────────────────────────────────────────────────────────
+      
+      The '{{ item }}' group contains {{ (groups.get(item, []) | length) }} hosts,
+      but only one host per group is currently supported when collocated with
+      the Nextcloud host.
+      
+      Multiple hosts per group will be interpreted as HA/load-balanced clusters
+      in future versions. This is not yet implemented.
+      
+      ─────────────────────────────────────────────────────────────────────────────
+    success_msg: "✓ Inventory validation: '{{ item }}' group has {{ (groups.get(item, []) | length) }} host(s) — OK"
+  loop:
+    - database
+    - redis
+  when:
+    - groups.get(item) is not none
+    - groups.get(item, []) | intersect(groups.get('nextcloud', [])) | length > 0
+  run_once: true
+  delegate_to: localhost
+
+- name: Ensure optional feature groups have at most one host
+  ansible.builtin.assert:
+    that:
+      - "(groups.get(item.group, []) | length) <= 1"
+    fail_msg: |
+      ─────────────────────────────────────────────────────────────────────────────
+      🚫 ERROR: Multiple hosts in '{{ item.group }}' group
+      ─────────────────────────────────────────────────────────────────────────────
+      
+      The '{{ item.group }}' group contains {{ (groups.get(item.group, []) | length) }} hosts,
+      but only one host per group is currently supported.
+      
+      Multiple hosts per group will be interpreted as HA/load-balanced clusters
+      in future versions. This is not yet implemented.
+      
+      ─────────────────────────────────────────────────────────────────────────────
+    success_msg: "✓ Inventory validation: '{{ item.group }}' group has {{ (groups.get(item.group, []) | length) }} host(s) — OK"
+  loop:
+    - { group: signal,          enabled: "{{ nextcloud_install.hpb | default(false) | bool }}" }
+    - { group: coturn,          enabled: "{{ nextcloud_install.talk | default(false) | bool }}" }
+    - { group: onlyoffice,      enabled: "{{ nextcloud_install.onlyoffice | default(false) | bool }}" }
+    - { group: nextcloudoffice, enabled: "{{ nextcloud_install.nextcloudoffice | default(false) | bool }}" }
+    - { group: fulltextsearch,  enabled: "{{ nextcloud_install.fulltextsearch | default(false) | bool }}" }
+  when:
+    - item.enabled | bool
+    - groups.get(item.group) is not none
+  run_once: true
+  delegate_to: localhost

@@ -1,0 +1,24 @@
+---
+# apt related OS tasks for nextcloudoffice
+
+# Add required apt components (contrib, non-free, universe) for Debian/Ubuntu
+- name: Ensure required apt components are present
+  ansible.builtin.apt_repository:
+    repo: "{{ apt_extra_repos[ansible_facts['distribution']] }}"
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Accept ttf-mscorefonts-installer EULA
+  ansible.builtin.debconf:
+    name: ttf-mscorefonts-installer
+    question: msttcorefonts/accepted-mscorefonts-eula
+    vtype: boolean
+    value: "true"
+
+- name: Install TTF fonts
+  ansible.builtin.apt:
+    name:
+      - ttf-mscorefonts-installer
+      - fonts-noto-core
+    state: present
+    update_cache: true

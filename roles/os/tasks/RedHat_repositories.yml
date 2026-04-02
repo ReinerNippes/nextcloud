@@ -1,0 +1,60 @@
+---
+
+- name: Install EPEL repository
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+
+- name: Create NGINX Repositories
+  when: (nextcloud_webserver_type == 'nginx') and (inventory_hostname in groups['webserver'] )
+  ansible.builtin.yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    baseurl: "{{ item.baseurl }}"
+    enabled: "{{ item.enabled }}"
+    gpgcheck: true
+    gpgkey: https://nginx.org/keys/nginx_signing.key
+    module_hotfixes: true
+  loop:
+    - name: 'nginx-stable'
+      description: 'nginx stable repo'
+      baseurl: 'https://nginx.org/packages/centos/$releasever/$basearch/'
+      enabled: false
+    - name: 'nginx-mainline'
+      description: 'nginx mainline repo'
+      baseurl: 'https://nginx.org/packages/mainline/centos/$releasever/$basearch/'
+      enabled: true
+
+- name: Create PostgreSQL Repositories
+  when: inventory_hostname in groups['database']
+  block:
+    - name: Add postgres GPG key on fedora/centos
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-{{ 'Fedora' if ansible_facts['distribution'] == 'Fedora' else 'RHEL' }}
+
+    - name: Add postgres repo
+      ansible.builtin.dnf:
+        name: "https://download.postgresql.org/pub/repos/yum/reporpms/{{ postgresql_yum_repo_rpm }}-repo-latest.noarch.rpm"
+        state: present
+
+- name: Add docker repo
+  when: inventory_hostname in groups['docker']
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/{{ (ansible_facts['distribution'] == "CentOS") | ternary('centos', 'rhel') }}/docker-ce.repo
+    dest: /etc/yum.repos.d/docker.repo
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Setup PHP Remi repository
+  when: inventory_hostname in groups['nextcloud']
+  block:
+    - name: Add php{{ php_version | replace(".", "") }} repo on fedora/centos
+      ansible.builtin.dnf:
+        name: "https://rpms.remirepo.net/{{ _remi_repo_type }}/remi-release-{{ ansible_facts['distribution_major_version'] | int }}.rpm"
+        disable_gpg_check: true
+        validate_certs: true
+        state: present
+      vars:
+        _remi_repo_type: "{{ 'fedora' if ansible_facts['distribution'] == 'Fedora' else 'enterprise' }}"

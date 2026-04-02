@@ -1,0 +1,11 @@
+---
+# apt related OS tasks
+
+- name: Install mariadb-server packages
+  ansible.builtin.apt:
+    name:
+      - mariadb-server
+      - mariadb-client
+      - python3-pymysql
+    autoremove: true
+    state: latest

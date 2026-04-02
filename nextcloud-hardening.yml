@@ -1,0 +1,14 @@
+#!/usr/bin/env ansible-playbook
+
+- name: Nextcloud Hardening Playbook
+  hosts: all
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: devsec.hardening.os_hardening
+      vars:
+        sysctl_overwrite:
+          # Enable IPv4 traffic forwarding for docker.
+          net.ipv4.ip_forward: 1
+    - role: devsec.hardening.ssh_hardening

@@ -1,14 +1,11 @@
 ---
 # tasks file for postgres
 
-- name: include os specific tasks
-  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: initialize postgresql
-  include_tasks: "initialize.yml"
+- name: Initialize postgresql
+  ansible.builtin.include_tasks: "initialize.yml"
 
-- name: configure postgresql
-  include_tasks: "configure.yml"
-
-- name: create nextcloud database
-  include_tasks: "database.yml"
+- name: Configure postgresql
+  ansible.builtin.include_tasks: "configure.yml"

@@ -1,0 +1,17 @@
+---
+# Debian/Ubuntu nginx installation
+
+- name: Remove default OS nginx packages
+  ansible.builtin.apt:
+    name:
+      - nginx-full
+      - nginx-extras
+    autoremove: true
+    state: absent
+
+- name: Install additional packages
+  ansible.builtin.apt:
+    name:
+      - nginx
+    autoremove: true
+    state: latest

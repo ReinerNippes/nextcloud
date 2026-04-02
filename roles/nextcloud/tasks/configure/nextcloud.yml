@@ -2,76 +2,74 @@
 
 # configure nextcloud
 
-- name: check if config.php exists
-  stat:
+- name: Check if config.php exists
+  ansible.builtin.stat:
     path: '{{ nextcloud_www_dir }}/config/config.php'
   register: config_php
 
-- name: define S3 as primary storage (only if config.php doesn't exist)
-  template:
-    src:   'objectstore_s3_config.php.j2'
-    dest:  '{{ nextcloud_www_dir }}/config/config.php'
-    owner: '{{ web_user[nextcloud_webserver_type][ansible_os_family] }}'
-    group: '{{ web_group[nextcloud_webserver_type][ansible_os_family] }}'
-    mode:  '0640'
+- name: Define S3 as primary storage (only if config.php doesn't exist)
+  ansible.builtin.template:
+    src: "objectstore_s3_config.php.j2"
+    dest: "{{ nextcloud_www_dir }}/config/config.php"
+    owner: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+    group: "{{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+    mode: "0640"
     backup: true
-    force:  false
-  when: 
+    force: false
+  when:
     - ( objectstore_s3_key != '' )
     - ( objectstore_s3_secret != '' )
     - ( not config_php.stat.exists )
 
-- name: generate admin passwd if nextcloud_passwd is empty
-  set_fact:
-    nextcloud_passwd: "{{ lookup('password', '{{ credential_store }}/nextcloud_admin_secret chars=ascii_letters,digits length=32') }}"
-  when: nextcloud_passwd == ''
-
-- name: first setup nextcloud
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: First setup nextcloud
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: >
-    php occ  maintenance:install 
-    --database {{ nextcloud_db_type }} 
-    --database-host "{{ nextcloud_db_host }}" 
-    --database-name {{ nextcloud_db }} 
-    --database-user {{ nextcloud_db_user }} 
-    --database-pass {{ lookup('password', '{{ credential_store }}/database_secret chars=ascii_letters,digits length=32') }} 
-    --admin-user {{ nextcloud_admin }} 
-    --admin-pass {{ nextcloud_passwd }} 
+  become: true
+  ansible.builtin.command: >-
+    php occ  maintenance:install
+    --database {{ nextcloud_db.type }}
+    --database-host "{{ nextcloud_db.host }}{{ (':' ~ nextcloud_db.port) if nextcloud_db.port | default('') | string | length > 0 else '' }}"
+    --database-name {{ nextcloud_db.name }}
+    --database-user {{ nextcloud_db.user }}
+    --database-pass {{ passwords.database }}
+    --admin-user {{ nextcloud_admin }}
+    --admin-pass {{ passwords.nextcloud_admin }}
     --data-dir {{ nextcloud_data_dir }}
   args:
     chdir: "{{ nextcloud_www_dir }}"
   when: ( not config_php.stat.exists )
   register: first_setup_nextcloud
 
-- debug: var=first_setup_nextcloud verbosity=2
+- name: Show first setup nextcloud debug
+  ansible.builtin.debug:
+    var: first_setup_nextcloud
+    verbosity: 2
 
-- name: set nextcloud domain config.php values
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: Set nextcloud domain config.php values
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: php occ config:system:set {{ item }}
+  become: true
+  ansible.builtin.command: php occ config:system:set {{ item }}
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop: "{{ nextcloud_config }}"
   when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) )
 
-- name: set nextcloud mail config.php values
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: Set nextcloud mail config.php values
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: php occ config:system:set {{ item }}
+  become: true
+  ansible.builtin.command: php occ config:system:set {{ item }}
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop: "{{ nextcloud_mail_config }}"
-  when: nextcloud_configure_mail|bool and (( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) ))
+  when: nextcloud_mail.configure|bool and (( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) ))
 
-- name: backup jobs, upgrade apps and database tuning
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: Backup jobs, upgrade apps and database tuning
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: php occ {{ item }}
+  become: true
+  ansible.builtin.command: php occ {{ item }}
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop:
@@ -80,17 +78,17 @@
     - db:add-missing-indices
     - db:convert-filecache-bigint
     - app:update --all
+    - maintenance:repair --include-expensive
   when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) )
 
-- name: install apps
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: Install apps
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: |
+  become: true
+  ansible.builtin.shell: |
     php occ app:install {{ item.name }} --no-interaction --no-warnings
     php occ app:{{ item.state }} {{ item.name }}
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop: "{{ nextcloud_app_config }}"
   when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) )
-  

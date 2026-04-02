@@ -1,0 +1,37 @@
+---
+
+- name: Install common build tools, nats-server and janus build dependencies
+  ansible.builtin.apt:
+    name:
+      - git
+      - make
+      - nats-server
+      - git
+      - autoconf
+      - automake
+      - libtool
+      - make
+      - pkg-config
+      - cmake
+      - python3
+      - python3-pip
+      - meson
+      - ninja-build
+      - libmicrohttpd-dev
+      - libjansson-dev
+      - libssl-dev
+      - libglib2.0-dev
+      - libopus-dev
+      - libogg-dev
+      - libcurl4-openssl-dev
+      - libconfig-dev
+      - libsrtp2-dev
+      - libwebsockets-dev
+      - zlib1g-dev
+    state: present
+
+- name: Build and install janus-gateway from source
+  ansible.builtin.include_tasks: install_janus.yml
+
+- name: Build and install nextcloud-spreed-signaling from source
+  ansible.builtin.include_tasks: install_signal.yml

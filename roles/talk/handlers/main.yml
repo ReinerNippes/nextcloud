@@ -1,8 +1,0 @@
----
-# handlers file for prep_talk
-
-- name: restart coturn
-  listen: restart coturn
-  systemd:
-    name: coturn
-    state: restarted

@@ -1,36 +1,8 @@
 ---
-# tasks file for nginx
+# tasks file for webserver (nginx or apache)
 
+- name: OS family specific installation tasks
+  ansible.builtin.include_tasks: "{{ nextcloud_webserver_type }}/{{ ansible_facts['os_family'] }}.yml"
 
-- name: pkg manager spefic tasks
-  include_tasks: "{{ nextcloud_webserver_type }}/{{ ansible_pkg_mgr }}.yml"
-
-- name: create some folders
-  file:
-    name: "{{ item.path }}"
-    state: directory
-    owner: "{{ item.owner }}"
-    group: "{{ item.group }}"
-    mode: "{{ item.mode }}"
-  loop:
-    - { path: '{{ nextcloud_data_dir }}', owner: '{{ web_user[nextcloud_webserver_type][ansible_os_family] }}', group: '{{ web_group[nextcloud_webserver_type][ansible_os_family] }}', mode: '0750' }
-    - { path: '{{ nextcloud_www_dir }}',  owner: '{{ web_user[nextcloud_webserver_type][ansible_os_family] }}', group: '{{ web_group[nextcloud_webserver_type][ansible_os_family] }}', mode: '0750' }
-
-- name: use ec2 public hostname if fqdn is not defined
-  set_fact:
-    nextcloud_fqdn: "{{ nextcloud_fqdn if ( nextcloud_fqdn ) else facter_ec2_metadata['public-hostname'] }}"
-  when: facter_ec2_metadata is defined
-
-- name: use ansible_fqdn if fqdn is not defined
-  set_fact:
-    nextcloud_fqdn: "{{ nextcloud_fqdn if ( nextcloud_fqdn ) else ansible_fqdn }}"
-
-- name: open redis/database server firewalls
-  include_tasks: firewall_config.yml
-
-- name: create tls certificate (webserver)
-  include_role: 
-    name: tls-certificate
-
-- name: include configuration tasks
-  include_tasks: "{{ nextcloud_webserver_type }}/configure.yml"
+- name: Include configuration tasks
+  ansible.builtin.include_tasks: "{{ nextcloud_webserver_type }}/configure.yml"

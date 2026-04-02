@@ -1,0 +1,13 @@
+---
+# dnf related tasks
+
+- name: Install mariadb-server packages
+  ansible.builtin.dnf:
+    name:
+      - mariadb
+      - mariadb-server
+      - mariadb-common
+      - python3-PyMySQL
+    enablerepo: mariadb
+    state: latest
+  register: install_mariadb

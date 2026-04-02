@@ -1,0 +1,13 @@
+---
+
+postgresql_config_path:
+  RedHat: "/var/lib/pgsql/{{ postgresql_version }}/data"
+  Debian: "/etc/postgresql/{{ postgresql_version }}/main"
+
+postgresql_autoconfig_path:
+  RedHat: "/var/lib/pgsql/{{ postgresql_version }}/data"
+  Debian: "/var/lib/postgresql/{{ postgresql_version }}/main"
+
+postgresql_service_name:
+  RedHat: postgresql-{{ postgresql_version }}
+  Debian: "postgresql@{{ postgresql_version }}-main"

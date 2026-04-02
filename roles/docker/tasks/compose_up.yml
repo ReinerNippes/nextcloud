@@ -1,0 +1,9 @@
+---
+
+- name: Start all containers via docker_compose_v2
+  community.docker.docker_compose_v2:
+    project_src: /opt/nextcloud/docker_compose
+    files:
+      - compose.yml
+    state: present
+    pull: missing

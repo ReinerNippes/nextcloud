@@ -1,8 +1,8 @@
 ---
 # handlers file for redis
 
-- name: restart redis-server
-  systemd:
-    name: redis-server.service
+- name: Restart redis-server
+  ansible.builtin.systemd:
+    name: "{{ redis_service_name[ansible_facts['os_family']] }}.service"
     state: restarted
-  listen: "restart web services"
+  listen: "Restart web services"

@@ -1,0 +1,43 @@
+---
+
+- name: Bring /etc/nginx/nginx.conf in place
+  ansible.builtin.template:
+    src: nginx/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: "0644"
+    force: true
+  notify: restart web services
+
+- name: Nginx default config
+  ansible.builtin.template:
+    src: nginx/{{ item }}.conf.j2
+    dest: /etc/nginx/conf.d/{{ item }}.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart webserver
+  loop:
+    - default
+    - http
+
+- name: Nginx server config
+  vars:
+    recording_fqdn: >-
+      {{
+        additional_fqdns.additional_fqdn_recording
+        | default((additional_certificate_fqdns | default([]) | first), true)
+        | default('')
+      }}
+  ansible.builtin.template:
+    src: nginx/{{ item.template }}.conf.j2
+    dest: /etc/nginx/conf.d/{{ item.path }}.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart webserver
+  loop:
+    - { template: "signaling", path: "{{ inventory_hostname }}" }
+    - { template: "recording", path: "{{ recording_fqdn }}" }
+  when: item.path | length > 0

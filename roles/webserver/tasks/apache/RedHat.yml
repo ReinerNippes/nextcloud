@@ -1,0 +1,15 @@
+---
+# RedHat/AlmaLinux/Rocky/Fedora apache installation (works with both dnf and dnf5)
+
+- name: Install needed packages
+  ansible.builtin.dnf:
+    name:
+      - httpd
+      - httpd-devel
+      - mod_ssl
+      - openssh
+
+- name: Remove default SSL configuration
+  ansible.builtin.file:
+    path: /etc/httpd/conf.d/ssl.conf
+    state: absent

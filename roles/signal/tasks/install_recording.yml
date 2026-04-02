@@ -1,0 +1,25 @@
+---
+
+
+- name: Add nextcloud-recording service to compose.yml
+  ansible.builtin.blockinfile:
+    path: /opt/nextcloud/docker_compose/compose.yml
+    marker: "# {mark} nextcloud-recording service"
+    block: |
+      #
+        nextcloud-recording:
+          image: nextcloud/aio-talk-recording
+          container_name: NextcloudRecording
+          restart: always
+          networks:
+            - nextcloud
+          ports:
+            - "127.0.0.1:1234:1234"
+          environment:
+            HPB_DOMAIN: "{{ inventory_hostname }}"
+            NC_DOMAIN: "{{ nextcloud_fqdn }}"
+            RECORDING_SECRET: "{{ passwords.signal_recording_secret }}"
+            INTERNAL_SECRET: "{{ passwords.signal_internal_secret }}"
+            TZ: "{{ nextcloud_timezone | default('Europe/Berlin') }}"
+          labels:
+            com.centurylinklabs.watchtower.enable: "true"

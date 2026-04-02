@@ -1,0 +1,57 @@
+- name: Configure janus jcfg
+  ansible.builtin.lineinfile:
+    path: /etc/janus/janus.jcfg
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    backrefs: true
+  notify: Restart janus
+  loop:
+    - { regexp: '^\s*#?\s*full_trickle\s*=', line: "\tfull_trickle = true" }
+    - { regexp: '^\s*#?\s*turn_rest_api_key\s*=', line: "\tturn_rest_api_key = \"{{ _janus_api_key.stdout }}\"" }
+
+- name: Disable janus STUN server autodiscovery on public hosts
+  ansible.builtin.replace:
+    path: /etc/janus/janus.jcfg
+    regexp: '^\s*stun_(server|port)\s*=.*\n?'
+    replace: ''
+  notify: Restart janus
+
+- name: Configure janus http transport to listen on loopback only
+  ansible.builtin.lineinfile:
+    path: /etc/janus/janus.transport.http.jcfg
+    regexp: '^\s*[#;]?\s*interface\s*='
+    line: "\tinterface = \"lo\""
+    backrefs: true
+  notify: Restart janus
+
+- name: Configure janus websocket to listen on loopback only
+  ansible.builtin.lineinfile:
+    path: /etc/janus/janus.transport.websockets.jcfg
+    regexp: '^\s*[#;]?\s*ws_interface\s*='
+    line: "\tws_interface = \"lo\""
+    backrefs: true
+  notify: Restart janus
+
+- name: Enable janus websocket transport
+  ansible.builtin.lineinfile:
+    path: /etc/janus/janus.transport.websockets.jcfg
+    regexp: '^\s*[#;]?\s*ws\s*='
+    line: "\tws = true"
+    backrefs: true
+  notify: Restart janus
+
+- name: Set janus websocket port for signaling
+  ansible.builtin.lineinfile:
+    path: /etc/janus/janus.transport.websockets.jcfg
+    regexp: '^\s*[#;]?\s*ws_port\s*='
+    line: "\tws_port = 8188"
+    backrefs: true
+  notify: Restart janus
+
+- name: Ensure janus websocket transport is not disabled
+  ansible.builtin.lineinfile:
+    path: /etc/janus/janus.transport.websockets.jcfg
+    regexp: '^\s*[#;]?\s*disable\s*='
+    line: "\tdisable = no"
+    backrefs: true
+  notify: Restart janus

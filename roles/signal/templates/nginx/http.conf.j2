@@ -1,0 +1,12 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name {{ ([inventory_hostname] + (additional_certificate_fqdns | default([]))) | join(' ') }};
+
+    root /var/www;
+    
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}

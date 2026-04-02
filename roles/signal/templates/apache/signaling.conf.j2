@@ -1,0 +1,21 @@
+<VirtualHost *:443>
+    ServerName {{ item.path }}
+
+    SSLEngine on
+    SSLCertificateFile {{ tls_certificate_fullchain }}
+    SSLCertificateKeyFile {{ tls_certificate_key }}
+    SSLOpenSSLConfCmd DHParameters {{ tls_certificate_directory }}/dhparam.pem
+
+    ProxyPreserveHost On
+    ProxyRequests Off
+    RequestHeader set X-Forwarded-Proto "https"
+    RequestHeader set X-Real-IP expr=%{REMOTE_ADDR}
+
+    ProxyPass /standalone-signaling/ http://127.0.0.1:8080/
+    ProxyPassReverse /standalone-signaling/ http://127.0.0.1:8080/
+
+    RewriteEngine On
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule ^/standalone-signaling/(.*)$ ws://127.0.0.1:8080/$1 [P,L]
+</VirtualHost>

@@ -1,0 +1,61 @@
+---
+
+- name: Deploy CLI PHP drop-in (Debian cli/conf.d, RedHat shared php.d)
+  ansible.builtin.template:
+    src: nextcloud-cli.ini.j2
+    dest: "{{ php_cli_confd[ansible_facts['os_family']] }}/99-nextcloud.ini"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  notify: Restart php-fpm
+  tags: php
+
+- name: Deploy FPM PHP drop-in (Debian only)
+  ansible.builtin.template:
+    src: nextcloud-fpm.ini.j2
+    dest: "{{ php_confd[ansible_facts['os_family']] }}/99-nextcloud.ini"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  when: ansible_facts['os_family'] == 'Debian'
+  notify: Restart php-fpm
+  tags: php
+
+# --- FPM pool ---
+
+- name: Disable default www pool
+  ansible.builtin.command:
+    cmd: "mv {{ php_www_conf[ansible_facts['os_family']] }} {{ php_www_conf[ansible_facts['os_family']] }}.disabled"
+    removes: "{{ php_www_conf[ansible_facts['os_family']] }}"
+    creates: "{{ php_www_conf[ansible_facts['os_family']] }}.disabled"
+  notify: Restart php-fpm
+  tags: php
+
+- name: Deploy Nextcloud FPM pool
+  ansible.builtin.template:
+    src: nextcloud-pool.conf.j2
+    dest: "{{ php_www_conf[ansible_facts['os_family']] | dirname }}/nextcloud.conf"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  notify: Restart php-fpm
+  tags: php
+
+- name: Configure php-fpm.conf
+  ansible.builtin.lineinfile:
+    path: "{{ php_fpm_conf[ansible_facts['os_family']] }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    backup: true
+  loop:
+    - { regexp: '^;?emergency_restart_threshold', line: 'emergency_restart_threshold = 10' }
+    - { regexp: '^;?emergency_restart_interval', line: 'emergency_restart_interval = 1m' }
+    - { regexp: '^;?process_control_timeout', line: 'process_control_timeout = 10' }
+  loop_control:
+    label: "{{ item.line }}"
+  notify: Restart php-fpm
+  tags: php

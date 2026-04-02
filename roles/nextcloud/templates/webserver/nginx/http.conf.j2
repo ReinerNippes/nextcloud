@@ -1,0 +1,26 @@
+upstream php-handler {
+    server unix:{{ php_socket[ansible_facts['os_family']] }};
+}
+
+# Set the `immutable` cache control options only for assets with a cache busting `v` argument
+map $arg_v $asset_immutable {
+    "" "";
+    default "immutable";
+}
+
+server {
+    listen {{ nextcloud_web_port }} default_server;
+    {% if ansible_facts['default_ipv6.address'] is defined %}listen [::]:{{ nextcloud_web_port }};{% endif %}
+    server_name {{ nextcloud_fqdn }};
+    root /var/www;
+{% if tls_certificate.type != 'selfsigned' %}
+    location ^~ /.well-known/acme-challenge {
+        default_type text/plain;
+        root /var/www/letsencrypt;
+    }
+{% endif %}
+    location / {
+        return 301 https://$host$request_uri;
+    }
+
+}

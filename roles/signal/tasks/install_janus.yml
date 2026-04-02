@@ -1,0 +1,232 @@
+---
+
+# -- build libnice from source (distro versions are often too old) -----------
+
+- name: Check if libnice is already installed at required version
+  ansible.builtin.shell: |
+    set -euo pipefail
+    pkg-config --modversion nice 2>/dev/null || echo "0"
+  args:
+    executable: /bin/bash
+  environment:
+    PKG_CONFIG_PATH: "/usr/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/local/lib/pkgconfig:/usr/share/pkgconfig"
+  register: _libnice_version
+  changed_when: false
+
+- name: Build and install libnice {{ janus_libnice_version }}
+  when: _libnice_version.stdout is version(janus_libnice_version, '<')
+  block:
+    - name: Remove distro libnice packages
+      ansible.builtin.package:
+        name: "{{ _libnice_remove_packages[ansible_facts['os_family']] | default([]) }}"
+        state: absent
+      vars:
+        _libnice_remove_packages:
+          Debian:
+            - libnice-dev
+            - libnice10
+          RedHat:
+            - libnice
+            - libnice-devel
+      failed_when: false
+
+    - name: Clone libnice {{ janus_libnice_version }}
+      ansible.builtin.git:
+        repo: https://gitlab.freedesktop.org/libnice/libnice.git
+        dest: /usr/local/src/libnice
+        version: "{{ janus_libnice_version }}"
+        force: true
+
+    - name: Remove stale libnice build directory
+      ansible.builtin.file:
+        path: /usr/local/src/libnice/build
+        state: absent
+
+    - name: Build libnice with meson
+      ansible.builtin.command:
+        cmd: "meson setup --prefix=/usr --libdir={{ 'lib64' if ansible_facts['os_family'] == 'RedHat' else 'lib' }} build"
+        chdir: /usr/local/src/libnice
+
+    - name: Compile libnice
+      ansible.builtin.command:
+        cmd: ninja -C build
+        chdir: /usr/local/src/libnice
+
+    - name: Install libnice
+      ansible.builtin.command:
+        cmd: ninja -C build install
+        chdir: /usr/local/src/libnice
+
+    - name: Run ldconfig after libnice install
+      ansible.builtin.command: ldconfig
+
+    - name: Discover nice.pc location after libnice install
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          pkg-config --variable pcfiledir nice 2>/dev/null || find /usr -name nice.pc -printf '%h' -quit 2>/dev/null
+      args:
+        executable: /bin/bash
+      register: _nice_pcdir_post_install
+      changed_when: false
+      failed_when: _nice_pcdir_post_install.stdout | length == 0
+
+    - name: Verify nice.pc was installed
+      ansible.builtin.command: pkg-config --modversion nice
+      environment:
+        PKG_CONFIG_PATH: >-
+          {{
+            [
+              _nice_pcdir_post_install.stdout,
+              '/usr/lib64/pkgconfig',
+              '/usr/lib/pkgconfig',
+              '/usr/local/lib64/pkgconfig',
+              '/usr/local/lib/pkgconfig',
+              '/usr/share/pkgconfig'
+            ] | join(':')
+          }}
+      changed_when: false
+
+# -- build usrsctp from source (for Data Channels) --------------------------
+
+- name: Check if usrsctp is installed
+  ansible.builtin.shell: |
+    set -euo pipefail
+    ldconfig -p 2>/dev/null | awk '{print $1}' | grep -qx libusrsctp.so
+  args:
+    executable: /bin/bash
+  register: _usrsctp_installed
+  changed_when: false
+  failed_when: false
+
+- name: Build and install usrsctp
+  when: _usrsctp_installed.rc != 0
+  block:
+    - name: Clone usrsctp
+      ansible.builtin.git:
+        repo: https://github.com/sctplab/usrsctp.git
+        dest: /usr/local/src/usrsctp
+        force: true
+
+    - name: Bootstrap usrsctp
+      ansible.builtin.command:
+        cmd: ./bootstrap
+        chdir: /usr/local/src/usrsctp
+
+    - name: Configure usrsctp
+      ansible.builtin.command:
+        cmd: ./configure --prefix=/usr --disable-programs --disable-inet --disable-inet6
+        chdir: /usr/local/src/usrsctp
+
+    - name: Build usrsctp
+      community.general.make:
+        chdir: /usr/local/src/usrsctp
+
+    - name: Install usrsctp
+      community.general.make:
+        chdir: /usr/local/src/usrsctp
+        target: install
+
+    - name: Run ldconfig after usrsctp install
+      ansible.builtin.command: ldconfig
+
+# -- build janus-gateway -----------------------------------------------------
+
+- name: Clone janus-gateway
+  ansible.builtin.git:
+    repo: https://github.com/meetecho/janus-gateway.git
+    dest: /usr/local/src/janus-gateway
+    version: "{{ janus_version }}"
+    force: true
+  register: _janus_git
+
+- name: Build and install janus-gateway
+  when: _janus_git.changed
+  notify: Restart janus
+  block:
+    - name: Run autogen.sh
+      ansible.builtin.command:
+        cmd: sh autogen.sh
+        chdir: /usr/local/src/janus-gateway
+
+    - name: Discover nice.pc location
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          pkg-config --variable pcfiledir nice 2>/dev/null || find /usr -name nice.pc -printf '%h' -quit 2>/dev/null
+      args:
+        executable: /bin/bash
+      register: _nice_pcdir
+      changed_when: false
+      failed_when: _nice_pcdir.stdout | length == 0
+
+    - name: Configure janus-gateway
+      ansible.builtin.command:
+        cmd: >
+          ./configure
+          --prefix=/opt/janus
+          --disable-plugin-sip
+          --disable-rabbitmq
+          --disable-mqtt
+          --disable-nanomsg
+        chdir: /usr/local/src/janus-gateway
+      environment:
+        PKG_CONFIG_PATH: >-
+          {{
+            [
+              _nice_pcdir.stdout,
+              '/usr/lib64/pkgconfig',
+              '/usr/lib/pkgconfig',
+              '/usr/local/lib64/pkgconfig',
+              '/usr/local/lib/pkgconfig',
+              '/usr/share/pkgconfig'
+            ] | join(':')
+          }}
+
+    - name: Compile janus-gateway
+      community.general.make:
+        chdir: /usr/local/src/janus-gateway
+
+    - name: Install janus-gateway
+      community.general.make:
+        chdir: /usr/local/src/janus-gateway
+        target: install
+
+    - name: Check if janus configs already exist
+      ansible.builtin.stat:
+        path: /opt/janus/etc/janus/janus.jcfg
+      register: _janus_cfg
+
+    - name: Install default janus configs
+      community.general.make:
+        chdir: /usr/local/src/janus-gateway
+        target: configs
+      when: not _janus_cfg.stat.exists
+
+- name: Create symlink for janus binary
+  ansible.builtin.file:
+    src: /opt/janus/bin/janus
+    dest: /usr/local/bin/janus
+    state: link
+
+- name: Create symlink for janus config directory
+  ansible.builtin.file:
+    src: /opt/janus/etc/janus
+    dest: /etc/janus
+    state: link
+    force: true
+
+- name: Install janus systemd service
+  ansible.builtin.copy:
+    src: janus.service
+    dest: /etc/systemd/system/janus.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart janus
+
+- name: Enable janus service
+  ansible.builtin.systemd:
+    name: janus
+    enabled: true
+    daemon_reload: true

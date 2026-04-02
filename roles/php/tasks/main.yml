@@ -1,40 +1,30 @@
 ---
 # tasks file for php
 
-- name: pkg manager spefic tasks
-  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+- name: Pkg manager specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: configure php
-  template:
-    src: "{{ item.file }}.j2"
-    dest: "{{ item.dest }}"
-    owner: root
-    group: root
-    mode: 0644
-    force: true
-    backup: true
-  loop:
-    - { file: 'fpm.php.ini',  dest: '{{ php_php_conf[ansible_distribution] }}' }
-    - { file: 'cli.php.ini',  dest: '{{ php_cli_conf[ansible_distribution] }}' }
-    - { file: 'www.conf',     dest: '{{ php_www_conf[ansible_distribution] }}' }
-    - { file: 'php-fpm.conf', dest: '{{ php_fpm_conf[ansible_distribution] }}' }
-  notify: restart php-fpm
+- name: Configure php
+  ansible.builtin.include_tasks: configure.yml
 
-- name: include selinux tasks
-  include_tasks: selinux.yml
+- name: Include selinux tasks
+  ansible.builtin.include_tasks: selinux.yml
   when:
-    - (ansible_os_family == "RedHat")
-    - ('status' in ansible_selinux)
-    - (ansible_selinux.status == "enabled")
+    - (ansible_facts['os_family'] == "RedHat")
+    - ('status' in ansible_facts['selinux'])
+    - (ansible_facts['selinux']['status'] == "enabled")
+    - false
 
-- name: enable php-fpm
-  systemd:
-    name: "{{ php_service_name[ansible_distribution] }}"
+- name: Enable php-fpm
+  ansible.builtin.systemd:
+    name: "{{ php_service_name[ansible_facts['os_family']] }}"
     state: started
     enabled: true
 
-- name: enable apache php conf
-  command: a2enconf php{{ php_version }}-fpm
+- name: Enable apache php conf
+  ansible.builtin.command: a2enconf php{{ php_version }}-fpm
   when:
     - nextcloud_webserver_type == 'apache'
-    - ansible_os_family == 'Debian'
+    - ansible_facts['os_family'] == 'Debian'
+  changed_when: "'Module php' in command_result.stdout"
+  register: command_result

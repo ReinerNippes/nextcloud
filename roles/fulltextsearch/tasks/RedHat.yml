@@ -1,0 +1,27 @@
+---
+
+- name: Import elasticsearch rpm key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+
+- name: Add elasticsearch-7.x
+  ansible.builtin.yum_repository:
+    name: elasticsearch-7.x
+    description: Elasticsearch repository for 7.x packages
+    baseurl: https://artifacts.elastic.co/packages/7.x/yum
+    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    gpgcheck: true
+    enabled: 1
+
+- name: Update OS packages
+  ansible.builtin.dnf:
+    name: '*'
+    update_cache: true
+    state: latest
+
+- name: Install needed packages
+  ansible.builtin.dnf:
+    name: elasticsearch
+    state: latest

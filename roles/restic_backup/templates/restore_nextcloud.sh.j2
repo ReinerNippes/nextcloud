@@ -1,0 +1,59 @@
+#!/bin/bash
+
+export RESTIC_REPOSITORY="{{ restic_repo.location }}"
+export RESTIC_PASSWORD="{{ restic_repo.password }}"
+
+# abort entire script if any command fails
+set -e
+
+# Usage info
+usage() {
+  echo "Usage: $0 [snapshot-id]"
+  echo "If no snapshot-id is given, 'latest' will be used."
+}
+
+# Parse snapshot id argument
+echo "Starting Nextcloud restore..."
+SNAPSHOT_ID="${1:-latest}"
+
+# Stop webserver
+systemctl stop {{ nextcloud_webserver_type }}
+
+# Set Nextcloud to maintenance mode, only if occ exists
+if [ -x "{{ nextcloud_www_dir }}/occ" ]; then
+  sudo -u {{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --on
+  OCC_PRESENT=1
+else
+  echo "occ not found, skipping maintenance mode ON."
+  OCC_PRESENT=0
+fi
+
+# Wipe existing data directory and Nextcloud directory
+rm -rf {{ nextcloud_data_dir }}/*
+rm -rf {{ nextcloud_www_dir }}/*
+
+# Restore data directory
+/usr/bin/restic restore "$SNAPSHOT_ID" --path "{{ nextcloud_data_dir }}" --target /
+
+# Restore Nextcloud directory
+/usr/bin/restic restore "$SNAPSHOT_ID" --path "{{ nextcloud_www_dir }}" --target /
+
+# Restore database dump
+/usr/bin/restic restore "$SNAPSHOT_ID" --path "/tmp/db_{{ nextcloud_db.type }}_nextcloud.sql" --target /
+
+# Restore database
+{% if nextcloud_db.type == 'mysql' %}
+mysql -h {{ nextcloud_db.host }} -u {{ nextcloud_db.user }} -p{{ nextcloud_db.password }} {{ nextcloud_db.name }} < /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
+{% elif nextcloud_db.type == 'pgsql' %}
+sudo -u postgres psql {{ nextcloud_db.name }} < /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
+{% endif %}
+
+# Remove temporary database dump
+rm -f /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
+
+sudo -u {{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off
+
+# Start webserver
+systemctl start {{ nextcloud_webserver_type }}
+
+echo "Restore completed from snapshot: $SNAPSHOT_ID"

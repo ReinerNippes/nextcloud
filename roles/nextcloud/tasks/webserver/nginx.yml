@@ -1,0 +1,24 @@
+---
+
+- name: Bring /etc/nginx/nginx.conf in place
+  ansible.builtin.template:
+    src: webserver/nginx/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: "0644"
+    force: true
+  notify: restart web services
+
+- name: Nginx nextcloud config
+  ansible.builtin.template:
+    src: webserver/nginx/{{ item }}.conf.j2
+    dest: /etc/nginx/conf.d/{{ item }}.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart web services
+  loop:
+    - default
+    - http
+    - nextcloud

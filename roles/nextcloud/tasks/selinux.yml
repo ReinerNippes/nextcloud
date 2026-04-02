@@ -1,11 +1,11 @@
 ---
 
-- name: selinux targets
-  sefcontext:
+- name: Set selinux targets
+  community.general.sefcontext:
     target: "{{ item }}"
     setype: httpd_sys_rw_content_t
     state: present
-  loop: 
+  loop:
     - '{{ nextcloud_data_dir }}(/.*)?'
     - "{{ nextcloud_www_dir }}/config(/.*)?"
     - "{{ nextcloud_www_dir }}/apps(/.*)?"
@@ -14,8 +14,8 @@
     - "{{ nextcloud_www_dir }}/.user.ini"
     - "{{ nextcloud_www_dir }}/3rdparty/aws/aws-sdk-php/src/data/logs(/.*)?"
 
-- name: enable seboolean settings
-  command: setsebool -P {{ item }} on
+- name: Enable SELinux boolean settings
+  ansible.builtin.command: setsebool -P {{ item }} on
   loop:
     - httpd_can_sendmail
     - httpd_unified
@@ -26,15 +26,27 @@
     - daemons_enable_cluster_mode
     - httpd_execmem
 
-- name: enable seboolean settings
-  command: semodule -i {{ role_path }}/files/{{ item }}
+- name: Copy SELinux policy modules to target host
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
   loop:
     - httpd-to-php-fpm.pp
     - httpd-to-redis-socket.pp
     - httpd-to-upload-tmp.pp
 
-- name: restorecon 
-  command: restorecon -Rv {{ item }}
+- name: Install SELinux policy modules
+  ansible.builtin.command: semodule -i /tmp/{{ item }}
+  loop:
+    - httpd-to-php-fpm.pp
+    - httpd-to-redis-socket.pp
+    - httpd-to-upload-tmp.pp
+
+- name: Restore SELinux context
+  ansible.builtin.command: restorecon -Rv {{ item }}
   loop:
     - "{{ nextcloud_www_dir }}"
     - '{{ nextcloud_data_dir }}'

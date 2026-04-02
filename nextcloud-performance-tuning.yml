@@ -1,0 +1,16 @@
+#!/usr/bin/env ansible-playbook
+
+- name: Performance tuning for Nextcloud
+  hosts: nextcloud
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+  - name: Load vars from role
+    ansible.builtin.include_vars:
+      file: roles/php/vars/main.yml
+
+  roles:
+    - role: postgres_analyzer
+      when: nextcloud_db.type == 'pgsql'
+    - php_fpm_analyser

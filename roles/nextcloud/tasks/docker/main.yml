@@ -1,0 +1,13 @@
+---
+
+# Zentraler Task für docker_compose_v2 up
+- name: Start all containers via docker_compose_v2
+  community.docker.docker_compose_v2:
+    project_src: /opt/nextcloud/docker_compose
+    files:
+      - compose.yml
+    state: present
+    pull: missing
+  delegate_to: "{{ item }}"
+  loop: "{{ (groups['docker'] | default([])) }}"
+  run_once: true

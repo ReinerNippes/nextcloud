@@ -1,0 +1,123 @@
+---
+
+- name: Install additional packages
+  ansible.builtin.apt:
+    name:
+      - python3-debian
+      - python3-cryptography
+    state: latest
+
+- name: Add nginx repo
+  when: (nextcloud_webserver_type == 'nginx') and (inventory_hostname in groups['webserver'])
+  ansible.builtin.deb822_repository:
+    state: present
+    name: "nginx-{{ ansible_facts['distribution_release'] }}"
+    types: [deb]
+    uris: ["http://nginx.org/packages/mainline/{{ ansible_facts['distribution'] | lower }}"]
+    suites: ["{{ ansible_facts['distribution_release'] }}"]
+    components: [nginx]
+    signed_by: "https://nginx.org/keys/nginx_signing.key"
+
+- name: Setup PHP repo
+  when: inventory_hostname in groups['nextcloud']
+  block:
+  # Huge thanks to https://github.com/geerlingguy/ansible-role-php-versions/
+  - name: Make API request to Launchpad
+    ansible.builtin.uri:
+      url: "https://api.launchpad.net/devel/~ondrej/+archive/ubuntu/php"
+      return_content: true
+      method: GET
+      headers:
+        Accept: "application/json"
+    register: launchpad_response
+    check_mode: false
+    retries: 5
+    until: launchpad_response.status == 200
+
+  - name: Parse JSON to extract signing key fingerprint
+    ansible.builtin.set_fact:
+      signing_key_fingerprint: "{{ launchpad_response.json.signing_key_fingerprint }}"
+
+  - name: Retrieve ASCII representation of the key using the signing key fingerprint
+    ansible.builtin.uri:
+      url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ signing_key_fingerprint }}"
+      return_content: true
+      method: GET
+    register: keyserver_response
+    check_mode: false
+
+  - name: Set data for Ondrej's repo (Ubuntu).
+    when: ansible_facts['distribution'] == "Ubuntu"
+    ansible.builtin.set_fact:
+      ondrej_repo_uri: "https://ppa.launchpadcontent.net/ondrej/php/ubuntu"
+      # Remove 'Comment' because response can be out of order.
+      # See: https://github.com/geerlingguy/ansible-role-php-versions/issues/94
+      ondrej_repo_signed_by: "{{ keyserver_response.content | regex_replace('\nComment.+\n','\n') }}"
+
+  - name: Display the retrieved GPG key for debugging purposes
+    ansible.builtin.debug:
+      var: ondrej_repo_signed_by
+      verbosity: 2
+
+  - name: Set data for Ondrej's repo (Debian).
+    when: ansible_facts['distribution'] == "Debian"
+    ansible.builtin.set_fact:
+      ondrej_repo_uri: "https://packages.sury.org/php"
+      ondrej_repo_signed_by: "https://packages.sury.org/php/apt.gpg"
+
+  - name: Add Ondrej's PHP repo.
+    become: true
+    ansible.builtin.deb822_repository:
+      state: present
+      name: "ondrej-php-{{ ansible_facts['distribution_release'] }}"
+      types: [deb]
+      uris: ["{{ ondrej_repo_uri }}"]
+      suites: ["{{ ansible_facts['distribution_release'] }}"]
+      components: [main]
+      signed_by: "{{ ondrej_repo_signed_by }}"
+
+- name: Add Postgres repo
+  when:
+    - nextcloud_db.type == 'pgsql'
+    - inventory_hostname in groups['database']
+  ansible.builtin.deb822_repository:
+    state: present
+    name: "postgres-{{ ansible_facts['distribution_release'] }}"
+    types: [deb]
+    uris: ["http://apt.postgresql.org/pub/repos/apt/"]
+    suites: ["{{ ansible_facts['distribution_release'] }}-pgdg"]
+    components: [main]
+    signed_by: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+
+- name: Add Redis repo
+  when: inventory_hostname in groups['redis']
+  ansible.builtin.deb822_repository:
+    state: present
+    name: "redis-{{ ansible_facts['distribution_release'] }}"
+    types: [deb]
+    uris: ["https://packages.redis.io/deb"]
+    suites: ["{{ ansible_facts['distribution_release'] }}"]
+    components: [main]
+    signed_by: "https://packages.redis.io/gpg"
+
+- name: Add Docker repo
+  when: inventory_hostname in groups['docker']
+  ansible.builtin.deb822_repository:
+    state: present
+    name: "docker-{{ ansible_facts['distribution_release'] }}"
+    types: [deb]
+    uris: ["https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }}"]
+    suites: ["{{ ansible_facts['distribution_release'] }}"]
+    components: [stable]
+    signed_by: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }}/gpg"
+
+- name: Add Elasticsearch repo
+  when: inventory_hostname in groups['elasticsearch']
+  ansible.builtin.deb822_repository:
+    state: present
+    name: "elasticsearch-{{ ansible_facts['distribution_release'] }}"
+    types: [deb]
+    uris: ["https://artifacts.elastic.co/packages/9.x/apt"]
+    suites: ["stable"]
+    components: ["main"]
+    signed_by: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"

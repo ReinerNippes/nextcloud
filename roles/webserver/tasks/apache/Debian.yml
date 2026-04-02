@@ -1,0 +1,10 @@
+---
+# Debian/Ubuntu apache installation
+
+- name: Install additional packages
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - apache2-utils
+      - openssl
+      - python3-openssl

@@ -1,0 +1,8 @@
+---
+# Pre-flight checks for Nextcloud deployment
+
+- name: Include office configuration checks
+  ansible.builtin.include_tasks: office_config.yml
+
+- name: Include inventory validation checks
+  ansible.builtin.include_tasks: inventory_validation.yml

@@ -1,0 +1,10 @@
+---
+
+- name: Include config reader
+  ansible.builtin.include_tasks: read_config.yml
+
+- name: Include process analyzer
+  ansible.builtin.include_tasks: analyze_processes.yml
+
+- name: Include recommendation engine
+  ansible.builtin.include_tasks: recommend.yml

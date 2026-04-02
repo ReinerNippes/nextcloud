@@ -1,0 +1,13 @@
+---
+
+- name: Install acme.sh
+  ansible.builtin.shell: |
+    curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online \
+      --home /opt/acme.sh \
+      --config-home /etc/acme.sh \
+      --cert-home {{ tls_certificate_directory }} \
+      --accountemail "{{ tls_certificate.email }}" \
+      --accountkey /etc/acme.sh/account.key \
+      --accountconf /etc/acme.sh/account.conf
+  args:
+    creates: "/opt/acme.sh/acme.sh"

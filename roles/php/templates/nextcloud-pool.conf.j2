@@ -1,0 +1,31 @@
+; Nextcloud PHP-FPM pool configuration
+; Managed by Ansible – do not edit manually
+
+[nextcloud]
+user = {{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}
+group = {{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}
+
+listen = {{ php_socket[ansible_facts['os_family']] }}
+listen.owner = {{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}
+listen.group = {{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}
+
+pm = {{ php_tuning.pm.type }}
+pm.max_children = {{ php_tuning.pm.max_children }}
+pm.start_servers = {{ php_tuning.pm.start_servers }}
+pm.min_spare_servers = {{ php_tuning.pm.min_spare_servers }}
+pm.max_spare_servers = {{ php_tuning.pm.max_spare_servers }}
+pm.max_requests = {{ php_tuning.pm.max_requests }}
+
+env[HOSTNAME] = $HOSTNAME
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+{% if ansible_facts['os_family'] == 'RedHat' %}
+
+; FPM overrides (RedHat: CLI and FPM share /etc/php.d/)
+php_admin_value[memory_limit] = 1G
+php_admin_value[cgi.fix_pathinfo] = {{ 0 if nextcloud_webserver_type == 'nginx' else 1 }}
+php_admin_value[session.cookie_secure] = 1
+php_admin_value[session.gc_maxlifetime] = 36000
+{% endif %}

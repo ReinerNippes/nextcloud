@@ -1,6 +1,6 @@
 ---
 # defaults file for postgres
 
-postgresql_version: 13
+postgresql_version: 17
 postgres_user: postgres
 pgdata: /var/lib/postgresql/data/pgdata

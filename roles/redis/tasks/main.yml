@@ -1,37 +1,71 @@
 ---
 # tasks file for redis
 
-- name: include os specific tasks
-  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: configure redis
-  template:
-    src: redis.conf.j2
-    dest: "{{ redis_conf_path[ansible_distribution] }}/redis.conf"
-    owner: redis
-    group: redis
-    mode: 0600
-    force: true
-    backup: true
-  notify: restart redis-server
+- name: Configure {{ redis_service_name[ansible_facts['os_family']] }}
+  ansible.builtin.lineinfile:
+    path: "{{ redis_conf_path[ansible_facts['os_family']] }}/{{ redis_service_name[ansible_facts['os_family']] }}.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    # backrefs: true
+    # backup: true
+  loop:
+    - regexp: "^port .*$"
+      line: "port 0"
+    - regexp: "# unixsocket .*$"
+      line: "unixsocket {{ redis_socket.path }}"
+    - regexp: "# unixsocketperm .*$"
+      line: "unixsocketperm {{ redis_socket.perm }}"
+    - regexp: "# maxclients .*$"
+      line: "maxclients 10240"
+    - regexp: "# requirepass foobared"
+      line: "requirepass {{ passwords.redis }}"
+  notify: Restart redis-server
 
-- name: add user {{ web_user[nextcloud_webserver_type][ansible_os_family] }} to group redis if running togehter with webserver
-  user:
-    name: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
-    groups: redis
-  when: groups['redis'] == groups['webserver']
+- name: Add webserver user to Redis/Valkey group on shared hosts
+  ansible.builtin.user:
+    name: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+    groups: "{{ redis_user_name[ansible_facts['os_family']] }}"
+  when: inventory_hostname in groups['nextcloud']
 
-- name: sysctl vm.overcommit_memory=1
-  sysctl:
+- name: Set vm.overcommit_memory=1
+  ansible.posix.sysctl:
     name: vm.overcommit_memory
     value: "1"
     state: present
     reload: true
     sysctl_file: /etc/sysctl.conf
-  when: ansible_virtualization_type not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
+  when: ansible_facts['virtualization_type'] not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
 
-- name: start and enable redis
-  systemd:
-    name: redis-server.service
+- name: Check /sys/kernel/mm/transparent_hugepage/enabled
+  ansible.builtin.stat:
+    path: /sys/kernel/mm/transparent_hugepage/enabled
+  register: redis_hugepage_enabled
+  when: ansible_facts['virtualization_type'] not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
+
+- name: Disable transparent hugepages
+  when:
+    - ansible_facts['virtualization_type'] not in [ 'docker', 'podman', 'lxc', 'container', 'containerd' ]
+    - redis_hugepage_enabled.stat.isreg is defined and redis_hugepage_enabled.stat.isreg
+  block:
+  - name: Disable transparent hugepages - copy service file
+    ansible.builtin.copy:
+      src: disable-transparent-huge-pages.service
+      dest: '{{ systemd_service_path[ansible_facts["os_family"]] }}/disable-transparent-huge-pages.service'
+      owner: root
+      group: root
+      mode: "0644"
+
+  - name: Enable service disable-transparent-hugepages
+    ansible.builtin.service:
+      name: disable-transparent-huge-pages.service
+      enabled: true
+      state: started
+
+- name: Start and enable {{ redis_service_name[ansible_facts['os_family']] }}.service
+  ansible.builtin.systemd:
+    name: "{{ redis_service_name[ansible_facts['os_family']] }}.service"
     state: started
     enabled: true

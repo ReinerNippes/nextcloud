@@ -1,0 +1,15 @@
+---
+
+- name: Install coturn
+  ansible.builtin.dnf:
+    name:
+      - coturn
+      - coturn-utils
+    state: present
+    enablerepo: epel
+
+- name: Make sure coturn user is in the ssl-cert group to read the certificate and key files
+  ansible.builtin.user:
+    name: coturn
+    groups: "{{ tls_certificate_group | default('ssl-cert') }}"
+    append: true

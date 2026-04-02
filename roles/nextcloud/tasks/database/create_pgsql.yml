@@ -1,0 +1,66 @@
+---
+# create nextcloud database
+#
+# Local (host=localhost): connect via unix socket as postgres (peer auth)
+# Remote (host!=localhost): connect via TCP with admin credentials
+
+- name: Set PostgreSQL login parameters
+  ansible.builtin.set_fact:
+    _pg_is_local: "{{ nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] }}"
+    _pg_login_host: "{{ none if nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] else nextcloud_db.host }}"
+    _pg_login_port: "{{ none if nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] else (nextcloud_db.port | default(5432)) }}"
+
+- name: Create {{ nextcloud_db.name }} db
+  community.postgresql.postgresql_db:
+    name: "{{ nextcloud_db.name }}"
+    state: present
+    encoding: UTF-8
+    template: template0
+    login_host: "{{ _pg_login_host | default(omit, true) }}"
+    login_port: "{{ _pg_login_port | default(omit, true) }}"
+    login_user: "{{ omit if _pg_is_local else nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ omit if _pg_is_local else nextcloud_db.admin_password | default(omit) }}"
+  become: "{{ _pg_is_local }}"
+  become_user: "{{ 'postgres' if _pg_is_local else omit }}"
+
+- name: Create {{ nextcloud_db.user }} account
+  community.postgresql.postgresql_user:
+    encrypted: true
+    login_db: "{{ nextcloud_db.name }}"
+    name: "{{ nextcloud_db.user }}"
+    password: "{{ passwords.database }}"
+    login_host: "{{ _pg_login_host | default(omit, true) }}"
+    login_port: "{{ _pg_login_port | default(omit, true) }}"
+    login_user: "{{ omit if _pg_is_local else nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ omit if _pg_is_local else nextcloud_db.admin_password | default(omit) }}"
+  become: "{{ _pg_is_local }}"
+  become_user: "{{ 'postgres' if _pg_is_local else omit }}"
+
+- name: Grant all privileges on schema public to {{ nextcloud_db.user }}
+  community.postgresql.postgresql_privs:
+    login_db: "{{ nextcloud_db.name }}"
+    privs: ALL
+    type: schema
+    obj: public
+    role: "{{ nextcloud_db.user }}"
+    login_host: "{{ _pg_login_host | default(omit, true) }}"
+    login_port: "{{ _pg_login_port | default(omit, true) }}"
+    login_user: "{{ omit if _pg_is_local else nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ omit if _pg_is_local else nextcloud_db.admin_password | default(omit) }}"
+  become: "{{ _pg_is_local }}"
+  become_user: "{{ 'postgres' if _pg_is_local else omit }}"
+
+- name: Grant default privileges on tables to {{ nextcloud_db.user }}
+  community.postgresql.postgresql_privs:
+    login_db: "{{ nextcloud_db.name }}"
+    privs: ALL
+    type: default_privs
+    obj: TABLES
+    schema: public
+    role: "{{ nextcloud_db.user }}"
+    login_host: "{{ _pg_login_host | default(omit, true) }}"
+    login_port: "{{ _pg_login_port | default(omit, true) }}"
+    login_user: "{{ omit if _pg_is_local else nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ omit if _pg_is_local else nextcloud_db.admin_password | default(omit) }}"
+  become: "{{ _pg_is_local }}"
+  become_user: "{{ 'postgres' if _pg_is_local else omit }}"

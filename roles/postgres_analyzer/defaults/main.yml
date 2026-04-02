@@ -1,0 +1,1 @@
+postgres_reserved_ram_mb: 2048   # RAM, den PostgreSQL nutzen darf, nicht Gesamt-RAM

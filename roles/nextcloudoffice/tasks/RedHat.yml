@@ -1,0 +1,13 @@
+---
+# dnf related OS tasks for nextcloudoffice
+
+- name: Install TTF fonts
+  ansible.builtin.dnf:
+    name:
+      - google-noto-sans-fonts
+      - google-noto-serif-fonts
+      - google-noto-sans-mono-fonts
+      - cabextract
+      - xorg-x11-font-utils
+    state: present
+    enablerepo: epel

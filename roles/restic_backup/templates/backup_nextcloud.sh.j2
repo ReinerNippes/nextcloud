@@ -1,36 +1,40 @@
 #!/bin/bash
 
-export RESTIC_REPOSITORY="{{ restic_repo }}"
-export RESTIC_PASSWORD="{{ restic_backup_secret }}"
+export RESTIC_REPOSITORY="{{ restic_repo.location }}"
+export RESTIC_PASSWORD="{{ restic_repo.password }}"
 
 # abort entire script if any command fails
 set -e
 
 # Make sure nextcloud is enabled when we are done
-trap "sudo -u {{ web_user[nextcloud_webserver_type][ansible_os_family] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off" EXIT
+trap "sudo -u {{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off" EXIT
 
 # set nextcloud to maintenance mode
-sudo -u {{ web_user[nextcloud_webserver_type][ansible_os_family] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --on
+sudo -u {{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --on
 
 # unlock restic to keep automatic backup going
-{{ restic_install_path }}/restic unlock --cleanup-cache
+/usr/bin/restic unlock --cleanup-cache
 
-# backup the database
-{% if nextcloud_db_type == 'mysql' %}
-mysqldump --single-transaction -h {{ nextcloud_db_host }} -u {{ nextcloud_db_user }} -p{{ nextcloud_db_passwd }} {{ nextcloud_db }} | {{ restic_install_path }}/restic backup --stdin --stdin-filename db_mysql_nextcloud.sql
-{% elif nextcloud_db_type == 'pgsql' %}
-sudo -u postgres pg_dump -c -U postgres {{ nextcloud_db }} | {{ restic_install_path }}/restic backup --stdin --stdin-filename db_postgres_nextcloud.sql
+# create a temporary database dump
+{% if nextcloud_db.type == 'mysql' %}
+/usr/bin/mysqldump --single-transaction -h {{ nextcloud_db.host }} -u {{ nextcloud_db.user }} -p{{ nextcloud_db.password }} {{ nextcloud_db.name }} > /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
+{% elif nextcloud_db.type == 'pgsql' %}
+sudo -u postgres /usr/bin/pg_dump -c -U postgres {{ nextcloud_db.name }} > /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
 {% endif %}
 
 # backup the data dir and nextcloud
-{{ restic_install_path }}/restic backup {{ nextcloud_data_dir }} {{ nextcloud_www_dir }}
+/usr/bin/restic backup {{ nextcloud_data_dir }} {{ nextcloud_www_dir }} /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
+
+# delete the temporary database dump
+rm -f /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
 
 # turn maintenance mode off
-sudo -u {{ web_user[nextcloud_webserver_type][ansible_os_family] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off
+sudo -u {{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }} php {{ nextcloud_www_dir }}/occ maintenance:mode --off
 
 # delete trap
 trap "" EXIT
 
 # clean up backup dir
-{{ restic_install_path }}/restic forget --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --keep-yearly 75
-{{ restic_install_path }}/restic prune
+/usr/bin/restic forget --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --keep-yearly 75
+/usr/bin/restic prune
+

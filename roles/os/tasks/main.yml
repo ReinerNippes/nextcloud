@@ -1,15 +1,26 @@
 ---
 # tasks file to setup os
 
-- name: include os specific tasks
-  include_tasks: '{{ ansible_pkg_mgr }}.yml'
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: init firewall
-  include_tasks: 'firewall_init.yml'
+- name: Detect DHCP on primary interface
+  ansible.builtin.set_fact:
+    _hosts_use_dhcp: >-
+      {{ ansible_facts['default_ipv4']['type'] | default('') == 'dhcp'
+         or ansible_facts['default_ipv4']['type'] | default('') == '' }}
 
-- name: make sure {{ credential_store }} is available
-  file: 
-    name: '{{ credential_store }}'
-    mode:  0700
-    state: directory
-  become: false
+- name: Set hostname to inventory hostname (short)
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname.split('.')[0] }}"
+
+- name: Deploy /etc/hosts
+  ansible.builtin.template:
+    src: etc_hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Parse Password File
+  ansible.builtin.include_tasks: 'passwords.yml'

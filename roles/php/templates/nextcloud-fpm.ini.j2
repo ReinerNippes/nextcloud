@@ -1,0 +1,35 @@
+; Nextcloud PHP FPM configuration
+; Managed by Ansible – do not edit manually
+;
+; Debian only: deployed to /etc/php/X.Y/fpm/conf.d/
+; (On RedHat FPM overrides are set via php_admin_value in pool config)
+
+[PHP]
+memory_limit = 1G
+output_buffering = Off
+allow_url_fopen = 1
+max_execution_time = 3600
+max_input_time = 3600
+post_max_size = 10G
+upload_max_filesize = 10G
+cgi.fix_pathinfo = {{ 0 if nextcloud_webserver_type == 'nginx' else 1 }}
+
+[Date]
+date.timezone = Europe/Berlin
+
+[Session]
+session.cookie_secure = True
+session.gc_maxlifetime = 36000
+
+[opcache]
+opcache.enable = 1
+opcache.enable_cli = 1
+opcache.validate_timestamps = 1
+opcache.memory_consumption = 256
+opcache.interned_strings_buffer = 64
+opcache.max_accelerated_files = 100000
+opcache.revalidate_freq = 0
+opcache.save_comments = 1
+opcache.huge_code_pages = 0
+opcache.jit = 1255
+opcache.jit_buffer_size = 256M

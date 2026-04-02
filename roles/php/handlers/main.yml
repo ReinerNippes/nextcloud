@@ -1,8 +1,8 @@
 ---
 # handlers file for php
 
-- name: restart php-fpm
-  systemd:
-    name: "{{ php_service_name[ansible_distribution] }}"
+- name: Restart php-fpm
+  ansible.builtin.systemd:
+    name: "{{ php_service_name[ansible_facts['os_family']] }}"
     state: restarted
   listen: "restart web services"

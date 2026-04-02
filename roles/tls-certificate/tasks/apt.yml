@@ -1,8 +1,0 @@
----
-# apt related OS tasks
-
-- name: install additional packages
-  apt:
-    name:
-      - socat
-    state: latest

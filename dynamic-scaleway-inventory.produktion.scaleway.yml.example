@@ -1,0 +1,45 @@
+---
+# Dynamic Scaleway inventory
+# Usage: ansible-playbook -i dynamic-scaleway-inventory.produktion.scaleway.yml nextcloud.yml
+#
+# Requirements:
+#   ansible-galaxy collection install scaleway.scaleway
+#   export SCW_ACCESS_KEY="your-access-key"
+#   export SCW_SECRET_KEY="your-secret-key"
+#
+# Or retrieve from a Pulumi stack:
+#   export SCW_ACCESS_KEY=$(cd cloud-stuff && pulumi config get scaleway:accessKey --stack <your-stack>)
+#   export SCW_SECRET_KEY=$(cd cloud-stuff && pulumi config get scaleway:secretKey --stack <your-stack>)
+#
+# Servers must have tags set by Pulumi (group_<name>)
+# to be assigned to the correct Ansible inventory groups.
+# The env=<stack> tag separates multiple deployments in the same account.
+
+plugin: scaleway.scaleway.scaleway
+
+# Filter by environment tag
+tags:
+  - "env=production"
+
+# Scaleway zone
+regions:
+  - fr-par-1
+
+# Map tags to Ansible groups
+groups:
+  nextcloud:       "'group_nextcloud'       in tags"
+  redis:           "'group_redis'           in tags"
+  database:        "'group_database'        in tags"
+  webserver:       "'group_webserver'       in tags"
+  docker:          "'group_docker'          in tags"
+  elasticsearch:   "'group_elasticsearch'   in tags"
+  coturn:          "'group_coturn'          in tags"
+  signal:          "'group_signal'          in tags"
+  hapr:            "'group_hapr'            in tags"
+  nextcloudoffice: "'group_nextcloudoffice' in tags"
+  onlyoffice:      "'group_onlyoffice'      in tags"
+
+# Compose host variables
+compose:
+  ansible_user: "'ansible'"
+  ansible_ssh_private_key_file: "'~/.ssh/id_ed25519'"

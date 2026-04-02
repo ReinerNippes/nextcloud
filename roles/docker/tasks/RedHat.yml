@@ -1,0 +1,34 @@
+---
+# dnf related OS tasks
+
+- name: Uninstall any conflicting packages
+  ansible.builtin.dnf:
+    name:
+      - docker
+      - docker-client-latest
+      - docker-client
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+      - podman
+      - runc
+    state: absent
+
+- name: Install docker
+  ansible.builtin.dnf:
+    name:
+      - docker-ce
+      - docker-compose-plugin
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      # - python3-docker
+    state: latest
+
+- name: Enable docker
+  ansible.builtin.systemd:
+    name: docker
+    daemon_reload: true
+    enabled: true

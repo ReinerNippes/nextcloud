@@ -1,0 +1,10 @@
+---
+# dnf related tasks
+
+- name: Install needed RedHat packages
+  ansible.builtin.dnf:
+    name:
+    - perl-File-FcntlLock
+    - ImageMagick
+    - ghostscript
+    state: latest

@@ -1,0 +1,91 @@
+- name: Remove comment lines from server.conf
+  ansible.builtin.replace:
+    path: /etc/nextcloud-spreed-signaling/server.conf
+    regexp: '^\s*[#;].*\n'
+    replace: ''
+
+- name: Read or generate janus api key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    existing=$(python3 -c "
+    import configparser; c = configparser.ConfigParser()
+    c.read('/etc/nextcloud-spreed-signaling/server.conf')
+    print(c.get('turn', 'apikey', fallback=''))
+    ")
+    if [ -n "$existing" ]; then echo "$existing"; else openssl rand -base64 16; fi
+  args:
+    executable: /bin/bash
+  register: _janus_api_key
+  changed_when: false
+
+- name: Read or generate hash key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    existing=$(python3 -c "
+    import configparser; c = configparser.ConfigParser()
+    c.read('/etc/nextcloud-spreed-signaling/server.conf')
+    print(c.get('sessions', 'hashkey', fallback=''))
+    ")
+    if [ -n "$existing" ] && [ "$existing" != "the-secret-for-session-checksums" ]; then echo "$existing"; else openssl rand -hex 16; fi
+  args:
+    executable: /bin/bash
+  register: _hash_key
+  changed_when: false
+
+- name: Read or generate block key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    existing=$(python3 -c "
+    import configparser; c = configparser.ConfigParser()
+    c.read('/etc/nextcloud-spreed-signaling/server.conf')
+    print(c.get('sessions', 'blockkey', fallback=''))
+    ")
+    if [ -n "$existing" ] && [ "$existing" != "-encryption-key-" ]; then echo "$existing"; else openssl rand -hex 16; fi
+  args:
+    executable: /bin/bash
+  register: _block_key
+  changed_when: false
+
+- name: Configure signal server.conf
+  vars:
+    coturn_inventory_hostname: "{{ hostvars[groups['coturn'][0]]['inventory_hostname'] }}"
+    signal_turn_servers_value: >-
+      turn:{{ coturn_inventory_hostname }}:{{ coturn_tls_port }}?transport=udp,turn:{{ coturn_inventory_hostname }}:{{ coturn_tls_port }}?transport=tcp
+  community.general.ini_file:
+    path: /etc/nextcloud-spreed-signaling/server.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  notify: Restart nextcloud-spreed-signaling
+  loop:
+    - { section: "http", option: "listen", value: "127.0.0.1:8080" }
+    - { section: "https", option: "certificate", value: "/etc/nginx/ssl/server.crt" }
+    - { section: "https", option: "key", value: "/etc/nginx/ssl/server.key" }
+    - { section: "app", option: "debug", value: "false" }
+    - { section: "sessions", option: "hashkey", value: "{{ _hash_key.stdout }}" }
+    - { section: "sessions", option: "blockkey", value: "{{ _block_key.stdout }}" }
+    - { section: "clients", option: "internalsecret", value: "{{ passwords.signal_internal_secret }}" }
+    - { section: "backend", option: "backends", value: "backend1" }
+    - { section: "backend", option: "allowall", value: "false" }
+    - { section: "backend", option: "secret", value: "{{ passwords.signal_nextcloud_secret }}" }
+    - { section: "backend", option: "timeout", value: "10" }
+    - { section: "backend", option: "connectionsperhost", value: "8" }
+    - { section: "backend1", option: "url", value: "https://{{ nextcloud_fqdn }}" }
+    - { section: "backend1", option: "secret", value: "{{ passwords.signal_nextcloud_secret }}" }
+    - { section: "nats", option: "url", value: "nats://localhost:4222" }
+    - { section: "mcu", option: "type", value: "janus" }
+    - { section: "mcu", option: "url", value: "ws://127.0.0.1:8188" }
+    - { section: "turn", option: "apikey", value: "{{ _janus_api_key.stdout }}" }
+    - { section: "turn", option: "secret", value: "{{ passwords.coturn }}" }
+    - { section: "turn", option: "servers", value: "{{ signal_turn_servers_value }}" }
+
+- name: Ensure empty sections exist in server.conf
+  community.general.ini_file:
+    path: /etc/nextcloud-spreed-signaling/server.conf
+    section: "{{ item }}"
+    allow_no_value: true
+    state: present
+  loop:
+    - geoip
+    - geoip-overrides
+    - stats

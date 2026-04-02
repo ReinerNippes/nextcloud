@@ -1,0 +1,33 @@
+---
+# create nextcloud database
+#
+# Local (host=localhost): connect via unix socket
+# Remote (host!=localhost): connect via TCP with admin credentials
+
+- name: Set MariaDB login parameters
+  ansible.builtin.set_fact:
+    _mysql_is_local: "{{ nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] }}"
+
+- name: Create nextcloud db
+  community.mysql.mysql_db:
+    name: "{{ nextcloud_db.name }}"
+    collation: utf8mb4_general_ci
+    encoding: utf8mb4
+    login_unix_socket: "{{ mariadb_socket[ansible_facts['os_family']] if _mysql_is_local else omit }}"
+    login_host: "{{ omit if _mysql_is_local else nextcloud_db.host }}"
+    login_port: "{{ omit if _mysql_is_local else (nextcloud_db.port | default(3306)) }}"
+    login_user: "{{ omit if _mysql_is_local else nextcloud_db.admin_user | default('root') }}"
+    login_password: "{{ omit if _mysql_is_local else nextcloud_db.admin_password | default(omit) }}"
+
+- name: Create nextcloud user
+  community.mysql.mysql_user:
+    name: "{{ nextcloud_db.user }}"
+    password: "{{ passwords.database }}"
+    priv: "{{ nextcloud_db.name }}.*:ALL"
+    host: "%"
+    state: present
+    login_unix_socket: "{{ mariadb_socket[ansible_facts['os_family']] if _mysql_is_local else omit }}"
+    login_host: "{{ omit if _mysql_is_local else nextcloud_db.host }}"
+    login_port: "{{ omit if _mysql_is_local else (nextcloud_db.port | default(3306)) }}"
+    login_user: "{{ omit if _mysql_is_local else nextcloud_db.admin_user | default('root') }}"
+    login_password: "{{ omit if _mysql_is_local else nextcloud_db.admin_password | default(omit) }}"

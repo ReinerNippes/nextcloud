@@ -1,0 +1,41 @@
+---
+
+# Nextcloud Database Settings
+# Leave Password Empty to generate secure, random one
+
+# nextcloud_db.type: mysql        # (MariaDB)
+# nextcloud_db.type: pgsql        # (PostgreSQL)
+
+nextcloud_db:
+  type: mysql
+  host: localhost
+  port: ''                  # empty = default port (5432/3306). Set for non-standard ports.
+  name: nextcloud
+  user: nextcloud
+  password: ''
+  migration: false
+
+# determines the version of postgresql to install if postgresql is used as database for nextcloud
+postgresql_version: 18
+
+# postgresql tuning parameters, only applied if postgresql is used as database for nextcloud
+# goto https://pgtune.leopard.in.ua/ to generate optimal values for your system
+postgres_tuning_parameters:
+  - max_connections: 50
+  - shared_buffers: 387MB
+  - effective_cache_size: 930MB
+  - work_mem: 7MB
+  - maintenance_work_mem: 155MB
+  - random_page_cost: 1.1
+  - effective_io_concurrency: 200
+  - checkpoint_completion_target: 0.9
+  - default_statistics_target: 100
+  - huge_pages: 'off'
+  - min_wal_size: 1GB
+  - max_wal_size: 4GB
+  - max_worker_processes: 4
+  - max_parallel_workers_per_gather: 2
+  - max_parallel_workers: 4
+  - max_parallel_maintenance_workers: 2
+
+# mariadb version is determined by the distribution

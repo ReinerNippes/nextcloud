@@ -1,0 +1,21 @@
+---
+
+
+- name: Add nats-server service to compose.yml
+  ansible.builtin.blockinfile:
+    path: /opt/nextcloud/docker_compose/compose.yml
+    marker: "# {mark} nats-server service"
+    block: |
+      #
+        nats-server:
+          image: nats:latest
+          container_name: natsserver
+          restart: always
+          networks:
+            - nextcloud
+          ports:
+            - "4222:4222"
+          environment:
+            TZ: "{{ nextcloud_timezone | default('Europe/Berlin') }}"
+          labels:
+            com.centurylinklabs.watchtower.enable: "true"

@@ -2,11 +2,11 @@
 
 # tasks to configure fulltextsearch
 
-- name: install fulltextsearch apps
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: Install fulltextsearch apps
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: 'php occ app:install {{ item }}'
+  become: true
+  ansible.builtin.command: 'php occ app:install {{ item }}'
   args:
     chdir: "{{ nextcloud_www_dir }}"
     creates: "{{ nextcloud_www_dir }}/apps/{{ item }}"
@@ -14,28 +14,28 @@
     - fulltextsearch
     - fulltextsearch_elasticsearch
     - files_fulltextsearch
-    - files_fulltextsearch_tesseract
+    # - files_fulltextsearch_tesseract
   register: fulltextsearch_app_installed
 
-- name: enable fulltextsearch apps
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: Enable fulltextsearch apps
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: 'php occ app:enable {{ item }}'
+  become: true
+  ansible.builtin.command: 'php occ app:enable {{ item }}'
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop:
     - fulltextsearch
     - fulltextsearch_elasticsearch
     - files_fulltextsearch
-    - files_fulltextsearch_tesseract
+    # - files_fulltextsearch_tesseract
   when: fulltextsearch_app_installed is changed
 
-- name: configure fulltextsearch app
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: Configure fulltextsearch app
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: 'php occ {{ item }}'
+  become: true
+  ansible.builtin.command: 'php occ {{ item }}'
   args:
     chdir: "{{ nextcloud_www_dir }}"
   loop:
@@ -59,26 +59,25 @@
     - config:app:set files_fulltextsearch_tesseract tesseract_lang --value="eng,de"
     - config:app:set files_fulltextsearch_tesseract tesseract_pdf --value="1"
 
-- name: create fulltextsearch index
-  become_user: "{{ web_user[nextcloud_webserver_type][ansible_os_family] }}"
+- name: Create fulltextsearch index
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   become_flags: "{{ ansible_become_flags | default(omit) }}"
-  become: yes
-  shell: 'php occ fulltextsearch:index'
+  become: true
+  ansible.builtin.command: 'php occ fulltextsearch:index'
   args:
     chdir: "{{ nextcloud_www_dir }}"
   when: fulltextsearch_app_installed.changed
 
-- name: fulltextsearch - copy service file
-  template:
+- name: Fulltextsearch - copy service file
+  ansible.builtin.template:
     src: nextcloud-fulltext-elasticsearch-worker.service.j2
-    dest: '{{ systemd_service_path[ansible_distribution] }}/nextcloud-fulltext-elasticsearch-worker.service'
+    dest: "{{ systemd_service_path[ansible_facts['os_family']] }}/nextcloud-fulltext-elasticsearch-worker.service"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
 
-- name: enable service nextcloud-fulltext-elasticsearch-worker
-  service:
+- name: Enable service nextcloud-fulltext-elasticsearch-worker
+  ansible.builtin.systemd:
     name: nextcloud-fulltext-elasticsearch-worker.service
     enabled: true
     state: started
-

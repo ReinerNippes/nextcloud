@@ -1,0 +1,58 @@
+---
+# apt related OS tasks
+
+- name: Setup nginx and php apt repository
+  ansible.builtin.include_tasks: Debian_repositories.yml
+
+- name: OS apt dist-upgrade
+  ansible.builtin.apt:
+    upgrade: dist
+    update_cache: true
+    cache_valid_time: 3600
+    autoremove: true
+    auto_install_module_deps: true
+
+- name: Install additional packages
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - bash-completion
+      - bzip2
+      - ca-certificates
+      - cron
+      - curl
+      - dialog
+      - dirmngr
+      - facter
+      - git
+      - gnupg
+      - gnupg2
+      - htop
+      - jq
+      - libfontconfig1
+      - libfuse2
+      - locate
+      - lsb-release
+      - net-tools
+      - nodejs
+      - npm
+      - rsyslog
+      - screen
+      - smbclient
+      - socat
+      - sqlite3
+      - ssl-cert
+      - sudo
+      - tree
+      - unzip
+      - vim
+      - wget
+      - zip
+    state: latest
+
+- name: Install software-properties-common (Ubuntu and Debian 12 only)
+  ansible.builtin.apt:
+    name:
+      - software-properties-common
+    state: latest
+  when: ansible_facts["distribution"] == 'Ubuntu' or (ansible_facts["distribution"] == 'Debian' and ansible_facts["distribution_major_version"] | int <= 12)

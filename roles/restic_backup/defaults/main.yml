@@ -1,30 +1,54 @@
 ---
 # defaults file for restic backup
 
-# checkout the latest version of restic. set to x.y.z to get a specific version 
-restic_version:    'latest'
-
-restic_backup_secret:       '' 
-restic_install_path:        '/usr/local/bin'
+restic_backup_secret: ""
 
 # use a local directory as a restic repository (not a good idea anyway)
-restic_repo:     ''
+# restic_repo: []
 
-# use rclone to backup a cloud storage, see https://rclone.org for more details
-#restic_repo:     "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ selfhosted_credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"
-#rclone_remote: |
-#      [backup-selfhosted]
-#      type = s3
-#      provider = AWS
-#      env_auth = false
-#      access_key_id = AKIxxxxx
-#      secret_access_key = QMpoxxxx
-#      region = us-east-1
-#      acl = private
-#      server_side_encryption = AES256
-#      storage_class = STANDARD_IA
+restic_repo:
+  type: "local"
+  location: /srv/nextcloud-backup
+  password: "{{ passwords.restic_backup_secret }}"
+
+# restic_repo:
+#   type: "remote"
+#   location: rest:https://restic_rest_server.example.com:8000/nextcloud-backup/
+#   password: "{{ passwords.restic_backup_secret }}"
+
+# restic_repo:
+#   type: "sftp"
+#   location: sftp:user@host:/srv/nextcloud-backup
+#   password: "{{ passwords.restic_backup_secret }}"
+
+# restic_repo:
+#   type:"aws"
+#   location: s3:s3.amazonaws.com/bucket_name
+#   password: "{{ passwords.restic_backup_secret }}"
+#   aws_access_key: accesskey
+#   aws_secret_access_key: secretaccesskey
+#   aws_default_region: eu-west-1
+
+# restic_repo:
+#   type: "azure"
+#   location: azure:container:/
+#   password: "{{ passwords.restic_backup_secret }}"
+#   azure_account_name: storageaccountname
+#   # Only one of the following are required
+#   azure_account_key: somekey
+#   azure_account_sas: sasurl
+#   # Optional
+#   azure_endpoint_suffix: core.windows.net
+
+# restic_repo:
+#   type: "b2"
+#   location: b2:bucketname:path/to/repo
+#   password: "{{ passwords.restic_backup_secret }}"
+#   b2_account_id: accountid
+#   b2_account_key: accountkey
 
 # crontab setings for the backup script - default daily at 3pm
-restic_backup_day:    '*'
-restic_backup_minute: '0'
-restic_backup_hour:   '3'
+restic_backup:
+  day: "*"
+  minute: "0"
+  hour: "3"

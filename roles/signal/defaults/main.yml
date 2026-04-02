@@ -1,0 +1,13 @@
+---
+
+# Go version to install for building nextcloud-spreed-signaling
+signal_go_version: "1.25.0"
+
+# Git tag or branch to build (nextcloud-spreed-signaling)
+signal_version: "v2.1.0"
+
+# Janus Gateway version (git tag)
+janus_version: "v1.4.0"
+
+# libnice version (git tag) - distro versions are often too old
+janus_libnice_version: "0.1.22"

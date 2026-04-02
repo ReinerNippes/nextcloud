@@ -1,0 +1,81 @@
+---
+
+- name: Enable apache modules for signaling proxy
+  when: ansible_facts['os_family'] == 'Debian'
+  community.general.apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - ssl
+    - headers
+    - proxy
+    - proxy_http
+    - proxy_wstunnel
+    - rewrite
+  notify: restart web services
+
+- name: Apache server config on Debian
+  when: ansible_facts['os_family'] == 'Debian'
+  vars:
+    recording_fqdn: >-
+      {{
+        additional_fqdns.additional_fqdn_recording
+        | default((additional_certificate_fqdns | default([]) | first), true)
+        | default('')
+      }}
+  block:
+    - name: Apache signaling vhost in sites-available
+      ansible.builtin.template:
+        src: apache/{{ item.template }}.conf.j2
+        dest: "{{ apache_server_root[ansible_facts['os_family']] }}/sites-available/{{ item.path }}.conf"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: restart web services
+      loop:
+        - { template: "signaling", path: "{{ inventory_hostname }}" }
+        - { template: "recording", path: "{{ recording_fqdn }}" }
+      when: item.path | length > 0
+
+    - name: Apache signaling vhost symlink in sites-enabled
+      ansible.builtin.file:
+        src: "{{ apache_server_root[ansible_facts['os_family']] }}/sites-available/{{ item }}.conf"
+        dest: "{{ apache_server_root[ansible_facts['os_family']] }}/sites-enabled/{{ item }}.conf"
+        state: link
+      notify: restart web services
+      loop:
+        - "{{ inventory_hostname }}"
+        - "{{ recording_fqdn }}"
+      when: item | length > 0
+
+- name: Apache server config on RedHat
+  when: ansible_facts['os_family'] == 'RedHat'
+  ansible.builtin.template:
+    src: apache/ssl-global.conf.j2
+    dest: "{{ apache_conf_path[ansible_facts['os_family']] }}/ssl-global.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart web services
+
+- name: Apache server config on RedHat
+  vars:
+    recording_fqdn: >-
+      {{
+        additional_fqdns.additional_fqdn_recording
+        | default((additional_certificate_fqdns | default([]) | first), true)
+        | default('')
+      }}
+  ansible.builtin.template:
+    src: apache/{{ item.template }}.conf.j2
+    dest: "{{ apache_conf_path[ansible_facts['os_family']] }}/{{ item.path }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart web services
+  loop:
+    - { template: "signaling", path: "{{ inventory_hostname }}" }
+    - { template: "recording", path: "{{ recording_fqdn }}" }
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - item.path | length > 0

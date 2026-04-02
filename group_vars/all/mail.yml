@@ -1,0 +1,15 @@
+---
+
+# Nextcloud Mail Setup
+nextcloud_mail:
+  configure: false
+  smtpmode: smtp
+  from: ''
+  domain: ''
+  smtpauthtype: LOGIN
+  smtpname: ''
+  smtppwd: ''
+  smtpsecure: ssl
+  smtpauth: 1
+  smtphost: ''
+  smtpport: 465

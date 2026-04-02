@@ -1,0 +1,9 @@
+---
+
+- name: Install restic
+  ansible.builtin.apt:
+    name:
+      - restic
+      - "{{ 'rclone' if 'rclone' in restic_repo else omit }}"
+    update_cache: true
+    state: present

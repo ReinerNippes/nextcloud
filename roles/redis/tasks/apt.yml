@@ -1,8 +1,0 @@
----
-# Ubuntu related OS tasks
-
-- name: install additional packages
-  apt:
-    name: redis-server
-    autoremove: true
-    state: latest

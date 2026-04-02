@@ -1,0 +1,18 @@
+---
+collections:
+  - name: ansible.posix
+    version: ">=2.1.0"
+  - name: community.mysql
+    version: ">=4.1.0"
+  - name: community.postgresql
+    version: ">=4.2.0"
+  - name: community.general
+    version: ">=12.4.0"
+  - name: community.crypto
+    version: ">=3.1.1"
+  - name: community.docker
+    version: ">=5.0.6"
+  - name: hetzner.hcloud
+    version: ">=6.7.0"
+  - name: devsec.hardening
+    version: ">=10.5.1"

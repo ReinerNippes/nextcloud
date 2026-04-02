@@ -1,52 +1,76 @@
 ---
+
 # tasks file for restic_backup
 
-- name: install restic
-  include_tasks: install_restic.yml
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: install restic
-  include_tasks: install_rclone.yml
+- name: Rclone Konfiguration anlegen
   when: ( 'rclone' in restic_repo )
+  block:
+    - name: Make sure rclone config folder exists
+      ansible.builtin.file:
+        name: "/root/.config/rclone"
+        owner: "root"
+        group: "root"
+        mode: "0700"
+        state: directory
 
-- name: generate restic secret if restic_backup_secret is empty
-  set_fact:
-    restic_backup_secret: "{{ lookup('password', '{{ credential_store }}/restic_backup_secret chars=ascii_letters,digits length=32') }}"
-  when: restic_backup_secret == ''
+    - name: Create rclone config
+      ansible.builtin.blockinfile:
+        content: "{{ rclone_remote }}"
+        path: "/root/.config/rclone/rclone.conf"
+        owner: "root"
+        group: "root"
+        mode: "0600"
+        create: true
 
-- name: create restic backup directory
-  file:
-    name:  '{{ restic_repo }}'
-    owner: 'root'
-    group: 'root'
-    mode:  '0700'
+- name: Create restic backup directory
+  ansible.builtin.file:
+    name: "{{ restic_repo }}"
+    owner: "root"
+    group: "root"
+    mode: "0700"
     state: directory
   when: ( 'rclone' not in restic_repo )
 
-- name: initialize repository
-  command: '{{ restic_install_path }}/restic init'
+- name: Initialize repository
+  ansible.builtin.command: "/usr/bin/restic init"
   environment:
-    RESTIC_REPOSITORY: "{{ restic_repo }}"
-    RESTIC_PASSWORD:   "{{ restic_backup_secret }}"
-#  no_log: true
+    RESTIC_REPOSITORY: "{{ restic_repo.location }}"
+    RESTIC_PASSWORD: "{{ restic_repo.password }}"
+    AWS_ACCESS_KEY_ID: '{{ restic_repo.aws_access_key | default("") }}'
+    AWS_SECRET_ACCESS_KEY: '{{ restic_repo.aws_secret_access_key | default("") }}'
+    AWS_DEFAULT_REGION: '{{ restic_repo.aws_default_region | default("") }}'
+    AZURE_ACCOUNT_NAME: '{{ restic_repo.azure_account_name | default("") }}'
+    AZURE_ACCOUNT_KEY: '{{ restic_repo.azure_account_key | default("") }}'
+    AZURE_ACCOUNT_SAS: '{{ restic_repo.azure_account_sas | default("") }}'
+    AZURE_ENDPOINT_SUFFIX: '{{ restic_repo.azure_endpoint_suffix | default("") }}'
+    B2_ACCOUNT_ID: '{{ restic_repo.b2_account_id | default("") }}'
+    B2_ACCOUNT_KEY: '{{ restic_repo.b2_account_key | default("") }}'
+  no_log: true
   register: restic_init
   changed_when: "'created restic backend' in restic_init.stdout"
   failed_when:
     - restic_init.rc != 0
     - not ( 'config already initialized' in restic_init.stderr or 'config file already exists' in restic_init.stderr )
 
-- name: cretae restic selfhosted backup script
-  template:
-    src:   'backup_nextcloud.sh.j2'
-    dest:  '{{ restic_install_path }}/backup_nextcloud.sh'
-    owner: 'root'
-    group: 'root'
-    mode:  '0750'
+- name: Create restic selfhosted backup script
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/usr/local/bin/{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0750"
     force: false
+  loop:
+    - backup_nextcloud.sh
+    - restore_nextcloud.sh
 
-- name: crontab entry
-  cron:
-    name:   "backup nextcloud"
-    day:    "{{ restic_backup_day }}"
-    minute: "{{ restic_backup_minute }}"
-    hour:   "{{ restic_backup_hour }}"
-    job:    "{{ restic_install_path }}/backup_nextcloud.sh > /dev/null 2>&1"
+- name: Create crontab entry
+  ansible.builtin.cron:
+    name: "backup nextcloud"
+    day: "{{ restic_backup.day }}"
+    minute: "{{ restic_backup.minute }}"
+    hour: "{{ restic_backup.hour }}"
+    job: "/usr/local/bin/backup_nextcloud.sh > /dev/null 2>&1"

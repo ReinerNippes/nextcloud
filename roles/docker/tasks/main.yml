@@ -1,19 +1,66 @@
 ---
 # tasks file for docker
 
-- name: include os specific tasks
-  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: enable docker
-  systemd:
-    name:          docker
-    state:         started
-    enabled:       true
-    daemon_reload: yes
+- name: Enable docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+    daemon_reload: true
 
-- name: add to group docker
-  user:
-    name: '{{ ansible_env.SUDO_USER }}'
+- name: Add to group docker
+  ansible.builtin.user:
+    name: '{{ ansible_facts["env"]["SUDO_USER"] }}'
     append: true
     groups: docker
-  when: ansible_env.SUDO_USER | default('root') != 'root'
+  when: ansible_facts["env"]["SUDO_USER"] | default('root') != 'root'
+
+- name: Create password directory
+  ansible.builtin.file:
+    name: /opt/nextcloud/docker_compose
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+
+
+- name: Add watchtower service to compose.yml
+  ansible.builtin.blockinfile:
+    path: /opt/nextcloud/docker_compose/compose.yml
+    marker: "# {mark} ANSIBLE MANAGED BLOCK docker compose file for nextcloud services"
+    create: true
+    block: |
+      ---
+      networks:
+        nextcloud:
+          external: true
+      services:
+      # watchtower service
+        watchtower:
+          image: containrrr/watchtower
+          container_name: watchtower
+          restart: always
+          networks:
+            - nextcloud
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+          environment:
+            WATCHTOWER_CLEANUP: "true"
+            WATCHTOWER_INCLUDE_RESTARTING: "true"
+            WATCHTOWER_POLL_INTERVAL: "{{ watchtower_poll_interval | default('86400') }}"
+            DOCKER_API_VERSION: "1.44"
+            TZ: "{{ nextcloud_timezone | default('Europe/Berlin') }}"
+          labels:
+            com.centurylinklabs.watchtower.enable: "true"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create Docker network "nextcloud"
+  community.docker.docker_network:
+    name: nextcloud
+    state: present
+  register: docker_network_nextcloud

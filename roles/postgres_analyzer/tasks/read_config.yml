@@ -1,0 +1,8 @@
+---
+
+- name: Collect PostgreSQL version and extensions
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_info:
+    filter: settings,version
+  register: pg_info

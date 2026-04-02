@@ -1,0 +1,35 @@
+---
+# tasks file for nextcloudoffice (collabora)
+
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
+
+- name: Add nextcloudoffice service to compose.yml
+  ansible.builtin.blockinfile:
+    path: /opt/nextcloud/docker_compose/compose.yml
+    marker: "# {mark} nextcloudoffice service"
+    block: |
+      #
+        nextcloudoffice:
+          image: collabora/code:latest
+          container_name: nextcloudoffice
+          restart: unless-stopped
+          networks:
+            - nextcloud
+          ports:
+            - "127.0.0.1:9980:9980"
+          volumes:
+            - /usr/share/fonts/truetype/:/opt/collaboraoffice/share/fonts/truetype/local/:ro
+          environment:
+            aliasgroup1: 'https://{{ nextcloud_fqdn }}:443,https://{{ nextcloud_fqdn.split('.') | join('\\.') }}'
+            username: "admin"
+            password: "{{ passwords.collabora_admin }}"
+            lang: "de_DE"
+            dictionaries: "de_DE en_GB en_US"
+            extra_params: "--o:home_mode.enable=true"
+          extra_hosts:
+            - "{{ nextcloud_fqdn }}:{{ docker_network_nextcloud.network.IPAM.Config[0].Gateway }}"
+          user: "1001:1001"
+          mem_limit: 4g
+          labels:
+            com.centurylinklabs.watchtower.enable: "true"

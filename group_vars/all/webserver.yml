@@ -1,0 +1,8 @@
+---
+
+# webserver type nginx or apache
+nextcloud_webserver_type: nginx
+
+# Nextcloud Webserver Ports
+nextcloud_web_port: 80
+nextcloud_ssl_port: 443

@@ -1,0 +1,29 @@
+---
+# Validate office configuration: ensure only one solution is enabled
+
+- name: Ensure only one office solution is installed
+  ansible.builtin.assert:
+    that:
+      - "not (nextcloud_install.nextcloudoffice|bool and nextcloud_install.onlyoffice|bool)"
+    fail_msg: |
+      ─────────────────────────────────────────────────────────────────────────────
+      🚫 ERROR: Conflicting office configuration
+      ─────────────────────────────────────────────────────────────────────────────
+      
+      Both 'nextcloudoffice' and 'onlyoffice' are enabled!
+      You must choose only ONE office solution:
+      
+        • nextcloudoffice: {{ nextcloud_install.nextcloudoffice }}  (Collabora Online)
+        • onlyoffice:      {{ nextcloud_install.onlyoffice }}       (OnlyOffice Document Server)
+      
+      Fix this by setting one to 'false' in:
+        → group_vars/all/nextcloud.yml
+      
+      Or override via command line:
+        → ansible-playbook nextcloud.yml -e "nextcloud_install.nextcloudoffice=false"
+        → ansible-playbook nextcloud.yml -e "nextcloud_install.onlyoffice=false"
+      
+      ─────────────────────────────────────────────────────────────────────────────
+    success_msg: "✓ Office configuration validated: only one solution enabled"
+  run_once: true
+  delegate_to: localhost

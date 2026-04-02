@@ -1,0 +1,48 @@
+---
+# Dynamic Hetzner Cloud inventory
+# Usage: ansible-playbook -i hetzner-inventory-dynamic.hcloud.yml nextcloud.yml
+#
+# Requirements:
+#   ansible-galaxy collection install hetzner.hcloud
+#   export HCLOUD_TOKEN="your-hetzner-cloud-api-token"
+#
+# Servers must have labels set by Pulumi (group_<name>: true)
+# to be assigned to the correct Ansible inventory groups.
+# The env label separates multiple deployments in the same account.
+
+plugin: hetzner.hcloud.hcloud
+
+# Only include servers belonging to this environment
+# Change the value to match your Pulumi stack / environment name
+label_selector: "env=production"
+
+# Use the server name from Hetzner as inventory hostname.
+# Pulumi now creates Hetzner servers with FQDN names derived from stack name + zone.
+hostname: "{{ hcloud_name }}"
+
+# Group servers by their group_* labels
+groups:
+  nextcloud: "hcloud_labels.group_nextcloud | default('') == 'true'"
+  redis: "hcloud_labels.group_redis | default('') == 'true'"
+  database: "hcloud_labels.group_database | default('') == 'true'"
+  webserver: "hcloud_labels.group_webserver | default('') == 'true'"
+  docker: "hcloud_labels.group_docker | default('') == 'true'"
+  elasticsearch: "hcloud_labels.group_elasticsearch | default('') == 'true'"
+  coturn: "hcloud_labels.group_coturn | default('') == 'true'"
+  signal: "hcloud_labels.group_signal | default('') == 'true'"
+  hapr: "hcloud_labels.group_hapr | default('') == 'true'"
+  nextcloudoffice: "hcloud_labels.group_nextcloudoffice | default('') == 'true'"
+  onlyoffice: "hcloud_labels.group_onlyoffice | default('') == 'true'"
+  all: true
+
+# Use the server name (FQDN) as inventory hostname
+# Hetzner server names like "nextcloud.nc-dev" become "nextcloud.nc-dev.<zoneName>"
+compose:
+  ansible_user: "'ansible'"
+  ansible_ssh_private_key_file: "'~/.ssh/id_ed25519_ozg'"
+  additional_fqdns: "hcloud_labels | dict2items | selectattr('key', 'match', '^additional_fqdn_') | items2dict"
+  additional_certificate_fqdns: "additional_fqdns.values() | list"
+
+# Connection settings for all hosts
+# Override per-host in host_vars/ if needed
+connect_with: public_ipv4

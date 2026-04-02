@@ -5,6 +5,9 @@ default-character-set = utf8mb4
 
 [mysqld]
 skip-name-resolve
+{% if groups['database'][0] != groups['nextcloud'][0] %}
+bind-address              = 0.0.0.0
+{% endif %}
 
 max_connections           = 200
 # connect_timeout         = 5

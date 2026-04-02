@@ -1,0 +1,86 @@
+---
+
+# 1. Install and enable the app (idempotent)
+
+- name: Check if notify_push app is installed
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: true
+  ansible.builtin.command: php occ app:list --output=json
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  changed_when: false
+  register: _nc_app_list
+
+- name: Install notify_push app
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: true
+  ansible.builtin.command: php occ app:install notify_push
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  when: "'notify_push' not in (_nc_app_list.stdout | from_json).get('enabled', {})
+         and 'notify_push' not in (_nc_app_list.stdout | from_json).get('disabled', {})"
+
+- name: Enable notify_push app
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: true
+  ansible.builtin.command: php occ app:enable notify_push
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  when: "'notify_push' not in (_nc_app_list.stdout | from_json).get('enabled', {})"
+
+# 2. Deploy systemd service and start it
+
+- name: Copy notify_push service file
+  ansible.builtin.template:
+    src: notify_push.service.j2
+    dest: "{{ systemd_service_path[ansible_facts['os_family']] }}/notify_push.service"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start notify_push service
+  ansible.builtin.systemd:
+    name: notify_push.service
+    enabled: true
+    state: started
+    daemon_reload: true
+
+# 3. Configure Nextcloud for notify_push
+
+- name: Add server IP as trusted proxy for notify_push
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: true
+  ansible.builtin.command: >
+    php occ config:system:set trusted_proxies 0 --value="{{ ansible_facts['default_ipv4']['address'] }}"
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  changed_when: false
+
+- name: Run notify_push setup
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: true
+  ansible.builtin.command: php occ notify_push:setup https://{{ nextcloud_fqdn }}/push/
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  changed_when: false
+
+# 4. Verify
+
+- name: Run notify_push self-test
+  become_user: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+  become_flags: "{{ ansible_become_flags | default(omit) }}"
+  become: true
+  ansible.builtin.command: php occ notify_push:self-test
+  args:
+    chdir: "{{ nextcloud_www_dir }}"
+  changed_when: false
+  register: notify_push_selftest
+
+- name: Show notify_push self-test result
+  ansible.builtin.debug:
+    msg: "{{ notify_push_selftest.stdout_lines }}"

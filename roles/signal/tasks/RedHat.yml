@@ -1,0 +1,50 @@
+---
+
+- name: Install dnf config-manager plugin
+  ansible.builtin.dnf:
+    name: dnf-plugins-core
+    state: present
+
+- name: Enable CRB repository for build dependencies
+  ansible.builtin.command: dnf config-manager --set-enabled crb
+  register: signal_enable_crb
+  changed_when: "'enabled' in (signal_enable_crb.stdout | lower) or signal_enable_crb.rc == 0"
+  failed_when: false
+
+- name: Install common build tools and janus build dependencies
+  ansible.builtin.dnf:
+    name:
+      - git
+      - make
+      - gcc
+      - gcc-c++
+      - cmake
+      - python3
+      - python3-pip
+      - meson
+      - ninja-build
+      - pkgconf-pkg-config
+      - libmicrohttpd-devel
+      - jansson-devel
+      - openssl-devel
+      - libsrtp-devel
+      - glib2-devel
+      - opus-devel
+      - libogg-devel
+      - libcurl-devel
+      - libconfig-devel
+      - libwebsockets-devel
+      - zlib-devel
+      - libtool
+      - autoconf
+      - automake
+    state: present
+
+- name: Build and install janus-gateway from source
+  ansible.builtin.include_tasks: install_janus.yml
+
+- name: Build and install nextcloud-spreed-signaling from source
+  ansible.builtin.include_tasks: install_signal.yml
+
+- name: Install nats-server via Docker Compose
+  ansible.builtin.include_tasks: install_nats.yml

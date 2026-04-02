@@ -1,0 +1,30 @@
+---
+# tasks file for HPB Signal Server
+
+- name: Pkg manager specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
+
+- name: Configure signal server
+  ansible.builtin.include_tasks: config_signal.yml
+
+- name: Configure janus server
+  ansible.builtin.include_tasks: config_janus.yml
+
+- name: Ensure janus service is started
+  ansible.builtin.systemd:
+    name: janus
+    state: started
+    enabled: true
+
+- name: Wait for janus websocket endpoint
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 8188
+    timeout: 30
+    delay: 1
+
+- name: Configure nginx server
+  ansible.builtin.include_tasks: "config_{{ nextcloud_webserver_type }}.yml"
+
+- name: Install recording server
+  ansible.builtin.include_tasks: install_recording.yml

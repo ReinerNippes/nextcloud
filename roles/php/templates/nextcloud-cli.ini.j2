@@ -1,0 +1,35 @@
+; Nextcloud PHP CLI configuration
+; Managed by Ansible – do not edit manually
+;
+; Debian: deployed to /etc/php/X.Y/cli/conf.d/ (CLI only)
+; RedHat: deployed to /etc/php.d/ (shared by CLI and FPM,
+;         FPM overrides via php_admin_value in pool config)
+
+[PHP]
+memory_limit = -1
+output_buffering = Off
+allow_url_fopen = 1
+max_execution_time = 3600
+max_input_time = 3600
+post_max_size = 10G
+upload_max_filesize = 10G
+cgi.fix_pathinfo = 0
+
+[Date]
+date.timezone = Europe/Berlin
+
+[opcache]
+opcache.enable = 1
+opcache.enable_cli = 1
+opcache.validate_timestamps = 1
+opcache.memory_consumption = 256
+opcache.interned_strings_buffer = 64
+opcache.max_accelerated_files = 100000
+opcache.revalidate_freq = 0
+opcache.save_comments = 1
+opcache.huge_code_pages = 0
+opcache.jit = 1255
+opcache.jit_buffer_size = 256M
+
+[apcu]
+apc.enable_cli = 1

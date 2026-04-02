@@ -1,0 +1,18 @@
+---
+
+- name: Collect PostgreSQL backend RSS sizes
+  ansible.builtin.command: "ps -o rss= -C postgres"
+  register: pg_rss_raw
+  changed_when: false
+
+- name: Convert RSS values to list
+  ansible.builtin.set_fact:
+    pg_rss: "{{ pg_rss_raw.stdout_lines | map('int') | list }}"
+
+- name: Calculate process statistics
+  ansible.builtin.set_fact:
+    pg_stats:
+      count: "{{ pg_rss | length }}"
+      min: "{{ pg_rss | min }}"
+      max: "{{ pg_rss | max }}"
+      avg: "{{ (pg_rss | sum / (pg_rss | length)) | round(0) }}"

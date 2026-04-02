@@ -1,0 +1,19 @@
+---
+
+- name: Restart nextcloud-spreed-signaling
+  ansible.builtin.systemd:
+    name: nextcloud-spreed-signaling
+    state: restarted
+    enabled: true
+
+- name: Restart janus
+  ansible.builtin.systemd:
+    name: janus
+    state: restarted
+    enabled: true
+
+- name: Restart webserver
+  ansible.builtin.systemd:
+    name: "{{ webserver_service_name[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+    state: restarted
+  listen: "restart web services"

@@ -1,0 +1,68 @@
+---
+
+# Your Nextcloud Server Domain Name
+# Default is the fqdn of the Machine
+nextcloud_fqdn: "{{ hostvars[groups['nextcloud'][0]]['inventory_hostname'] }}"
+
+# TLS Certificate Configuration
+# type: selfsigned (default) or acme.sh
+# email: Your email address for ACME registration (required for acme.sh)
+# acme_ca: Your CA for acme.sh, default is zerossl
+#          see: https://github.com/acmesh-official/acme.sh/wiki/Server
+#          options: zerossl, letsencrypt, letsencrypt_test
+tls_certificate:
+    type: selfsigned
+    # type: acme.sh
+    # email: nextcloud@example.com
+    # acme_ca: letsencrypt_test
+
+# Nextcloud variables
+
+# Nextcloud Web Root
+nextcloud_www_dir: /var/www/nextcloud
+
+# Nextcloud Data Dir
+nextcloud_data_dir: /var/nc-data
+
+# Nextcloud Admin User
+# Leave Password Empty to generate secure, random one
+nextcloud_admin: admin
+nextcloud_passwd: ''
+
+# Always get the latest version of Nextcloud
+nextcloud_archive: https://download.nextcloud.com/server/releases/latest.tar.bz2
+
+# this sets the default region for phone numbers on your Nextcloud server
+# using ISO 3166-1 country codes such as DE for Germany, FR for France,
+nextcloud_default_phone_region: DE
+
+# OnlyOffice Server Domain Name
+# Default is the fqdn of the first host in the onlyoffice group
+# For collocated setup this equals nextcloud_fqdn
+onlyoffice_fqdn: "{{ hostvars[groups['onlyoffice'][0]]['inventory_hostname'] }}"
+
+nextcloud_install:
+  # Install notify_push
+  notify_push: true
+  # Install turn server for Nextcloud Talk
+  # coturn_tls_port is auto-selected:
+  # - 5349 when coturn runs on the same host as Nextcloud
+  # - 443 when coturn runs on a dedicated host
+  # Talk coturn endpoint is auto-selected:
+  # - collocated: coturn host IPv4 (avoids local FQDN->loopback issues)
+  # - dedicated:  coturn inventory hostname/FQDN
+  # override in inventory/group_vars if required
+  talk: true
+  # Install HPB for Nextcloud Talk
+  hpb: true
+  # Install HaPR for exAPPs
+  hapr: true
+  # Install Collabora Online
+  # more info about collabora office: https://www.collaboraoffice.com/
+  nextcloudoffice: false
+  # Install OnlyOffice Document Server
+  # set onlyoffice_ssl_port in inventory/group_vars when running collocated (default: 8443)
+  # set onlyoffice_ssl_port: 443 when running on a dedicated server
+  onlyoffice: true
+  # Install fulltextsearch
+  fulltextsearch: false

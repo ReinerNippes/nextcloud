@@ -1,0 +1,8 @@
+---
+# Ubuntu related OS tasks
+
+- name: Install additional packages
+  ansible.builtin.apt:
+    name: "{{ redis_package_name[ansible_facts['os_family']] }}"
+    autoremove: true
+    state: latest

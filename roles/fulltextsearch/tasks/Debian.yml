@@ -1,0 +1,13 @@
+---
+
+# Debian related OS tasks
+
+- name: Install elasticsearch packages
+  ansible.builtin.apt:
+    name:
+      - elasticsearch
+      - tesseract-ocr
+      - tesseract-ocr-all
+    autoremove: true
+    state: latest
+  notify: Restart elasticsearch

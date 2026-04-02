@@ -1,0 +1,14 @@
+---
+
+# apt related tasks on nextcloud server
+
+- name: Install additional packages needed for nextcloud
+  ansible.builtin.apt:
+    name:
+      - ffmpeg
+      - imagemagick
+      - libmagickcore*extra
+      - ghostscript
+      - libfile-fcntllock-perl
+    state: latest
+  register: nextcloud_apt_packages_installed

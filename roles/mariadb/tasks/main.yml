@@ -1,62 +1,41 @@
 ---
 # tasks file for mariadb
 
-- name: include os specific tasks
-  include_tasks: "{{ ansible_pkg_mgr }}.yml"
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: create conf dir
-  file:
-    name: "{{ mariadb_conf_dir[ansible_distribution] | dirname }}"
+- name: Create conf dir
+  ansible.builtin.file:
+    name: "{{ mariadb_conf_dir[ansible_facts['os_family']] | dirname }}"
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
     state: directory
 
-- name: configure mariadb
-  template:
+- name: Configure mariadb
+  ansible.builtin.template:
     src: my.cnf.j2
-    dest: "{{ mariadb_conf_dir[ansible_distribution] }}/90-nextcloud.cfg"
+    dest: "{{ mariadb_conf_dir[ansible_facts['os_family']] }}/90-nextcloud.cfg"
     owner: root
     group: root
-    mode: 0644
-  notify: restart mariadb
+    mode: "0644"
+  notify: Restart mariadb
 
-- name: start and enable MariaDB
-  systemd:
+- name: Start and enable MariaDB
+  ansible.builtin.systemd:
     name: mysql
     state: started
     enabled: true
 
-- name: remove anonymous user
-  mysql_user:
+- name: Remove anonymous user
+  community.mysql.mysql_user:
     name: ''
-    host_all: yes
+    host_all: true
     state: absent
-    login_unix_socket: "{{ mariadb_socket[ansible_distribution] }}"
+    login_unix_socket: "{{ mariadb_socket[ansible_facts['os_family']] }}"
 
-- name: remove test db
-  mysql_db:
+- name: Remove test db
+  community.mysql.mysql_db:
     name: test
     state: absent
-    login_unix_socket: "{{ mariadb_socket[ansible_distribution] }}"
-  
-- name: create nextcloud db
-  mysql_db:
-    name: "{{ nextcloud_db }}"
-    collation: utf8mb4_general_ci
-    encoding: utf8mb4
-    login_unix_socket: "{{ mariadb_socket[ansible_distribution] }}"
-
-- name: generate db passwd if nextcloud_db_passwd is empty
-  set_fact: 
-    nextcloud_db_passwd: "{{ lookup('password', '{{ credential_store }}/database_secret chars=ascii_letters,digits length=32') }}"
-  when: nextcloud_db_passwd == ''
-
-- name: create nextcloud user
-  mysql_user:
-    name:     "{{ nextcloud_db_user }}"
-    password: "{{ nextcloud_db_passwd }}"
-    priv:     "{{ nextcloud_db }}.*:ALL"
-    host:     "{{ nextcloud_db_host }}"
-    state: present
-    login_unix_socket: "{{ mariadb_socket[ansible_distribution] }}"
+    login_unix_socket: "{{ mariadb_socket[ansible_facts['os_family']] }}"

@@ -1,0 +1,22 @@
+---
+
+- name: Add appapi-harp service to compose.yml
+  ansible.builtin.blockinfile:
+    path: /opt/nextcloud/docker_compose/compose.yml
+    marker: "# {mark} appapi-harp service"
+    block: |
+      #
+        appapi-harp:
+          image: ghcr.io/nextcloud/nextcloud-appapi-harp:release
+          container_name: appapi-harp
+          restart: unless-stopped
+          hostname: appapi-harp
+          network_mode: host
+          environment:
+            HP_SHARED_KEY: "{{ passwords.hp_shared_key }}"
+            NC_INSTANCE_URL: "https://{{ nextcloud_fqdn }}"
+            HP_EXAPPS_ADDRESS: "127.0.0.1:8780"
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+          labels:
+            com.centurylinklabs.watchtower.enable: "true"

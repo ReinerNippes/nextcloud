@@ -1,0 +1,19 @@
+<VirtualHost *:443>
+    ServerName {{ item.path }}
+
+    SSLEngine on
+    SSLCertificateFile {{ tls_certificate_fullchain }}
+    SSLCertificateKeyFile {{ tls_certificate_key }}
+    SSLOpenSSLConfCmd DHParameters {{ tls_certificate_directory }}/dhparam.pem
+
+    ProxyPreserveHost On
+    ProxyRequests Off
+    RequestHeader set X-Forwarded-Proto "https"
+    RequestHeader set X-Real-IP expr=%{REMOTE_ADDR}
+
+    ProxyPass /standalone-signaling/ http://127.0.0.1:8080/
+    ProxyPassReverse /standalone-signaling/ http://127.0.0.1:8080/
+
+    ProxyPass / http://127.0.0.1:1234/
+    ProxyPassReverse / http://127.0.0.1:1234/
+</VirtualHost>

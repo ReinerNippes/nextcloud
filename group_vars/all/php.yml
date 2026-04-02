@@ -1,0 +1,17 @@
+---
+
+# php version 8.4
+php_version: '8.4'
+
+# optional php packages see: roles/php/var/main.yml
+php_install_optional_packages: false
+
+php_tuning:
+  reserved_ram_mb: 1024
+  pm:
+    type: dynamic
+    max_children: 50
+    start_servers: 10
+    min_spare_servers: 10
+    max_spare_servers: 25
+    max_requests: 500

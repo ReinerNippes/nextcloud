@@ -1,0 +1,34 @@
+---
+all:
+
+nextcloud:
+  hosts:
+    nextcloud.example.com:
+
+redis:
+  hosts:
+    nextcloud.example.com:
+
+database:
+  hosts:
+    nextcloud.example.com:
+
+webserver:
+  hosts:
+    nextcloud.example.com:
+
+elasticsearch:
+  hosts:
+    nextcloud.example.com:
+
+nextcloudoffice:
+  hosts:
+    nextcloud.example.com:
+
+onlyoffice:
+  hosts:
+    nextcloud.example.com:
+
+hapr:
+  hosts:
+    nextcloud.example.com:

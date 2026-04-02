@@ -1,0 +1,10 @@
+---
+# dnf related OS tasks
+
+- name: Install postgres server
+  ansible.builtin.dnf:
+    name: "{{ postgresql_packages[ansible_facts['os_family']] }}"
+    state: latest
+    exclude: python-unversioned-command
+    disablerepo: '*'
+    enablerepo: 'pgdg-common,pgdg{{ postgresql_version }},baseos'

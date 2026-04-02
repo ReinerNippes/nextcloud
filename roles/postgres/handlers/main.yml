@@ -1,7 +1,7 @@
 ---
 # handlers file for postgres
 
-- name: restart postgresql
-  service:
-    name: "{{ postgresql_daemon[ansible_distribution] }}"
+- name: Restart postgresql
+  ansible.builtin.systemd:
+    name: "{{ postgresql_daemon_service_name }}.service"
     state: restarted

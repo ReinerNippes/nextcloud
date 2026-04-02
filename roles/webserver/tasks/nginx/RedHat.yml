@@ -1,0 +1,9 @@
+---
+# RedHat/AlmaLinux/Rocky/Fedora nginx installation (works with both dnf and dnf5)
+
+- name: Install needed packages
+  ansible.builtin.dnf:
+    name:
+      - nginx
+    state: latest
+    disablerepo: nginx

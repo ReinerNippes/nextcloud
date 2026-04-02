@@ -1,0 +1,124 @@
+---
+
+- name: Set Go arch mapping
+  ansible.builtin.set_fact:
+    _go_arch: "{{ 'amd64' if ansible_facts['architecture'] == 'x86_64' else 'arm64' }}"
+
+- name: Check current Go version
+  ansible.builtin.command: /usr/local/go/bin/go version
+  register: _go_installed
+  changed_when: false
+  failed_when: false
+
+- name: Install Go {{ signal_go_version }}
+  when: _go_installed.rc != 0 or ('go' ~ signal_go_version) not in _go_installed.stdout
+  block:
+    - name: Download Go {{ signal_go_version }}
+      ansible.builtin.get_url:
+        url: "https://go.dev/dl/go{{ signal_go_version }}.linux-{{ _go_arch }}.tar.gz"
+        dest: "/tmp/go{{ signal_go_version }}.linux-{{ _go_arch }}.tar.gz"
+        mode: "0644"
+
+    - name: Remove old Go installation
+      ansible.builtin.file:
+        path: /usr/local/go
+        state: absent
+
+    - name: Extract Go to /usr/local
+      ansible.builtin.unarchive:
+        src: "/tmp/go{{ signal_go_version }}.linux-{{ _go_arch }}.tar.gz"
+        dest: /usr/local
+        remote_src: true
+
+- name: Create signaling group
+  ansible.builtin.group:
+    name: signaling
+    system: true
+    state: present
+
+- name: Create signaling user
+  ansible.builtin.user:
+    name: signaling
+    group: signaling
+    system: true
+    shell: /usr/sbin/nologin
+    comment: "Standalone signaling server for Nextcloud Talk."
+    create_home: false
+
+- name: Create install directory
+  ansible.builtin.file:
+    path: /opt/nextcloud-spreed-signaling
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Clone nextcloud-spreed-signaling
+  ansible.builtin.git:
+    repo: https://github.com/strukturag/nextcloud-spreed-signaling.git
+    dest: /opt/nextcloud-spreed-signaling/src
+    version: "{{ signal_version }}"
+    force: true
+  register: _signal_git
+
+- name: Build nextcloud-spreed-signaling
+  ansible.builtin.command:
+    cmd: make build
+    chdir: /opt/nextcloud-spreed-signaling/src
+  environment:
+    PATH: "/usr/local/go/bin:{{ ansible_facts['env']['PATH'] }}"
+    GOPATH: "/opt/nextcloud-spreed-signaling/.go"
+  when: _signal_git.changed
+  notify: Restart nextcloud-spreed-signaling
+
+- name: Create bin directory
+  ansible.builtin.file:
+    path: /opt/nextcloud-spreed-signaling/bin
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install signaling binary
+  ansible.builtin.copy:
+    src: /opt/nextcloud-spreed-signaling/src/bin/signaling
+    dest: /opt/nextcloud-spreed-signaling/bin/signaling
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+  when: _signal_git.changed
+  notify: Restart nextcloud-spreed-signaling
+
+- name: Create config directory
+  ansible.builtin.file:
+    path: /etc/nextcloud-spreed-signaling
+    state: directory
+    owner: signaling
+    group: signaling
+    mode: "0750"
+
+- name: Copy default server.conf
+  ansible.builtin.copy:
+    src: /opt/nextcloud-spreed-signaling/src/server.conf.in
+    dest: /etc/nextcloud-spreed-signaling/server.conf
+    remote_src: true
+    owner: signaling
+    group: signaling
+    mode: "0600"
+    force: false
+
+- name: Install systemd service file
+  ansible.builtin.copy:
+    src: signaling.service
+    dest: /etc/systemd/system/nextcloud-spreed-signaling.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart nextcloud-spreed-signaling
+
+- name: Enable nextcloud-spreed-signaling service
+  ansible.builtin.systemd:
+    name: nextcloud-spreed-signaling
+    enabled: true
+    daemon_reload: true

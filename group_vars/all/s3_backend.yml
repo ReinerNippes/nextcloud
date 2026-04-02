@@ -1,0 +1,12 @@
+---
+
+# Use S3 Bucket as primary storage
+# Leave empty for disabling S3 storage
+objectstore_s3_key: ''
+objectstore_s3_secret: ''
+# objectstore_s3_bucket_name: ''
+# objectstore_s3_hostname: s3.amazonaws.com
+# objectstore_s3_port: '443'
+# objectstore_s3_use_ssl: 'true'
+# objectstore_s3_region: us-east-1
+# objectstore_s3_use_path_style: 'true'

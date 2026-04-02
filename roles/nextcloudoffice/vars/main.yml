@@ -1,0 +1,6 @@
+---
+# vars file for collabora
+
+apt_extra_repos:
+  Debian: "deb http://deb.debian.org/debian {{ ansible_facts['distribution_release'] }} contrib non-free"
+  Ubuntu: "deb http://archive.ubuntu.com/ubuntu {{ ansible_facts['distribution_release'] }} universe"

@@ -1,0 +1,40 @@
+---
+# yum related os tasks
+
+- name: Setup additional repositories
+  ansible.builtin.include_tasks: RedHat_repositories.yml
+
+- name: Update os via dnf
+  ansible.builtin.dnf:
+    name: '*'
+    update_cache: true
+    state: latest
+  retries: 5
+  register: os_dnf_update_result
+  until: os_dnf_update_result is succeeded
+
+- name: Install needed os packages
+  ansible.builtin.dnf:
+    name:
+      - zip
+      - unzip
+      - bzip2
+      - curl
+      - wget
+      - cronie
+      - firewalld
+      - tar
+      - python3-policycoreutils
+      - python3-cryptography
+      - acl
+    state: latest
+    enablerepo: epel
+  retries: 5
+  register: os_dnf_update_result
+  until: os_dnf_update_result is succeeded
+
+- name: Ensure ssl-cert group exists
+  ansible.builtin.group:
+    name: ssl-cert
+    system: true
+    state: present

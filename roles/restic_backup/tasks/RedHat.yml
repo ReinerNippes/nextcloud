@@ -1,0 +1,8 @@
+---
+
+- name: Install restic
+  ansible.builtin.dnf:
+    name:
+      - restic
+      - "{{ 'rclone' if 'rclone' in restic_repo else omit }}"
+    state: present

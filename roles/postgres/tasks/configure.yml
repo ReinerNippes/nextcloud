@@ -1,30 +1,51 @@
 ---
-# configure tasks for postgresql 
+# configure tasks for postgresql
 
-- name: configure global settings
-  lineinfile:
-    dest: "{{ postgresql_config_path[ansible_distribution] }}/postgresql.conf"
-    regexp: "^#?{{ item.option }}.+$"
-    line: "{{ item.option }} = '{{ item.value }}'"
-    state: "{{ item.state | default('present') }}"
-  loop: "{{ postgresql_global_config_options }}"
-  notify: restart postgresql
+- name: ALTER SYSTEM for global settings
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_alter_system:
+    param: "{{ item.keys() | first }}"
+    value: "{{ item.values() | first }}"
+  loop: "{{ postgresql_global_config_options + postgres_tuning_parameters }}"
+  notify: Restart postgresql
 
-- name: configure host based authentication (if entries are configured)
-  template:
-    src: "pg_hba.conf.j2"
-    dest: "{{ postgresql_config_path[ansible_distribution] }}/pg_hba.conf"
-    owner: "{{ postgresql_user }}"
-    group: "{{ postgresql_group }}"
-    mode: 0600
-  notify: restart postgresql
-  when: postgresql_hba_entries | length > 0
+- name: Allow nextcloud DB user to connect via unix socket using password
+  community.postgresql.postgresql_pg_hba:
+    dest: "{{ postgresql_config_path[ansible_facts['os_family']] }}/pg_hba.conf"
+    contype: local
+    databases: nextcloud
+    users: nextcloud
+    method: md5
+  notify: Restart postgresql
 
-- name: ensure postgresql unix socket dirs exist
-  file:
+# When the database server is separate from the nextcloud server,
+# PostgreSQL must listen on the network and allow TCP connections.
+- name: Listen on all interfaces for remote access
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_alter_system:
+    param: listen_addresses
+    value: "*"
+  notify: Restart postgresql
+  when: groups['database'][0] != groups['nextcloud'][0]
+
+- name: Allow nextcloud server to connect via TCP
+  community.postgresql.postgresql_pg_hba:
+    dest: "{{ postgresql_config_path[ansible_facts['os_family']] }}/pg_hba.conf"
+    contype: host
+    databases: "{{ nextcloud_db.name }}"
+    users: "{{ nextcloud_db.user }}"
+    source: "{{ postgres_allowed_ipv4 }}/32"
+    method: md5
+  notify: Restart postgresql
+  when: groups['database'][0] != groups['nextcloud'][0]
+
+- name: Ensure postgresql unix socket dirs exist
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     owner: "{{ postgresql_user }}"
     group: "{{ postgresql_group }}"
-    mode: 02775
+    mode: "02775"
   loop: "{{ postgresql_unix_socket_directories }}"
