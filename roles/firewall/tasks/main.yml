@@ -1,0 +1,5 @@
+---
+# tasks file for firewall
+
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
