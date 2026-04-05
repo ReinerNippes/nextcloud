@@ -7,6 +7,7 @@ Documentation for deploying Nextcloud Talk with this playbook, including the `co
 
 - Debian / Ubuntu
 - RHEL / AlmaLinux / Rocky Linux
+- openSUSE Leap 16
 
 ## Architecture Overview
 

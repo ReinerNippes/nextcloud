@@ -1,0 +1,39 @@
+---
+
+- name: Install common build tools and janus build dependencies
+  community.general.zypper:
+    name:
+      - git
+      - make
+      - gcc
+      - gcc-c++
+      - cmake
+      - python3
+      - python3-pip
+      - meson
+      - ninja
+      - pkg-config
+      - libmicrohttpd-devel
+      - libjansson-devel
+      - openssl-devel
+      - libsrtp-devel
+      - glib2-devel
+      - libopus-devel
+      - libogg-devel
+      - libcurl-devel
+      - libconfig-devel
+      - libwebsockets-devel
+      - zlib-devel
+      - libtool
+      - autoconf
+      - automake
+    state: present
+
+- name: Build and install janus-gateway from source
+  ansible.builtin.include_tasks: install_janus.yml
+
+- name: Build and install nextcloud-spreed-signaling from source
+  ansible.builtin.include_tasks: install_signal.yml
+
+- name: Install nats-server via Docker Compose
+  ansible.builtin.include_tasks: install_nats.yml

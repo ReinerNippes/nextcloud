@@ -22,7 +22,7 @@
 
 - name: Change ImageMagick settings
   ansible.builtin.lineinfile:
-    path: "/etc/ImageMagick-{{ imagemagick_version }}/policy.xml"
+    path: "{{ imagemagick_policy_path[ansible_facts['os_family']] }}"
     line: '  <policy domain="coder" rights="read|write" pattern="{{ item }}" />'
     regexp: '(.*)<policy domain="coder" rights="(.*)" pattern="{{ item }}" />(.*)'
     insertbefore: '</policymap>'

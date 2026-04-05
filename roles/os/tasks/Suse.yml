@@ -1,20 +1,20 @@
 ---
-# yum related os tasks
+# zypper related os tasks
 
 - name: Setup additional repositories
-  ansible.builtin.include_tasks: RedHat_repositories.yml
+  ansible.builtin.include_tasks: Suse_repositories.yml
 
-- name: Update os via dnf
-  ansible.builtin.dnf:
+- name: Update os via zypper
+  community.general.zypper:
     name: '*'
-    update_cache: true
     state: latest
+    update_cache: true
   retries: 5
-  register: os_dnf_update_result
-  until: os_dnf_update_result is succeeded
+  register: os_zypper_update_result
+  until: os_zypper_update_result is succeeded
 
 - name: Install needed os packages
-  ansible.builtin.dnf:
+  community.general.zypper:
     name:
       - zip
       - unzip
@@ -24,15 +24,14 @@
       - cronie
       - firewalld
       - tar
-      - python3-policycoreutils
       - python3-cryptography
       - acl
       - bash-completion
+      - openssh-clients
     state: latest
-    enablerepo: epel
   retries: 5
-  register: os_dnf_update_result
-  until: os_dnf_update_result is succeeded
+  register: os_zypper_install_result
+  until: os_zypper_install_result is succeeded
 
 - name: Ensure ssl-cert group exists
   ansible.builtin.group:

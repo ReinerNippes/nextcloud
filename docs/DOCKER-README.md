@@ -6,6 +6,7 @@ Ansible role to install Docker and manage a shared Docker Compose file for all c
 
 - Debian / Ubuntu (Docker CE from `download.docker.com`, added by the [OS role](OS_README.md))
 - RHEL / AlmaLinux / Rocky Linux (Docker CE from docker.com repo)
+- openSUSE Leap 16 (Docker CE from `download.docker.com`, added by the [OS role](OS_README.md))
 
 ## What This Role Does
 

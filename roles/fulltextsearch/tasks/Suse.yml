@@ -1,8 +1,8 @@
 ---
 
 - name: Install needed packages
-  ansible.builtin.dnf:
+  community.general.zypper:
     name:
       - elasticsearch
-      - tesseract
+      - tesseract-ocr
     state: latest

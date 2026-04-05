@@ -6,6 +6,7 @@ Ansible role to install and configure Redis (Debian/Ubuntu) or Valkey (RedHat) a
 
 - Debian / Ubuntu → **Redis** (from the official redis.io repository, added by the [OS role](OS_README.md))
 - RHEL / AlmaLinux / Rocky Linux → **Valkey** (from EPEL)
+- openSUSE Leap 16 → **Valkey** (from default repositories)
 
 ## What This Role Does
 
@@ -71,18 +72,19 @@ The service is installed to `systemd_service_path[os_family]` and enabled at boo
 
 ### Internal variables (`group_vars/all/redis/main.yml`)
 
-| Variable | Debian | RedHat |
-|----------|--------|--------|
-| `redis_package_name` | `redis-server`, `redis-tools`, `python3-redis` | `valkey` |
-| `redis_conf_path` | `/etc/redis` | `/etc/valkey` |
-| `redis_service_name` | `redis` | `valkey` |
-| `redis_user_name` | `redis` | `valkey` |
+| Variable | Debian | RedHat | Suse |
+|----------|--------|--------|------|
+| `redis_package_name` | `redis-server`, `redis-tools`, `python3-redis` | `valkey` | `valkey` |
+| `redis_conf_path` | `/etc/redis` | `/etc/valkey` | `/etc/valkey` |
+| `redis_service_name` | `redis` | `valkey` | `valkey` |
+| `redis_systemd_unit` | `redis.service` | `valkey.service` | `valkey.target` |
+| `redis_user_name` | `redis` | `valkey` | `valkey` |
 
 ### Connection variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `redis_socket.path` | `/run/{{ redis_service_name[ansible_facts['os_family']] }}/{{ redis_service_name[ansible_facts['os_family']] }}.sock` | Unix socket path (used by Nextcloud PHP config; resolves to `redis.sock` on Debian and `valkey.sock` on RedHat) |
+| `redis_socket.path` | `/run/{{ redis_service_name[ansible_facts['os_family']] }}/{{ redis_service_name[ansible_facts['os_family']] }}.sock` | Unix socket path (used by Nextcloud PHP config; resolves to `redis.sock` on Debian and `valkey.sock` on RedHat/Suse) |
 | `redis_socket.perm` | `770` | Socket file permissions |
 | `redis_tcp.address` | *(auto-detected from inventory)* | TCP address (for remote Redis setups) |
 | `redis_tcp.port` | `6379` | TCP port (not used when `port 0` is set) |
@@ -107,13 +109,13 @@ The service is installed to `systemd_service_path[os_family]` and enabled at boo
 
 ## Platform Differences
 
-| Aspect | Debian / Ubuntu | RedHat / Alma / Rocky |
-|--------|-----------------|----------------------|
-| Software | Redis | Valkey (Redis-compatible fork) |
-| Package source | redis.io APT repository | EPEL |
-| Service name | `redis.service` | `valkey.service` |
-| Config file | `/etc/redis/redis.conf` | `/etc/valkey/valkey.conf` |
-| User / Group | `redis` | `valkey` |
+| Aspect | Debian / Ubuntu | RedHat / Alma / Rocky | openSUSE Leap |
+|--------|-----------------|----------------------|---------------|
+| Software | Redis | Valkey (Redis-compatible fork) | Valkey (Redis-compatible fork) |
+| Package source | redis.io APT repository | EPEL | Default repositories |
+| Service name | `redis.service` | `valkey.service` | `valkey.target` |
+| Config file | `/etc/redis/redis.conf` | `/etc/valkey/valkey.conf` | `/etc/valkey/valkey.conf` |
+| User / Group | `redis` | `valkey` | `valkey` |
 
 ## Unused Artifacts
 

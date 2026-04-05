@@ -98,7 +98,7 @@ These variables are defined in `group_vars/all/common.yml` and provide sensible 
 |----------|---------|-------------|
 | `tls_service_map.webserver` | Derived from `webserver_service_name` | Systemd service to reload for webserver hosts |
 | `tls_service_map.coturn` | `coturn.service` | Systemd service to reload for coturn hosts |
-| `tls_service_map.redis` | Derived from `redis_service_name` | Systemd service to reload for standalone redis hosts |
+| `tls_service_map.redis` | Derived from `redis_systemd_unit` | Systemd unit to reload for standalone redis hosts |
 | `tls_service_map.database` | `mariadb` or PostgreSQL service | Systemd service to reload for standalone database hosts |
 
 The role automatically determines which services to reload based on the host's group membership in the inventory. Services are only reloaded on hosts that actually run them.

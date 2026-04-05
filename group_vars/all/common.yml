@@ -44,6 +44,7 @@ password_vars:
 systemd_service_path:
   RedHat: '/usr/lib/systemd/system'
   Debian: '/lib/systemd/system'
+  Suse: '/usr/lib/systemd/system'
 
 # Port OnlyOffice listens on.
 # Use 8443 when collocated with Nextcloud (port 443 is taken by the web server).
@@ -68,16 +69,30 @@ coturn_tls_port: >-
     | ternary(5349, 443)
   }}
 
+coturn_user:
+  RedHat: coturn
+  Debian: turnserver
+  Suse: coturn
+
+coturn_conf_path:
+  RedHat: /etc/coturn/turnserver.conf
+  Debian: /etc/turnserver.conf
+  Suse: /etc/coturn/turnserver.conf
+
 # OS-dependent certificate directories
-tls_certificate_directory: "{{ (ansible_facts.os_family == 'Debian')
-                               | ternary('/etc/ssl/private', '/etc/pki/tls/private') }}"
+_tls_certificate_directory_map:
+  RedHat: "/etc/pki/tls/private"
+  Debian: "/etc/ssl/private"
+  Suse: "/etc/ssl/private"
+
+tls_certificate_directory: "{{ _tls_certificate_directory_map[ansible_facts['os_family']] }}"
 
 tls_certificate_group: "ssl-cert"
 
 tls_service_map:
   webserver: "{{ webserver_service_name[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   coturn: "coturn.service"
-  redis: "{{ redis_service_name[ansible_facts['os_family']] }}.service"
+  redis: "{{ redis_systemd_unit[ansible_facts['os_family']] }}"
   database: "{{ (nextcloud_db.type == 'mysql') | ternary('mariadb', postgresql_daemon_service_name) }}.service"
 
 tls_certificate_owner: "root"

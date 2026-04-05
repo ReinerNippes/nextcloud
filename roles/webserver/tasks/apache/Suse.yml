@@ -1,0 +1,15 @@
+---
+# zypper apache installation
+
+- name: Install needed packages
+  community.general.zypper:
+    name:
+      - apache2
+      - apache2-event
+      - apache2-utils
+      - openssh
+
+- name: Remove default SSL configuration
+  ansible.builtin.file:
+    path: /etc/apache2/conf.d/ssl.conf
+    state: absent

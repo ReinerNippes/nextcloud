@@ -1,5 +1,6 @@
 ---
-# vars file for postgres
+
+# postgres settings, used in various roles
 
 postgres_run_dir: "/var/run/postgresql"
 postgres_allowed_ipv4: "{{ hostvars[groups['nextcloud'][0]].ansible_facts['default_ipv4']['address'] }}"
@@ -29,29 +30,42 @@ postgresql_packages:
   Debian:
     - postgresql-{{ postgresql_version }}
     - python3-psycopg2
+  Suse:
+    - postgresql{{ postgresql_version }}-server
+    - python313-psycopg2
 
 postgresql_data_dir:
   RedHat: "/var/lib/pgsql/{{ postgresql_version }}/data"
   Debian: "/var/lib/postgresql/{{ postgresql_version }}/main"
+  Suse: "/var/lib/pgsql/{{ postgresql_version }}/data"
 
 postgresql_bin_path:
   RedHat: "/usr/pgsql-{{ postgresql_version }}/bin"
   Debian: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
+  Suse: "/usr/pgsql-{{ postgresql_version }}/bin"
 
 postgresql_config_path:
   RedHat: "/var/lib/pgsql/{{ postgresql_version }}/data"
   Debian: "/etc/postgresql/{{ postgresql_version }}/main"
+  Suse: "/var/lib/pgsql/{{ postgresql_version }}/data"
 
 postgresql_daemon:
   RedHat: "postgresql-{{ postgresql_version }}"
   Debian: "postgresql@{{ postgresql_version }}-main"
+  Suse: "postgresql-{{ postgresql_version }}"
 
 postgresql_daemon_service_name: "{{ postgresql_daemon[ansible_facts['os_family']] }}"
 
 postgresql_locales:
   - 'en_US.UTF-8'
 
-# database settings, used in various roles
+# mariadb settings, used in various roles
 mariadb_socket:
   RedHat: /var/lib/mysql/mysql.sock
   Debian: /var/run/mysqld/mysqld.sock
+  Suse: /var/run/mysql/mysql.sock
+
+mariadb_conf_dir:
+  RedHat: /etc/my.cnf.d
+  Debian: /etc/mysql/mariadb.conf.d/
+  Suse: /etc/my.cnf.d

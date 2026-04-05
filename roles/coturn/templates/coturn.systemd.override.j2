@@ -2,5 +2,5 @@
 LimitNOFILE=1048576
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ExecStart=
-ExecStart=/usr/bin/turnserver -c /etc/{{ 'coturn/' if ansible_facts['os_family'] == 'RedHat' else '' }}turnserver.conf --pidfile /run/coturn/turnserver.pid --no-stdout-log --simple-log --log-file /var/log/coturn/turnserver.log
+ExecStart=/usr/bin/turnserver -c {{ coturn_conf_path[ansible_facts['os_family']] }} --pidfile /run/coturn/turnserver.pid --no-stdout-log --simple-log --log-file /var/log/coturn/turnserver.log
 Restart=always

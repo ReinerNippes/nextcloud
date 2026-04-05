@@ -31,7 +31,8 @@ Testet Linux Flavours:
 - Debian 12/13 
 - CentOS 10
 - AlmaLinux 10
-- RockyLinux 10 
+- RockyLinux 10
+- OpenSuse Leap 16
 
 > ⚠️ **WARNING**: Your existing setup will be overwritten. It's strongly recommendet to only run this playbook on fresh installed instances.
 
@@ -52,28 +53,28 @@ Testet Linux Flavours:
 
 ✅ = works  &nbsp;&nbsp; 🟡 = not tested (yet) &nbsp;&nbsp; 🔒 = works only with LE certs &nbsp;&nbsp; ❌ = not working / not yet implemented
 
-| Feature | Ubuntu 24.04 | Debian 12 | Debian 13 | AlmaLinux 10 | Rocky 10 | CentOS10 |
-|---------|:---:|:---:|:---:|:---:|:---:|:---:|
-| PostgreSQL | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| MariaDB | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| nginx | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Apache | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| acme.sh (Let's Encrypt) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Self-signed Certificate | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
-| Talk (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
-| Talk (Apache) | 🟡 | 🟡 | ✅ | ✅ | ✅ | ✅ |
-| Talk HPB (nginx) | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🟡 |
-| Talk HPB (Apache) | 🟡 | 🟡 | 🔒 | 🟡 | 🟡 | 🔒 |
-| Nextcloud Office (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Nextcloud Office (Apache) | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ |
-| OnlyOffice | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ |
-| Fulltextsearch | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| ExApps (HaPR) | 🔒 | 🔒 | 🔒 | 🟡 | 🔒 | 🔒 |
-| Notify Push | ✅ | ✅ | ✅ | 🟡 | ✅ | ✅ |
-| S3 Primary Storage | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Whiteboard | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| CrowdSec | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| SMTP Relayserver | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Feature | Ubuntu 24.04 | Debian 12 | Debian 13 | AlmaLinux 10 | Rocky 10 | CentOS10 | OpenSuse 16
+|---------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| PostgreSQL | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| MariaDB | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| nginx | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Apache | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| acme.sh (Let's Encrypt) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Self-signed Certificate | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 | ✅ |
+| Talk (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 | ✅ |
+| Talk (Apache) | 🟡 | 🟡 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Talk HPB (nginx) | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🟡 | 🔒 |
+| Talk HPB (Apache) | 🟡 | 🟡 | 🔒 | 🟡 | 🟡 | 🔒 | 🟡 |
+| Nextcloud Office (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
+| Nextcloud Office (Apache) | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ | 🟡 |
+| OnlyOffice | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ | ✅ |
+| Fulltextsearch | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| ExApps (HaPR) | 🔒 | 🔒 | 🔒 | 🟡 | 🔒 | 🔒 | 🟡 | 🔒 |
+| Notify Push | ✅ | ✅ | ✅ | 🟡 | ✅ | ✅ | ✅ |
+| S3 Primary Storage | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Whiteboard | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| CrowdSec | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| SMTP Relayserver | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ### Dedicated Server Offloading Status
 

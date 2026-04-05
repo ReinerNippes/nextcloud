@@ -6,6 +6,7 @@ Ansible role to download, install, and configure Nextcloud including webserver, 
 
 - Debian / Ubuntu
 - RHEL / AlmaLinux / Rocky Linux
+- openSUSE Leap 16
 
 ## What This Role Does
 
@@ -150,6 +151,7 @@ Three config files are deployed:
 - Deploys vhost with SSL, HSTS, and PHP-FPM proxy
 - On Debian: uses `sites-available/sites-enabled` pattern, removes default vhost
 - On RedHat: deploys `php.conf` and vhost in `conf.d/`
+- On openSUSE: uses `a2enmod` for module management, `apache2-event` MPM
 
 ### Port Variables
 

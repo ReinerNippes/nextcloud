@@ -143,11 +143,11 @@
       ─────────────────────────────────────────────────────────────────────────────
     success_msg: "✓ Inventory validation: '{{ item.group }}' group has {{ (groups.get(item.group, []) | length) }} host(s) — OK"
   loop:
-    - { group: signal,          enabled: "{{ nextcloud_install.hpb | default(false) | bool }}" }
-    - { group: coturn,          enabled: "{{ nextcloud_install.talk | default(false) | bool }}" }
-    - { group: onlyoffice,      enabled: "{{ nextcloud_install.onlyoffice | default(false) | bool }}" }
+    - { group: signal, enabled: "{{ nextcloud_install.hpb | default(false) | bool }}" }
+    - { group: coturn, enabled: "{{ nextcloud_install.talk | default(false) | bool }}" }
+    - { group: onlyoffice, enabled: "{{ nextcloud_install.onlyoffice | default(false) | bool }}" }
     - { group: nextcloudoffice, enabled: "{{ nextcloud_install.nextcloudoffice | default(false) | bool }}" }
-    - { group: fulltextsearch,  enabled: "{{ nextcloud_install.fulltextsearch | default(false) | bool }}" }
+    - { group: fulltextsearch, enabled: "{{ nextcloud_install.fulltextsearch | default(false) | bool }}" }
   when:
     - item.enabled | bool
     - groups.get(item.group) is not none

@@ -3,6 +3,6 @@
 
 - name: Restart redis-server
   ansible.builtin.systemd:
-    name: "{{ redis_service_name[ansible_facts['os_family']] }}.service"
+    name: "{{ redis_systemd_unit[ansible_facts['os_family']] }}"
     state: restarted
   listen: "Restart web services"

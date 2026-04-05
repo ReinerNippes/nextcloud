@@ -1,0 +1,8 @@
+---
+
+- name: Install restic
+  community.general.zypper:
+    name:
+      - restic
+      - "{{ 'rclone' if 'rclone' in restic_repo else omit }}"
+    state: present

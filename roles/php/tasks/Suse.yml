@@ -1,0 +1,12 @@
+---
+
+- name: Install needed php packages
+  community.general.zypper:
+    name: "{{ php_package_required['Suse'] }}"
+    state: latest
+
+- name: Install optional php packages
+  community.general.zypper:
+    name: "{{ php_package_optional['Suse'] }}"
+    state: latest
+  when: php_install_optional_packages|bool

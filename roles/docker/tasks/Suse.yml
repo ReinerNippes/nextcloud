@@ -1,0 +1,25 @@
+---
+# zypper related tasks
+
+- name: Uninstall any conflicting packages
+  community.general.zypper:
+    name:
+      - podman
+      # - runc
+    state: absent
+
+- name: Install docker
+  community.general.zypper:
+    name:
+      - docker
+      - docker-compose
+      - docker-buildx
+      - docker-bash-completion
+      - docker-zsh-completion
+    state: latest
+
+- name: Enable docker
+  ansible.builtin.systemd:
+    name: docker
+    daemon_reload: true
+    enabled: true
