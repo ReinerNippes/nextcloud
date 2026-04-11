@@ -1,0 +1,12 @@
+---
+# zypper related OS tasks for nextcloudoffice
+
+- name: Install TTF fonts
+  community.general.zypper:
+    name:
+      - google-noto-sans-fonts
+      - google-noto-serif-fonts
+      - google-noto-sans-mono-fonts
+      - cabextract
+      - fontconfig
+    state: present

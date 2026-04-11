@@ -1,0 +1,55 @@
+---
+
+# tasks to install and configure fulltextsearch
+
+- name: Install fulltext search apps
+  reinernippes.nextcloud.occ_app:
+    name: "{{ item }}"
+    state: enabled
+  loop:
+    - fulltextsearch
+    - fulltextsearch_elasticsearch
+    - files_fulltextsearch
+  register: fulltextsearch_app_installed
+
+- name: Configure fulltextsearch app
+  reinernippes.nextcloud.occ_config_app:
+    app: "{{ item.app }}"
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { key: search_platform, value: "OCA\\FullTextSearch_Elasticsearch\\Platform\\ElasticSearchPlatform", app: fulltextsearch }
+    - { key: app_navigation, value: "1", app: fulltextsearch }
+    - { key: analyzer_tokenizer, value: "standard", app: fulltextsearch_elasticsearch }
+    - { key: elastic_host, value: "http://localhost:9200", app: fulltextsearch_elasticsearch }
+    - { key: elastic_index, value: "nc_index", app: fulltextsearch_elasticsearch }
+    - { key: files_local, value: "1", app: files_fulltextsearch }
+    - { key: files_external, value: "0", app: files_fulltextsearch }
+    - { key: files_group_folders, value: "1", app: files_fulltextsearch }
+    - { key: files_encrypted, value: "1", app: files_fulltextsearch }
+    - { key: files_federated, value: "0", app: files_fulltextsearch }
+    - { key: files_size, value: "20", app: files_fulltextsearch }
+    - { key: files_pdf, value: "1", app: files_fulltextsearch }
+    - { key: files_office, value: "1", app: files_fulltextsearch }
+    - { key: files_image, value: "1", app: files_fulltextsearch }
+    - { key: files_audio, value: "0", app: files_fulltextsearch }
+
+- name: Create fulltextsearch index
+  reinernippes.nextcloud.occ_command:
+    command: fulltextsearch:index
+  when: fulltextsearch_app_installed.changed
+
+- name: Fulltextsearch - copy service file
+  ansible.builtin.template:
+    src: nextcloud-fulltext-elasticsearch-worker.service.j2
+    dest: "{{ systemd_service_path[ansible_facts['os_family']] }}/nextcloud-fulltext-elasticsearch-worker.service"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable service nextcloud-fulltext-elasticsearch-worker
+  ansible.builtin.systemd:
+    name: nextcloud-fulltext-elasticsearch-worker.service
+    enabled: true
+    state: started

@@ -1,0 +1,44 @@
+---
+# tasks file for onlyoffice configuration
+
+- name: Install and enable onlyoffice app
+  reinernippes.nextcloud.occ_app:
+    name: onlyoffice
+    state: enabled
+
+- name: Determine onlyoffice backend URL
+  ansible.builtin.set_fact:
+    _onlyoffice_host: "{{ groups['onlyoffice'][0] }}"
+
+- name: Set onlyoffice collocated server URL
+  ansible.builtin.set_fact:
+    _onlyoffice_url: "https://{{ nextcloud_fqdn }}/onlyoffice"
+  when: _onlyoffice_host in groups.get('nextcloud', [])
+
+- name: Set onlyoffice dedicated server URL
+  ansible.builtin.set_fact:
+    _onlyoffice_url: "https://{{ onlyoffice_fqdn }}"
+  when: _onlyoffice_host not in groups.get('nextcloud', [])
+
+- name: Set onlyoffice server url
+  reinernippes.nextcloud.occ_config_app:
+    app: onlyoffice
+    key: DocumentServerUrl
+    value: "{{ _onlyoffice_url }}"
+    state: present
+
+- name: Set onlyoffice server secret
+  reinernippes.nextcloud.occ_config_app:
+    app: onlyoffice
+    key: jwt_secret
+    value: "{{ passwords.onlyoffice_secret }}"
+    state: present
+
+- name: Disable certificate verification for self-signed / test certs
+  reinernippes.nextcloud.occ_config_system:
+    key: onlyoffice
+    indices: verify_peer_off
+    value: true
+    value_type: boolean
+    state: present
+  when: (tls_certificate.type == 'selfsigned') or tls_certificate_test

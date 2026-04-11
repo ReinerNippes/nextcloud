@@ -1,7 +1,7 @@
 ---
 # vars file for php
 
-php_yum_repo_typ: "{{ 'fedora' if ansible_facts['distribution'] == 'Fedora' else 'enterprise' }}"
+php_major_version: "{{ php_version.split('.')[0] }}"
 
 php_db_extension:
   mysql: php{{ php_version }}-mysql
@@ -10,25 +10,30 @@ php_db_extension:
 php_service_name:
   RedHat: php-fpm
   Debian: php{{ php_version }}-fpm
+  Suse: php-fpm
 
 php_fpm_conf:
   RedHat: /etc/php-fpm.conf
   Debian: /etc/php/{{ php_version }}/fpm/php-fpm.conf
+  Suse: /etc/php{{ php_major_version }}/fpm/php-fpm.conf
 
 php_www_conf:
   RedHat: /etc/php-fpm.d/www.conf
   Debian: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+  Suse: /etc/php{{ php_major_version }}/fpm/php-fpm.d/www.conf
 
 php_confd:
   RedHat: /etc/php.d
   Debian: /etc/php/{{ php_version }}/fpm/conf.d
+  Suse: /etc/php{{ php_major_version }}/conf.d
 
 php_cli_confd:
   RedHat: /etc/php.d
   Debian: /etc/php/{{ php_version }}/cli/conf.d
+  Suse: /etc/php{{ php_major_version }}/conf.d
 
 php_package_required:
-  yum:
+  RedHat:
     - php
     - php-cli
     - php-fpm
@@ -50,7 +55,7 @@ php_package_required:
     - php-pecl-zip
     - php-{% if nextcloud_db.type == 'mysql' %}mysqlnd{% elif nextcloud_db.type == 'pgsql' %}pgsql{% endif %}
     - php-pear
-  apt:
+  Debian:
     - php{{ php_version }}
     - php{{ php_version }}-cli
     - php{{ php_version }}-fpm
@@ -71,13 +76,45 @@ php_package_required:
     - php{{ php_version }}-zip
     - "{{ php_db_extension[nextcloud_db.type] }}"
     - php-pear
+  Suse:
+    - php{{ php_major_version }}
+    - php{{ php_major_version }}-cli
+    - php{{ php_major_version }}-fpm
+    - php{{ php_major_version }}-curl
+    - php{{ php_major_version }}-gd
+    - php{{ php_major_version }}{% if php_version.split('.')[0] | int < 8 %}-json{% endif %}
+    - php{{ php_major_version }}-mbstring
+    - php{{ php_major_version }}-xmlwriter
+    - php{{ php_major_version }}-xmlreader
+    - php{{ php_major_version }}-intl
+    - php{{ php_major_version }}-bcmath
+    - php{{ php_major_version }}-gmp
+    - php{{ php_major_version }}-APCu
+    - php{{ php_major_version }}-opcache
+    - php{{ php_major_version }}-redis
+    - php{{ php_major_version }}-sodium
+    - php{{ php_major_version }}-readline
+    - php{{ php_major_version }}-ctype
+    - php{{ php_major_version }}-fileinfo
+    - php{{ php_major_version }}-pcntl
+    - php{{ php_major_version }}-posix
+    - php{{ php_major_version }}-exif
+    - php{{ php_major_version }}-sysvsem
+    - php{{ php_major_version }}-bz2
+    - php{{ php_major_version }}-zip
+    - php{{ php_major_version }}-{% if nextcloud_db.type == 'mysql' %}mysql{% elif nextcloud_db.type == 'pgsql' %}pgsql{% endif %}
+    - php{{ php_major_version }}-pear
 
 php_package_optional:
-  yum:
+  RedHat:
     - php-smbclient
     - php-imap
     - php-ldap
-  apt:
+  Debian:
     - php{{ php_version }}-smbclient
     - php{{ php_version }}-ldap
     - php{{ php_version }}-imap
+  Suse:
+    - php{{ php_major_version }}-smbclient
+    - php{{ php_major_version }}-ldap
+    - php{{ php_major_version }}-imap

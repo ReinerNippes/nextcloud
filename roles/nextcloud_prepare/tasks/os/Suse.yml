@@ -1,0 +1,10 @@
+---
+# zypper related tasks
+
+- name: Install needed packages
+  community.general.zypper:
+    name:
+    - perl-File-FcntlLock
+    - ImageMagick
+    - ghostscript
+    state: latest

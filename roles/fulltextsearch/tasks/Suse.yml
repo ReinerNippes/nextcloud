@@ -1,0 +1,8 @@
+---
+
+- name: Install needed packages
+  community.general.zypper:
+    name:
+      - elasticsearch
+      - tesseract-ocr
+    state: latest

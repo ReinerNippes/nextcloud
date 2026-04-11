@@ -1,0 +1,6 @@
+---
+
+# TODO: manage firewalld rules
+- name: Firewall management placeholder (RedHat)
+  ansible.builtin.debug:
+    msg: "Firewall management not yet implemented for RedHat"

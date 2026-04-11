@@ -26,6 +26,7 @@ password_vars:
   - name: collabora_admin
   - name: hp_shared_key
   - name: onlyoffice_secret
+  - name: whiteboard_secret
 
 # example of rclone config to backup to a s3 bucket
 
@@ -44,17 +45,7 @@ password_vars:
 systemd_service_path:
   RedHat: '/usr/lib/systemd/system'
   Debian: '/lib/systemd/system'
-
-# Port OnlyOffice listens on.
-# Use 8443 when collocated with Nextcloud (port 443 is taken by the web server).
-# Use 443 when OnlyOffice runs on a dedicated server (override in inventory/group_vars).
-onlyoffice_ssl_port: >-
-  {{
-    ((groups['onlyoffice'] | default([]) | first | default(''))
-    ==
-    (groups['nextcloud'] | default([]) | first | default('')))
-    | ternary(8443, 443)
-  }}
+  Suse: '/usr/lib/systemd/system'
 
 # Port coturn listens on for TURN/TLS.
 # Use coturn default 5349 when collocated with Nextcloud (port 443 is taken by the web server).
@@ -68,16 +59,35 @@ coturn_tls_port: >-
     | ternary(5349, 443)
   }}
 
+coturn_user:
+  RedHat: coturn
+  Debian: turnserver
+  Suse: coturn
+
+coturn_conf_path:
+  RedHat: /etc/coturn/turnserver.conf
+  Debian: /etc/turnserver.conf
+  Suse: /etc/coturn/turnserver.conf
+
 # OS-dependent certificate directories
-tls_certificate_directory: "{{ (ansible_facts.os_family == 'Debian')
-                               | ternary('/etc/ssl/private', '/etc/pki/tls/private') }}"
+_tls_certificate_directory_map:
+  RedHat: "/etc/pki/tls/private"
+  Debian: "/etc/ssl/private"
+  Suse: "/etc/ssl/private"
+
+tls_certificate_directory: "{{ _tls_certificate_directory_map[ansible_facts['os_family']] }}"
 
 tls_certificate_group: "ssl-cert"
+
+# Derive additional_certificate_fqdns from additional_fqdns automatically.
+# This avoids having to set both variables manually in static inventories.
+# Can still be overridden explicitly if needed.
+additional_certificate_fqdns: "{{ (additional_fqdns | default({})).values() | list }}"
 
 tls_service_map:
   webserver: "{{ webserver_service_name[nextcloud_webserver_type][ansible_facts['os_family']] }}"
   coturn: "coturn.service"
-  redis: "{{ redis_service_name[ansible_facts['os_family']] }}.service"
+  redis: "{{ redis_systemd_unit[ansible_facts['os_family']] }}"
   database: "{{ (nextcloud_db.type == 'mysql') | ternary('mariadb', postgresql_daemon_service_name) }}.service"
 
 tls_certificate_owner: "root"
@@ -93,3 +103,9 @@ tls_certificate_csr: "{{ tls_certificate_directory }}/{{ tls_certificate_common_
 tls_certificate_ca: "{{ tls_certificate_directory }}/{{ tls_certificate_common_name }}_ecc/ca.cer"
 
 tls_certificate_test: "{{ tls_certificate.acme_ca | default('') is regex('test$') }}"
+
+# Environment variables for nextcloud_occ* modules.
+# Set once here so every playbook can use:  environment: "{{ nextcloud_occ_env }}"
+nextcloud_occ_env:
+  NEXTCLOUD_OCC_PATH: "{{ nextcloud_www_dir }}/occ"
+  NEXTCLOUD_WEB_USER: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family'] | default('Debian')] }}"

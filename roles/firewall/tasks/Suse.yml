@@ -1,0 +1,11 @@
+---
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Stop and disable firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: stopped
+    enabled: false
+  when: ansible_facts.services['firewalld.service'] is defined

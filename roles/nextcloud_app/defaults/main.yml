@@ -1,0 +1,12 @@
+---
+# defaults for nextcloud_app
+
+nextcloud_apps:
+  - name: survey_client
+    state: disabled
+  - name: firstrunwizard
+    state: disabled
+  - name: admin_audit
+    state: enabled
+  - name: files_pdfviewer
+    state: enabled

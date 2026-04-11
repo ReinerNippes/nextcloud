@@ -5,50 +5,62 @@ web_user:
   apache:
     RedHat: "apache"
     Debian: "www-data"
+    Suse: "wwwrun"
   nginx:
     RedHat: "nginx"
     Debian: "www-data"
+    Suse: "nginx"
 
 web_group:
   apache:
     RedHat: "apache"
     Debian: "www-data"
+    Suse: "www"
   nginx:
     RedHat: "nginx"
     Debian: "www-data"
+    Suse: "nginx"
 
 # OS service name for webserver, used in multiple roles
 webserver_service_name:
   nginx:
     RedHat: nginx.service
     Debian: nginx.service
+    Suse: nginx.service
   apache:
     RedHat: httpd.service
     Debian: apache2.service
+    Suse: apache2.service
 
 php_socket:
-  'RedHat': '/run/php-fpm/php{{ php_version }}-fpm.sock'
-  'Debian': '/run/php/php{{ php_version }}-fpm.sock'
+  RedHat: '/run/php-fpm/php{{ php_version }}-fpm.sock'
+  Debian: '/run/php/php{{ php_version }}-fpm.sock'
+  Suse: '/run/php-fpm/php{{ php_version }}-fpm.sock'
 
 apache_server_root:
   Debian: /etc/apache2
   RedHat: /etc/httpd
+  Suse: /etc/apache2
 
 apache_conf_path:
   Debian: /etc/apache2
   RedHat: /etc/httpd/conf.d
+  Suse: /etc/apache2/conf.d
 
 apache_log_dir:
   Debian: /var/log/apache2
   RedHat: /var/log/httpd
+  Suse: /var/log/apache2
 
 apache_access_log_file:
   Debian: access.log
   RedHat: access_log
+  Suse: access_log
 
 apache_error_log_file:
   Debian: error.log
   RedHat: error_log
+  Suse: error_log
 
 apache_default_vhost_filename: 000-default.conf
 apache_remove_default_vhost: true

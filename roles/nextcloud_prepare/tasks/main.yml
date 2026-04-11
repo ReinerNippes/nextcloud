@@ -1,0 +1,19 @@
+---
+# tasks file for nextcloud_prepare
+# OS packages, database creation, webserver config
+
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: 'os/main.yml'
+
+- name: Include database create tasks
+  ansible.builtin.include_tasks: 'database/create_{{ nextcloud_db.type }}.yml'
+
+- name: Include webserver specific tasks
+  ansible.builtin.include_tasks: 'webserver/{{ nextcloud_webserver_type }}.yml'
+
+- name: Include selinux tasks
+  ansible.builtin.include_tasks: selinux.yml
+  when:
+    - (ansible_facts['os_family'] == "RedHat")
+    - ('status' in ansible_selinux)
+    - (ansible_selinux.status == "enabled")

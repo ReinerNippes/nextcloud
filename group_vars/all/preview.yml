@@ -1,0 +1,29 @@
+---
+
+nextcloud_preview_providers:
+  - 'OC\Preview\PNG'
+  - 'OC\Preview\JPEG'
+  - 'OC\Preview\GIF'
+  - 'OC\Preview\BMP'
+  - 'OC\Preview\XBitmap'
+  - 'OC\Preview\MarkDown'
+  - 'OC\Preview\MP3'
+  - 'OC\Preview\TXT'
+  # - 'OC\Preview\Illustrator'
+  - 'OC\Preview\Movie'
+  # - 'OC\Preview\MSOffice2003'
+  # - 'OC\Preview\MSOffice2007'
+  # - 'OC\Preview\MSOfficeDoc'
+  # - 'OC\Preview\OpenDocument'
+  # - 'OC\Preview\PDF'
+  # - 'OC\Preview\Photoshop'
+  - 'OC\Preview\Postscript'
+  - 'OC\Preview\StarOffice'
+  - 'OC\Preview\SVG'
+  - 'OC\Preview\TIFF'
+  - 'OC\Preview\Font'
+
+preview_max:
+  x: '1024'
+  y: '768'
+  scale_factor: '1'

@@ -3,12 +3,12 @@
 
 - name: Install needed php packages
   ansible.builtin.apt:
-    name: "{{ php_package_required[ansible_facts['pkg_mgr']] }}"
+    name: "{{ php_package_required['Debian'] }}"
     state: latest
 
 - name: Install optional php packages
   ansible.builtin.apt:
-    name: "{{ php_package_optional[ansible_facts['pkg_mgr']] }}"
+    name: "{{ php_package_optional['Debian'] }}"
     state: latest
   when: php_install_optional_packages|bool
 

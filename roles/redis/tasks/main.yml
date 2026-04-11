@@ -14,13 +14,13 @@
   loop:
     - regexp: "^port .*$"
       line: "port 0"
-    - regexp: "# unixsocket .*$"
+    - regexp: "^#?\\s*unixsocket .*$"
       line: "unixsocket {{ redis_socket.path }}"
-    - regexp: "# unixsocketperm .*$"
+    - regexp: "^#?\\s*unixsocketperm .*$"
       line: "unixsocketperm {{ redis_socket.perm }}"
-    - regexp: "# maxclients .*$"
+    - regexp: "^#?\\s*maxclients .*$"
       line: "maxclients 10240"
-    - regexp: "# requirepass foobared"
+    - regexp: "^#?\\s*requirepass .*$"
       line: "requirepass {{ passwords.redis }}"
   notify: Restart redis-server
 
@@ -64,8 +64,8 @@
       enabled: true
       state: started
 
-- name: Start and enable {{ redis_service_name[ansible_facts['os_family']] }}.service
+- name: Start and enable {{ redis_systemd_unit[ansible_facts['os_family']] }}
   ansible.builtin.systemd:
-    name: "{{ redis_service_name[ansible_facts['os_family']] }}.service"
+    name: "{{ redis_systemd_unit[ansible_facts['os_family']] }}"
     state: started
     enabled: true

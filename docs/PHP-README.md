@@ -6,6 +6,7 @@ Ansible role to install and configure PHP-FPM for Nextcloud.
 
 - Debian / Ubuntu (via Sury PPA)
 - RHEL / AlmaLinux / Rocky Linux (via Remi repository)
+- openSUSE Leap 16 (system PHP packages)
 
 ## What This Role Does
 
@@ -84,6 +85,16 @@ php_admin_value[session.gc_maxlifetime] = 36000
 /etc/php-fpm.conf                           ← tuned via lineinfile
 ```
 
+### openSUSE Leap
+
+```
+/etc/php8/cli/php.d/99-nextcloud.ini         ← CLI drop-in
+/etc/php8/fpm/php.d/99-nextcloud.ini         ← FPM drop-in
+/etc/php8/fpm/php-fpm.d/nextcloud.conf       ← FPM pool
+/etc/php8/fpm/php-fpm.d/www.conf.disabled    ← default pool (disabled)
+/etc/php8/fpm/php-fpm.conf                   ← tuned via lineinfile
+```
+
 ## Required Variables
 
 | Variable | Description |
@@ -106,8 +117,8 @@ php_admin_value[session.gc_maxlifetime] = 36000
 
 ```
 tasks/main.yml
-  ├── Debian.yml or RedHat.yml    (repo setup + package install)
-  ├── configure.yml               (drop-in INIs + pool + php-fpm.conf)
-  ├── selinux.yml                 (RedHat + SELinux enabled only)
+  ├── Debian.yml, RedHat.yml, or Suse.yml    (repo setup + package install)
+  ├── configure.yml                           (drop-in INIs + pool + php-fpm.conf)
+  ├── selinux.yml                             (RedHat + SELinux enabled only)
   └── enable php-fpm service
 ```

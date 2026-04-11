@@ -6,6 +6,7 @@ Ansible role to install Docker and manage a shared Docker Compose file for all c
 
 - Debian / Ubuntu (Docker CE from `download.docker.com`, added by the [OS role](OS_README.md))
 - RHEL / AlmaLinux / Rocky Linux (Docker CE from docker.com repo)
+- openSUSE Leap 16 (Docker CE from `download.docker.com`, added by the [OS role](OS_README.md))
 
 ## What This Role Does
 
@@ -33,12 +34,14 @@ The central design pattern of this role is a **shared Docker Compose file** that
                          with watchtower service + nextcloud network
                                     ↓
 2. exapp_hapr role    → appends appapi-harp service block
-3. nextcloudoffice    → appends collabora/code service block
-4. signal role        → appends nats-server + recording service blocks
+3. nextcloudoffice    → appends collabora/code service block (collocated)
+4. onlyoffice         → appends onlyoffice service block (collocated)
+5. whiteboard         → appends whiteboard service block (collocated)
+6. signal role        → appends nats-server + recording service blocks
                                     ↓
-5. docker role        → runs compose_up.yml → docker compose up
+7. docker role        → runs compose_up.yml → docker compose up
                                     ↓
-6. nextcloud role     → installs Nextcloud (containers already running)
+8. nextcloud roles    → installs Nextcloud (containers already running)
 ```
 
 Each role uses `ansible.builtin.blockinfile` with a unique marker to insert its service definition into the existing Compose file. This allows services to be added or removed independently without conflicting with each other.
@@ -49,9 +52,13 @@ Each role uses `ansible.builtin.blockinfile` with a unique marker to insert its 
 |------|-----------------|--------|-----------|
 | **docker** | `watchtower` | `docker compose file for nextcloud services` | Always |
 | **exapp_hapr** | `appapi-harp` | `appapi-harp service` | `nextcloud_install.hapr` |
-| **nextcloudoffice** | `nextcloudoffice` (Collabora) | `nextcloudoffice service` | `nextcloud_install.nextcloudoffice` |
+| **nextcloudoffice** | `nextcloudoffice` (Collabora) | `nextcloudoffice service` | `nextcloud_install.nextcloudoffice` (collocated) |
+| **onlyoffice** | `onlyoffice` | `onlyoffice service` | `nextcloud_install.onlyoffice` (collocated) |
+| **whiteboard** | `whiteboard` | `whiteboard service` | `nextcloud_install.whiteboard` (collocated) |
 | **signal** | `nats-server` | `nats-server service` | `nextcloud_install.hpb` |
 | **signal** | `nextcloud-recording` | `nextcloud-recording service` | `nextcloud_install.hpb` |
+
+> **Note:** When nextcloudoffice, onlyoffice, or whiteboard run on a dedicated server, they use a standalone Compose file instead of appending to the shared one.
 
 ### Resulting Compose File Structure
 
@@ -66,7 +73,11 @@ services:
     ...
   appapi-harp:      # if hapr enabled (exapp_hapr role)
     ...
-  nextcloudoffice:  # if nextcloudoffice enabled (nextcloudoffice role)
+  nextcloudoffice:  # if nextcloudoffice enabled, collocated (nextcloudoffice role)
+    ...
+  onlyoffice:       # if onlyoffice enabled, collocated (onlyoffice role)
+    ...
+  whiteboard:       # if whiteboard enabled, collocated (whiteboard role)
     ...
   nats-server:      # if hpb enabled (signal role)
     ...
@@ -107,16 +118,20 @@ nextcloud.yml
   ├── os              (all hosts)
   ├── redis           (redis hosts)
   ├── webserver       (webserver hosts)
-  ├── tls-certificate (webserver, coturn, signal hosts)
+  ├── tls-certificate (webserver, coturn, signal, onlyoffice, nextcloudoffice, whiteboard hosts)
   ├── database        (database hosts)
   ├── docker          ← First pass: install Docker, seed compose.yml
   ├── exapp_hapr      ← Adds appapi-harp to compose.yml
   ├── fulltextsearch  (elasticsearch hosts)
-  ├── nextcloudoffice ← Adds collabora to compose.yml
+  ├── nextcloudoffice ← Adds collabora to compose.yml (collocated) or deploys standalone (dedicated)
+  ├── onlyoffice      ← Adds onlyoffice to compose.yml (collocated) or deploys standalone (dedicated)
+  ├── whiteboard      ← Adds whiteboard to compose.yml (collocated) or deploys standalone (dedicated)
   ├── coturn          (coturn hosts)
   ├── signal          ← Adds nats + recording to compose.yml
   ├── docker          ← Second pass: compose_up.yml (start all containers)
-  ├── nextcloud       (Nextcloud install — containers already running)
+  ├── nextcloud_prepare  (OS prep, database, webserver)
+  ├── nextcloud_install  (download, install, core config)
+  ├── nextcloud_app      (app config — containers already running)
   └── ...
 ```
 

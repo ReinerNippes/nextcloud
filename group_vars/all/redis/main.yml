@@ -11,10 +11,17 @@ redis_yum_repo:
 redis_conf_path:
   RedHat: '/etc/valkey'
   Debian: '/etc/redis'
+  Suse: '/etc/valkey'
 
 redis_service_name:
   RedHat: valkey
   Debian: redis
+  Suse: valkey
+
+redis_systemd_unit:
+  RedHat: valkey.service
+  Debian: redis.service
+  Suse: valkey.target
 
 redis_package_name:
   RedHat:
@@ -23,10 +30,13 @@ redis_package_name:
     - redis-server
     - redis-tools
     - python3-redis
+  Suse:
+    - valkey
 
 redis_user_name:
   RedHat: valkey
   Debian: redis
+  Suse: valkey
 
 # redis config
 # if inventory_name is localhost unix socket will be useed

@@ -1,0 +1,40 @@
+---
+# zypper related os tasks
+
+- name: Setup additional repositories
+  ansible.builtin.include_tasks: Suse_repositories.yml
+
+- name: Update os via zypper
+  community.general.zypper:
+    name: '*'
+    state: latest
+    update_cache: true
+  retries: 5
+  register: os_zypper_update_result
+  until: os_zypper_update_result is succeeded
+
+- name: Install needed os packages
+  community.general.zypper:
+    name:
+      - zip
+      - unzip
+      - bzip2
+      - curl
+      - wget
+      - cronie
+      - firewalld
+      - tar
+      - python3-cryptography
+      - acl
+      - bash-completion
+      - openssh-clients
+    state: latest
+  retries: 5
+  register: os_zypper_install_result
+  until: os_zypper_install_result is succeeded
+
+- name: Ensure ssl-cert group exists
+  ansible.builtin.group:
+    name: ssl-cert
+    system: true
+    state: present

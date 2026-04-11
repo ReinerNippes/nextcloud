@@ -1,0 +1,13 @@
+---
+# internal variables for nextcloud_install (auto-configured, not meant to be overridden)
+
+nextcloud_redis:
+  host: "{% if groups['redis'][0] == groups['nextcloud'][0] %}{{ redis_socket.path }}{% else %}{{ redis_tcp.address }}{% endif %}"
+  port: "{% if groups['redis'][0] == groups['nextcloud'][0] %}0{% else %}{{ redis_tcp.port }}{% endif %}"
+  timeout: 0
+  password: "{{ passwords.redis }}"
+
+nextcloud_memcache:
+  local: '\OC\Memcache\APCu'
+  locking: '\OC\Memcache\Redis'
+  filelocking_enabled: true

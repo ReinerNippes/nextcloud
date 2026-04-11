@@ -41,7 +41,14 @@ nextcloud_default_phone_region: DE
 # For collocated setup this equals nextcloud_fqdn
 onlyoffice_fqdn: "{{ hostvars[groups['onlyoffice'][0]]['inventory_hostname'] }}"
 
+# Nextcloud Office (Collabora) Server Domain Name
+# Default is the fqdn of the first host in the nextcloudoffice group
+# For collocated setup this equals nextcloud_fqdn
+nextcloudoffice_fqdn: "{{ hostvars[groups['nextcloudoffice'][0]]['inventory_hostname'] }}"
+
 nextcloud_install:
+  # Preview Icons
+  preview: true
   # Install notify_push
   notify_push: true
   # Install turn server for Nextcloud Talk
@@ -52,17 +59,21 @@ nextcloud_install:
   # - collocated: coturn host IPv4 (avoids local FQDN->loopback issues)
   # - dedicated:  coturn inventory hostname/FQDN
   # override in inventory/group_vars if required
-  talk: true
+  talk: false
   # Install HPB for Nextcloud Talk
-  hpb: true
+  hpb: false
   # Install HaPR for exAPPs
-  hapr: true
+  hapr: false
   # Install Collabora Online
   # more info about collabora office: https://www.collaboraoffice.com/
   nextcloudoffice: false
   # Install OnlyOffice Document Server
-  # set onlyoffice_ssl_port in inventory/group_vars when running collocated (default: 8443)
-  # set onlyoffice_ssl_port: 443 when running on a dedicated server
-  onlyoffice: true
+  # OnlyOffice runs behind nginx/apache reverse proxy (same architecture as NextcloudOffice)
+  # Can run collocated with Nextcloud or on a dedicated server
+  onlyoffice: false
+  # Install Whiteboard (Excalidraw-based collaborative whiteboard)
+  # Requires a WebSocket server (Docker container)
+  # Can run collocated with Nextcloud or on a dedicated server
+  whiteboard: false
   # Install fulltextsearch
   fulltextsearch: false

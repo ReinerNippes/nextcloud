@@ -2,3 +2,4 @@ php_reserved_ram_mb: 1024   # RAM für PHP-FPM, nicht Gesamt-RAM
 php_fpm_process_name:
   Debian: "php-fpm{{ php_version }}"
   RedHat: "php-fpm"
+  Suse: "php-fpm"

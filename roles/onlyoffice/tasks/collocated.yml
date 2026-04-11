@@ -1,0 +1,33 @@
+---
+# Collocated OnlyOffice — runs on the same host as Nextcloud.
+# OnlyOffice listens on HTTP port 8000 internally.
+# The Nextcloud webserver proxies to http://127.0.0.1:8443.
+
+- name: Add onlyoffice service to compose.yml
+  ansible.builtin.blockinfile:
+    path: /opt/nextcloud/docker_compose/compose.yml
+    marker: "# {mark} onlyoffice service"
+    block: |
+      #
+        onlyoffice:
+          image: onlyoffice/documentserver:latest
+          container_name: onlyoffice
+          restart: unless-stopped
+          networks:
+            - nextcloud
+          ports:
+            - "127.0.0.1:8443:80"
+          environment:
+            ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
+            USE_UNAUTHORIZED_STORAGE: "true"
+            JWT_ENABLED: "true"
+            JWT_SECRET: "{{ passwords.onlyoffice_secret }}"
+          volumes:
+            - /opt/onlyoffice/DocumentServer/data:/var/www/onlyoffice/Data
+            - /opt/onlyoffice/DocumentServer/logs:/var/log/onlyoffice
+            - /opt/onlyoffice/DocumentServer/lib:/var/lib/onlyoffice
+            - /opt/onlyoffice/DocumentServer/db:/var/lib/postgresql
+          extra_hosts:
+            - "{{ nextcloud_fqdn }}:{{ docker_network_nextcloud.network.IPAM.Config[0].Gateway }}"
+          labels:
+            com.centurylinklabs.watchtower.enable: "true"

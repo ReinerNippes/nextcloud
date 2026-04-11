@@ -1,0 +1,9 @@
+---
+# Suse nginx installation
+
+- name: Install needed packages
+  community.general.zypper:
+    name:
+      - nginx
+    state: latest
+    # disablerepo: nginx

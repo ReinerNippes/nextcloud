@@ -21,8 +21,8 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ 'coturn' if ansible_facts['os_family'] == 'RedHat' else 'turnserver' }}"
-    group: "{{ 'coturn' if ansible_facts['os_family'] == 'RedHat' else 'turnserver' }}"
+    owner: "{{ coturn_user[ansible_facts['os_family']] }}"
+    group: "{{ coturn_user[ansible_facts['os_family']] }}"
     mode: "0755"
   loop:
     - "/var/log/coturn"
@@ -32,7 +32,7 @@
 - name: Configure coturn in /etc/turnserver.conf
   ansible.builtin.template:
     src: turnserver.conf.j2
-    dest: /etc/{{ 'coturn/' if ansible_facts['os_family'] == 'RedHat' else '' }}turnserver.conf
+    dest: "{{ coturn_conf_path[ansible_facts['os_family']] }}"
     owner: root
     group: root
     mode: "0644"
@@ -67,9 +67,8 @@
   ansible.builtin.meta: flush_handlers
 
 - name: Wait for coturn TLS listener socket
-  ansible.builtin.command: "ss -ltn sport = :{{ coturn_tls_port }}"
-  register: coturn_tls_socket
-  changed_when: false
-  retries: 30
-  delay: 1
-  until: coturn_tls_socket.stdout is search('LISTEN')
+  ansible.builtin.wait_for:
+    host: "{{ ansible_facts['default_ipv4']['address'] }}"
+    port: "{{ coturn_tls_port }}"
+    state: started
+    timeout: 30

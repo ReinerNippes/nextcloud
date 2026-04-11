@@ -23,35 +23,31 @@
     tls_reload_services: >-
       {{
         (
-          (inventory_hostname in groups['nextcloud']
-          or inventory_hostname in groups['signal'])
+          (inventory_hostname in groups.get('nextcloud', [])
+          or inventory_hostname in groups.get('signal', [])
+          or inventory_hostname in groups.get('webserver', []))
           | ternary([ tls_service_map.webserver ], [])
         )
         +
         (
-          (inventory_hostname in groups['coturn'])
+          (inventory_hostname in groups.get('coturn', []))
           | ternary([ tls_service_map.coturn ], [])
         )
         +
         (
-          (inventory_hostname in groups['redis']
-           and not inventory_hostname in groups['nextcloud'])
+          (inventory_hostname in groups.get('redis', [])
+           and not inventory_hostname in groups.get('nextcloud', []))
           | ternary([ tls_service_map.redis ], [])
         )
         +
         (
-          (inventory_hostname in groups['database']
-           and not inventory_hostname in groups['nextcloud'])
+          (inventory_hostname in groups.get('database', [])
+           and not inventory_hostname in groups.get('nextcloud', []))
           | ternary([ tls_service_map.database ], [])
         )
       }}
     tls_restart_containers: >-
-      {{
-        (
-          (inventory_hostname in groups.get('onlyoffice', []))
-          | ternary(['onlyoffice'], [])
-        )
-      }}
+      {{ [] }}
 
 - name: Build reload command
   ansible.builtin.set_fact:
@@ -127,8 +123,9 @@
       --issue
       --home /opt/acme.sh
       --config-home /etc/acme.sh
-      --{{ (inventory_hostname in groups['nextcloud']
-          or inventory_hostname in groups['signal'])
+      --{{ (inventory_hostname in groups.get('nextcloud', [])
+          or inventory_hostname in groups.get('signal', [])
+          or inventory_hostname in groups.get('webserver', []))
           | ternary(nextcloud_webserver_type, 'standalone') }}
       --reloadcmd "{{ tls_reloadcmd }}"
       --server {{ tls_certificate.acme_ca }}

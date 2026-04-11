@@ -75,6 +75,19 @@ config:
       # additional_fqdns:
       #   recording: rec
       #   onlyoffice: office
+    # Dedicated Nextcloud Office (Collabora) server
+    # - name: office
+    #   server_type: cx32
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - nextcloudoffice
+    #     - webserver
+    #     - docker
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - nextcloudoffice
 
   # ── Private network (optional) ────────────────────────────────────
   # nextcloud-wizard:network:

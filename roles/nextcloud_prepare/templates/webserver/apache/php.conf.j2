@@ -1,0 +1,18 @@
+# Managed by Ansible (Nextcloud role)
+# PHP-FPM integration and required modules.
+{% if ansible_facts['os_family'] == 'RedHat' %}
+
+LoadModule mpm_event_module modules/mod_mpm_event.so
+
+<IfModule !proxy_module>
+    LoadModule proxy_module modules/mod_proxy.so
+</IfModule>
+
+<IfModule !proxy_fcgi_module>
+    LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so
+</IfModule>
+{% endif %}
+
+<FilesMatch "\.php$">
+    SetHandler "proxy:unix:{{ php_socket[ansible_facts['os_family']] }}|fcgi://localhost"
+</FilesMatch>

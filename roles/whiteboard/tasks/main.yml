@@ -1,0 +1,15 @@
+---
+# tasks file for whiteboard websocket server
+
+- name: Determine if whiteboard is collocated with nextcloud
+  ansible.builtin.set_fact:
+    _whiteboard_collocated: >-
+      {{ inventory_hostname in groups.get('nextcloud', []) }}
+
+- name: Include collocated tasks
+  ansible.builtin.include_tasks: collocated.yml
+  when: _whiteboard_collocated | bool
+
+- name: Include dedicated server tasks
+  ansible.builtin.include_tasks: dedicated.yml
+  when: not (_whiteboard_collocated | bool)

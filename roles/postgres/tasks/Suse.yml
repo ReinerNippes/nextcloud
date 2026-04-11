@@ -1,0 +1,7 @@
+---
+# zypper related OS tasks
+
+- name: Install postgres server
+  community.general.zypper:
+    name: "{{ postgresql_packages[ansible_facts['os_family']] }}"
+    state: latest

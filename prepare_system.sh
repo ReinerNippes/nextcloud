@@ -6,7 +6,7 @@
 prepare_ubuntu() {
         $SUDO apt update -y
         $SUDO apt-get -o Dpkg::Options::="--force-confold" -fuy dist-upgrade
-        $SUDO apt-get -o Dpkg::Options::="--force-confold" -fuy install software-properties-common curl git mc vim facter python3 python3-setuptools python3-apt python3-pip python3-passlib python3-wheel python3-bcrypt aptitude ansible -y
+        $SUDO apt-get -o Dpkg::Options::="--force-confold" -fuy install software-properties-common curl git mc vim facter python3 python3-setuptools python3-apt python3-pip python3-passlib python3-wheel python3-bcrypt python3-dnspython aptitude ansible -y
 
         set +x
         echo
@@ -23,7 +23,7 @@ prepare_ubuntu() {
 prepare_debian() {
         $SUDO apt update -y
         $SUDO apt-get -o Dpkg::Options::="--force-confold" -fuy dist-upgrade
-        $SUDO apt-get -o Dpkg::Options::="--force-confnew" -fuy install dirmngr curl git mc vim facter python3 python3-pip python3-apt python3-passlib python3-bcrypt python3-wheel python3-setuptools aptitude ansible -y
+        $SUDO apt-get -o Dpkg::Options::="--force-confnew" -fuy install dirmngr curl git mc vim facter python3 python3-pip python3-apt python3-passlib python3-bcrypt python3-wheel python3-setuptools python3-dnspython aptitude ansible -y
 
         set +x
         echo
@@ -81,7 +81,7 @@ prepare_centos() {
 }
 
 prepare_fedora() {
-        $SUDO dnf install git vim mc curl facter python3 python3-dnf python3-pip python3-libselinux python3-bcrypt python3-passlib ansible -y
+        $SUDO dnf install git vim mc curl facter python3 python3-dnf python3-pip python3-libselinux python3-bcrypt python3-passlib python3-dns ansible -y
         $SUDO dnf update -y
 
         set +x
@@ -118,7 +118,7 @@ prepare_amzn() {
 }
 
 prepare_opensuse-leap() {
-        $SUDO zypper install --no-confirm git vim mc curl python3 python3-pip python3-bcrypt python3-passlib ansible
+        $SUDO zypper install --no-confirm git vim mc curl python3 python3-pip python3-bcrypt python3-passlib python3-dnspython ansible
         $SUDO zypper update --no-confirm
 
         set +x

@@ -27,6 +27,7 @@
       - python3-policycoreutils
       - python3-cryptography
       - acl
+      - bash-completion
     state: latest
     enablerepo: epel
   retries: 5

@@ -1,0 +1,6 @@
+---
+
+imagemagick_policy_path:
+  Debian: "/etc/ImageMagick-{{ imagemagick_version }}/policy.xml"
+  RedHat: "/etc/ImageMagick-{{ imagemagick_version }}/policy.xml"
+  Suse: "/etc/IM-{{ imagemagick_version }}/policy.xml"

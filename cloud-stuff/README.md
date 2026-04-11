@@ -416,9 +416,9 @@ nextcloud_db:
   port: "5432"
   name: nextcloud
   user: nextcloud
-  password: s3cure!
+  password: <your-db-password>
   admin_user: nextcloud
-  admin_password: s3cure!
+  admin_password: <your-db-password>
 ```
 
 This overrides `database.yml` defaults. Because `host` is no longer `localhost`,
@@ -432,7 +432,7 @@ redis_tcp:
   address: 10.x.x.x
   port: "6379"
 passwords:
-  redis: s3cure!
+  redis: <your-db-password>
 ```
 
 ### Inventory for managed services

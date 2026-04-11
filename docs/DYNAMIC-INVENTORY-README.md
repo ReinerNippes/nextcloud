@@ -48,13 +48,14 @@ groups:
   hapr:            "hcloud_labels.group_hapr            | default('') == 'true'"
   nextcloudoffice: "hcloud_labels.group_nextcloudoffice | default('') == 'true'"
   onlyoffice:      "hcloud_labels.group_onlyoffice      | default('') == 'true'"
+  whiteboard:      "hcloud_labels.group_whiteboard      | default('') == 'true'"
 
 # Compose host variables from labels
 compose:
   ansible_user: "'ansible'"
   ansible_ssh_private_key_file: "'~/.ssh/id_ed25519'"
   additional_fqdns: "hcloud_labels | dict2items | selectattr('key', 'match', '^additional_fqdn_') | items2dict"
-  additional_certificate_fqdns: "additional_fqdns.values() | list"
+  additional_certificate_fqdns: "(hcloud_labels | dict2items | selectattr('key', 'match', '^additional_fqdn_') | items2dict).values() | list"
 
 connect_with: public_ipv4
 ```
@@ -109,6 +110,7 @@ groups:
   hapr:            "'group_hapr'            in tags"
   nextcloudoffice: "'group_nextcloudoffice' in tags"
   onlyoffice:      "'group_onlyoffice'      in tags"
+  whiteboard:      "'group_whiteboard'      in tags"
 
 compose:
   ansible_user: "'ansible'"
@@ -141,6 +143,7 @@ Pulumi sets the following metadata on each server automatically:
 | `group_hapr=true` | Assigns server to `hapr` group |
 | `group_nextcloudoffice=true` | Assigns server to `nextcloudoffice` group |
 | `group_onlyoffice=true` | Assigns server to `onlyoffice` group |
+| `group_whiteboard=true` | Assigns server to `whiteboard` group |
 | `additional_fqdn_<name>=<fqdn>` | Additional FQDNs for webserver vhosts and TLS certificates |
 
 A single server can have multiple group labels (e.g. a single-server setup has all groups on one host).

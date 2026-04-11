@@ -58,3 +58,20 @@
         state: present
       vars:
         _remi_repo_type: "{{ 'fedora' if ansible_facts['distribution'] == 'Fedora' else 'enterprise' }}"
+
+- name: Add Elasticsearch repository
+  when: inventory_hostname in groups['elasticsearch']
+  block:
+    - name: Import elasticsearch rpm key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+    - name: Add elasticsearch-7.x repo
+      ansible.builtin.yum_repository:
+        name: elasticsearch-9.x
+        description: Elasticsearch repository for 9.x packages
+        baseurl: https://artifacts.elastic.co/packages/9.x/yum
+        gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        gpgcheck: true
+        enabled: 1

@@ -1,0 +1,50 @@
+---
+
+# os related tasks on nextcloud server
+- name: Include os specific tasks
+  ansible.builtin.include_tasks: "os/{{ ansible_facts['os_family'] }}.yml"
+
+# apply some fixes
+- name: Create symbolic link to /usr/bin/gs
+  ansible.builtin.file:
+    src: /usr/bin/gs
+    dest: /usr/local/bin/gs
+    state: link
+
+- name: Get imagemagick version
+  ansible.builtin.command: convert -version
+  register: imagemagick_version_output
+  changed_when: false
+
+- name: Extract imagemagick major version
+  ansible.builtin.set_fact:
+    imagemagick_version: "{{ imagemagick_version_output.stdout | regex_search('ImageMagick (\\d+)', '\\1') | first }}"
+
+- name: Change ImageMagick settings
+  ansible.builtin.lineinfile:
+    path: "{{ imagemagick_policy_path[ansible_facts['os_family']] }}"
+    line: '  <policy domain="coder" rights="read|write" pattern="{{ item }}" />'
+    regexp: '(.*)<policy domain="coder" rights="(.*)" pattern="{{ item }}" />(.*)'
+    insertbefore: '</policymap>'
+  loop:
+    - PS
+    - EPI
+    - PDF
+    - XPS
+
+- name: Create nextcloud an data folders
+  ansible.builtin.file:
+    name: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: '{{ nextcloud_data_dir }}'
+      owner: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+      group: "{{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+      mode: '0750'
+    - path: '{{ nextcloud_www_dir }}'
+      owner: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+      group: "{{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+      mode: '0750'

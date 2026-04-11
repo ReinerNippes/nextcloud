@@ -48,6 +48,7 @@
       - vim
       - wget
       - zip
+      - bash-completion
     state: latest
 
 - name: Install software-properties-common (Ubuntu and Debian 12 only)

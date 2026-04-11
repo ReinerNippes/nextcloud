@@ -6,6 +6,7 @@ Ansible role to provision TLS certificates for all servers in the Nextcloud depl
 
 - Debian / Ubuntu
 - RHEL / AlmaLinux / Rocky Linux
+- openSUSE Leap 16
 
 ## Certificate Types
 
@@ -98,12 +99,12 @@ These variables are defined in `group_vars/all/common.yml` and provide sensible 
 |----------|---------|-------------|
 | `tls_service_map.webserver` | Derived from `webserver_service_name` | Systemd service to reload for webserver hosts |
 | `tls_service_map.coturn` | `coturn.service` | Systemd service to reload for coturn hosts |
-| `tls_service_map.redis` | Derived from `redis_service_name` | Systemd service to reload for standalone redis hosts |
+| `tls_service_map.redis` | Derived from `redis_systemd_unit` | Systemd unit to reload for standalone redis hosts |
 | `tls_service_map.database` | `mariadb` or PostgreSQL service | Systemd service to reload for standalone database hosts |
 
 The role automatically determines which services to reload based on the host's group membership in the inventory. Services are only reloaded on hosts that actually run them.
 
-Docker containers with bind-mounted certificates (e.g. OnlyOffice) are restarted via `docker restart` after renewal, since they re-read certificates only on startup.
+Docker containers with bind-mounted certificates (e.g. OnlyOffice, Collabora, Whiteboard) are restarted via `docker restart` after renewal, since they re-read certificates only on startup.
 
 #### Staging detection
 
@@ -193,11 +194,11 @@ The `fixperms.sh` hook is deployed on all supported platforms and receives `CERT
 
 ## Platform Differences
 
-| Aspect | Debian / Ubuntu | RedHat / Alma / Rocky |
-|--------|-----------------|----------------------|
-| Certificate base directory | `/etc/ssl/private` | `/etc/pki/tls/private` |
-| Key file group | `ssl-cert` | `ssl-cert` |
-| Post-hook (fixperms.sh) | Deployed and used | Deployed and used |
+| Aspect | Debian / Ubuntu | RedHat / Alma / Rocky | openSUSE Leap |
+|--------|-----------------|----------------------|---------------|
+| Certificate base directory | `/etc/ssl/private` | `/etc/pki/tls/private` | `/etc/ssl/private` |
+| Key file group | `ssl-cert` | `ssl-cert` | `ssl-cert` |
+| Post-hook (fixperms.sh) | Deployed and used | Deployed and used | Deployed and used |
 | Webserver validation | nginx or apache | nginx or apache |
 
 ## Example Configuration

@@ -1,0 +1,11 @@
+---
+# zypper related tasks
+
+- name: Install mariadb-server packages
+  community.general.zypper:
+    name:
+      - mariadb
+      - mariadb-client
+      - python3-PyMySQL
+    state: latest
+  register: install_mariadb

@@ -1,0 +1,6 @@
+---
+
+# TODO: manage ufw / nftables rules
+- name: Firewall management placeholder (Debian)
+  ansible.builtin.debug:
+    msg: "Firewall management not yet implemented for Debian"

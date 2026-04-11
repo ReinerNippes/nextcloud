@@ -1,0 +1,35 @@
+---
+# tasks file for whiteboard configuration in nextcloud
+
+- name: Install and enable whiteboard app
+  reinernippes.nextcloud.occ_app:
+    name: whiteboard
+    state: enabled
+
+- name: Determine whiteboard backend URL
+  ansible.builtin.set_fact:
+    _whiteboard_host: "{{ groups['whiteboard'][0] }}"
+
+- name: Set whiteboard collocated backend URL
+  ansible.builtin.set_fact:
+    _whiteboard_backend_url: "https://{{ nextcloud_fqdn }}/whiteboard"
+  when: _whiteboard_host in groups.get('nextcloud', [])
+
+- name: Set whiteboard dedicated backend URL
+  ansible.builtin.set_fact:
+    _whiteboard_backend_url: "https://{{ whiteboard_fqdn }}:443"
+  when: _whiteboard_host not in groups.get('nextcloud', [])
+
+- name: Configure whiteboard collabBackendUrl
+  reinernippes.nextcloud.occ_config_app:
+    app: whiteboard
+    key: collabBackendUrl
+    value: "{{ _whiteboard_backend_url }}"
+    state: present
+
+- name: Configure whiteboard jwt_secret_key
+  reinernippes.nextcloud.occ_config_app:
+    app: whiteboard
+    key: jwt_secret_key
+    value: "{{ passwords.whiteboard_secret }}"
+    state: present

@@ -1,0 +1,27 @@
+---
+
+# zypper related tasks
+
+- name: Install {{ redis_package_name[ansible_facts['os_family']] }} packages
+  community.general.zypper:
+    name: "{{ redis_package_name[ansible_facts['os_family']] }}"
+    state: latest
+  retries: 5
+  register: valkey_installed
+  until: valkey_installed is succeeded
+
+- name: Copy /etc/valkey/default.conf.example to /etc/valkey/valkey.conf
+  ansible.builtin.copy:
+    src: /etc/valkey/default.conf.example
+    dest: "{{ redis_conf_path[ansible_facts['os_family']] }}/valkey.conf"
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: true
+  when: valkey_installed.changed
+
+- name: Enable and start valkey service
+  ansible.builtin.systemd:
+    name: valkey@valkey
+    enabled: true
+    state: started

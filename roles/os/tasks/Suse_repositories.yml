@@ -1,0 +1,78 @@
+---
+
+- name: Add NGINX repository
+  when: (nextcloud_webserver_type == 'nginx') and (inventory_hostname in groups['webserver'])
+  block:
+    - name: Add nginx signing key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://nginx.org/keys/nginx_signing.key
+
+    - name: Add nginx mainline repo
+      ansible.builtin.command:
+        cmd: >-
+          zypper addrepo --gpgcheck --type yum --refresh --check
+          https://nginx.org/packages/mainline/sles/{{ ansible_facts['distribution_major_version'] }}
+          nginx-mainline
+      register: _nginx_repo_result
+      changed_when: _nginx_repo_result.rc == 0
+      failed_when: _nginx_repo_result.rc not in [0, 4]
+
+- name: Create PostgreSQL Repositories
+  when: inventory_hostname in groups['database']
+  block:
+    - name: Add postgres GPG key
+      ansible.builtin.rpm_key:
+        state: present
+        key: "https://download.postgresql.org/pub/repos/zypp/keys/PGDG-RPM-GPG-KEY-SLES{{ ansible_facts['distribution_major_version'] }}"
+
+    - name: Add postgres repo
+      community.general.zypper_repository:
+        name: pgdg
+        repo: "https://download.postgresql.org/pub/repos/zypp/{{ postgresql_version }}/opensuse/leap-{{ ansible_facts['distribution_version'] }}-x86_64"
+        enabled: true
+        autorefresh: true
+        state: present
+
+- name: Add docker repo (openSUSE Leap 15.x)
+  when:
+    - inventory_hostname in groups['docker']
+    - ansible_facts['distribution_major_version'] | int < 16
+  community.general.zypper_repository:
+    name: virtualization-containers
+    repo: "https://download.opensuse.org/repositories/Virtualization:/containers/{{ ansible_facts['distribution_major_version'] }}.{{ ansible_facts['distribution_version'].split('.')[-1] }}/"
+    enabled: true
+    autorefresh: true
+    auto_import_keys: true
+    state: present
+
+# openSUSE Leap 16+ ships docker/podman in the default repositories — no extra repo needed.
+
+- name: Add Elasticsearch repository
+  when: inventory_hostname in groups['elasticsearch']
+  block:
+    - name: Import elasticsearch rpm key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+    - name: Add elasticsearch-7.x repo
+      community.general.zypper_repository:
+        name: elasticsearch-9.x
+        description: Elasticsearch repository for 9.x packages
+        repo: https://artifacts.elastic.co/packages/9.x/yum
+        auto_import_keys: true
+        enabled: true
+        state: present
+
+- name: Setup PHP repository
+  when: inventory_hostname in groups['nextcloud']
+  block:
+    - name: Add devel:languages:php repo
+      community.general.zypper_repository:
+        name: devel-languages-php
+        repo: "https://download.opensuse.org/repositories/devel:/languages:/php/{{ ansible_facts['distribution_version'] }}/"
+        enabled: true
+        autorefresh: true
+        auto_import_keys: true
+        state: present

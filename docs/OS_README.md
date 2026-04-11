@@ -6,6 +6,7 @@ Ansible role to prepare the operating system for a Nextcloud deployment. Runs on
 
 - Debian / Ubuntu
 - RHEL / AlmaLinux / Rocky Linux
+- openSUSE Leap 16
 
 ## What This Role Does
 
@@ -23,6 +24,8 @@ tasks/main.yml
   │   └── Debian_repositories.yml   Add APT repositories (nginx, PHP, PostgreSQL, Redis, Docker, Elasticsearch)
   ├── RedHat.yml                 RHEL/Alma/Rocky/Fedora specific tasks
   │   └── RedHat_repositories.yml   Add YUM/DNF repositories (EPEL, nginx, PostgreSQL)
+  ├── Suse.yml                   openSUSE Leap specific tasks
+  │   └── Suse_repositories.yml     Add zypper repositories (nginx, PostgreSQL, Docker, Elasticsearch)
   ├── (set hostname + deploy /etc/hosts via etc_hosts.j2 template)
   └── passwords.yml              Generate and persist passwords for all components
 ```
@@ -49,6 +52,15 @@ Repositories are added conditionally based on host group membership and configur
 | EPEL | Always | `epel-release` package |
 | nginx (mainline) | Host in `webserver` group | `nginx.org` |
 | PostgreSQL | Host in `database` group | `download.postgresql.org` |
+
+### openSUSE Leap
+
+| Repository | Condition | Source |
+|------------|-----------|--------|
+| nginx (mainline) | Host in `webserver` group | `nginx.org` |
+| PostgreSQL | Host in `database` group | `download.postgresql.org` |
+| Docker CE | Host in `docker` group | `download.docker.com` |
+| Elasticsearch 9.x | Host in `elasticsearch` group | `artifacts.elastic.co` |
 
 ## Installed Packages
 

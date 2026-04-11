@@ -1,0 +1,4 @@
+---
+
+- name: Include OS-specific apache configuration
+  ansible.builtin.include_tasks: "apache_{{ ansible_facts['os_family'] }}.yml"

@@ -1,0 +1,67 @@
+---
+# Example: multi-server setup where nextcloudoffice and whiteboard
+# share the same server (office.example.com)
+all:
+
+nextcloud:
+  hosts:
+    nextcloud.example.com:
+
+redis:
+  hosts:
+    nextcloud.example.com:
+
+database:
+  hosts:
+    nextcloud.example.com:
+
+elasticsearch:
+  hosts:
+    nextcloud.example.com:
+
+coturn:
+  hosts:
+    turn.example.com:
+
+signal:
+  vars:
+    additional_certificate_fqdns:
+      - rec.example.com
+  hosts:
+    signal.example.com:
+
+hapr:
+  hosts:
+    nextcloud.example.com:
+
+# nextcloudoffice and onlyoffice are mutual exclusive
+# choose one or the other
+# nextcloudoffice and whiteboard can share the same server
+nextcloudoffice:
+  hosts:
+    office.example.com:
+
+#onlyoffice:
+#  hosts:
+#    onlyoffice.example.com:
+
+whiteboard:
+  vars:
+    additional_fqdns:
+      additional_fqdn_whiteboard: whiteboard.example.com
+  hosts:
+    office.example.com:
+
+# webserver and docker groups are managed automatically
+# do not edit them even if you don't install a particular service
+webserver:
+  hosts:
+    nextcloud.example.com:
+    signal.example.com:
+    office.example.com:
+
+docker:
+  hosts:
+    nextcloud.example.com:
+    signal.example.com:
+    office.example.com:

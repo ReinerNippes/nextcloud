@@ -1,0 +1,15 @@
+---
+
+# Whiteboard Server Domain Name
+# When whiteboard runs on a shared server (e.g. with nextcloudoffice),
+# the FQDN comes from additional_fqdns.additional_fqdn_whiteboard.
+# When whiteboard has its own server, inventory_hostname is used.
+whiteboard_fqdn: >-
+  {{ hostvars[groups['whiteboard'][0]]['additional_fqdns']['additional_fqdn_whiteboard']
+     | default(hostvars[groups['whiteboard'][0]]['inventory_hostname']) }}
+
+
+# Maximum upload file size for whiteboard WebSocket payload (in bytes).
+# Must be >= the "Maximale Bildgröße" setting in the Whiteboard admin UI.
+# Default 10 MB matches the Nextcloud default of 10 MB max image size.
+whiteboard_max_upload_file_size: "10485760"

@@ -1,0 +1,46 @@
+---
+all:
+
+nextcloud:
+  hosts:
+    nextcloud.example.com:
+
+redis:
+  hosts:
+    nextcloud.example.com:
+
+database:
+  hosts:
+    nextcloud.example.com:
+
+elasticsearch:
+  hosts:
+    nextcloud.example.com:
+
+# nextcloudoffice and onlyoffice are mutual exclusive
+# choose one or the other
+nextcloudoffice:
+  hosts:
+    nextcloud.example.com:
+
+#onlyoffice:
+#  hosts:
+#    nextcloud.example.com:
+
+whiteboard:
+  hosts:
+    nextcloud.example.com:
+
+hapr:
+  hosts:
+    nextcloud.example.com:
+
+# webserver and docker groups are managed automatically
+# do not edit them even if you don't install a particular service
+webserver:
+  hosts:
+    nextcloud.example.com:
+
+docker:
+  hosts:
+    nextcloud.example.com:
