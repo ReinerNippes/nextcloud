@@ -33,7 +33,7 @@
     - webserver
 
 - name: Install tls certificates
-  hosts: nextcloud, coturn, signal, onlyoffice
+  hosts: nextcloud, coturn, signal, onlyoffice, nextcloudoffice, whiteboard
   become: true
   gather_facts: false
 
@@ -95,6 +95,15 @@
     - role: onlyoffice
       when: nextcloud_install.onlyoffice|bool
 
+- name: Install Whiteboard
+  hosts: whiteboard
+  become: true
+  gather_facts: false
+
+  roles:
+    - role: whiteboard
+      when: nextcloud_install.whiteboard|bool
+
 - name: Install coturn server
   hosts: coturn
   become: true
@@ -131,10 +140,13 @@
     - role: restic_backup
       when: restic_repo != []
     - php
-    - nextcloud
+    - nextcloud_prepare
+    - nextcloud_install
+    - nextcloud_app
     - role: postgres_analyzer
       when: nextcloud_db.type == 'pgsql'
     - php_fpm_analyser
+  environment: "{{ nextcloud_occ_env }}"
 
   post_tasks:
     - name: Check install status

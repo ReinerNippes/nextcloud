@@ -6,8 +6,8 @@ Documentation for deploying Collabora Online with this playbook via the `nextclo
 
 This setup uses two layers:
 
-1. `roles/nextcloudoffice` adds a Collabora container (`collabora/code`) to the shared Docker Compose file.
-2. `roles/nextcloud/tasks/configure/nextcloudoffice.yml` installs and configures the Nextcloud app (`richdocuments`) via `occ`.
+1. `roles/nextcloudoffice` deploys a Collabora container (`collabora/code`) — either collocated (appended to the shared Compose file) or on a dedicated server (standalone Compose + nginx reverse proxy).
+2. `roles/nextcloud_app/tasks/configure/nextcloudoffice.yml` installs and configures the Nextcloud app (`richdocuments`) via the `reinernippes.nextcloud` collection modules.
 
 ## Role: `nextcloudoffice`
 
@@ -16,12 +16,25 @@ This setup uses two layers:
 - Includes OS-specific package tasks:
   - Debian/Ubuntu: ensures apt components and installs fonts (`ttf-mscorefonts-installer`, `fonts-noto-core`)
   - RedHat-family: installs Noto fonts and helper packages
-- Appends a `nextcloudoffice` service block to `/opt/nextcloud/docker_compose/compose.yml`
-- Runs Collabora on loopback only:
-  - `127.0.0.1:9980:9980`
+  - openSUSE: installs required fonts
+- Detects deployment mode automatically based on inventory group membership:
+  - **Collocated** (nextcloudoffice host == nextcloud host): appends service block to shared `/opt/nextcloud/docker_compose/compose.yml`
+  - **Dedicated server**: deploys a standalone Compose file with nginx reverse proxy (`nextcloudoffice-dedicated-nginx.conf.j2`)
 - Configures container environment, including:
   - `aliasgroup1` based on `nextcloud_fqdn`
   - admin password from `passwords.collabora_admin`
+
+### Role structure
+
+```
+roles/nextcloudoffice/tasks/
+  ├── main.yml           Determines collocated vs. dedicated
+  ├── Debian.yml         OS-specific packages (Debian/Ubuntu)
+  ├── RedHat.yml         OS-specific packages (RHEL/Alma/Rocky)
+  ├── Suse.yml           OS-specific packages (openSUSE)
+  ├── collocated.yml     Appends to shared compose.yml
+  └── dedicated.yml      Standalone compose + nginx reverse proxy
+```
 
 ### Inventory requirement
 
@@ -35,20 +48,28 @@ nextcloudoffice:
     nextcloud.example.com:
 ```
 
-## Nextcloud role integration
+Dedicated server setup:
 
-When `nextcloud_install.nextcloudoffice` is enabled, the `nextcloud` role includes:
+```yaml
+nextcloudoffice:
+  hosts:
+    office.example.com:
+```
 
-- `roles/nextcloud/tasks/configure/nextcloudoffice.yml`
+## Nextcloud app integration
 
-This task file configures Nextcloud app integration using `occ`:
+When `nextcloud_install.nextcloudoffice` is enabled, the `nextcloud_app` role includes:
 
-- `app:install richdocuments`
-- `app:enable richdocuments`
-- `config:app:set richdocuments wopi_url --value https://<nextcloud_fqdn>:<nextcloud_ssl_port>`
-- `config:app:set richdocuments wopi_allowlist --value 127.0.0.1/8,::1/128,<docker-subnet>,fe80::/10`
-- `config:app:set richdocuments disable_certificate_verification --value=yes`
-- `richdocuments:activate-config`
+- `roles/nextcloud_app/tasks/configure/nextcloudoffice.yml`
+
+This task file configures Nextcloud app integration using `reinernippes.nextcloud` collection modules:
+
+- Installs and enables the `richdocuments` app via `reinernippes.nextcloud.occ_app`
+- Sets WOPI URL via `reinernippes.nextcloud.occ_config_app`:
+  - `wopi_url` → `https://<nextcloudoffice_fqdn>:<nextcloud_ssl_port>`
+- Sets WOPI allowlist
+- Disables certificate verification for self-signed/test certs
+- Runs `richdocuments:activate-config`
 
 ## Required and relevant variables
 
@@ -56,6 +77,7 @@ From `group_vars/all/nextcloud.yml`:
 
 - `nextcloud_install.nextcloudoffice` (feature toggle)
 - `nextcloud_fqdn`
+- `nextcloudoffice_fqdn` (defaults to first host in `nextcloudoffice` group)
 
 From web/TLS config:
 
@@ -75,10 +97,12 @@ If `nextcloud_install.nextcloudoffice` is true, Nextcloud webserver templates ad
 nextcloud.yml
   -> role: nextcloudoffice (hosts: nextcloudoffice)
       -> roles/nextcloudoffice/tasks/main.yml
+          -> collocated.yml (if same host as nextcloud)
+          -> dedicated.yml  (if separate host)
   -> role: docker (task_from: compose_up.yml)
       -> starts collabora container
-  -> role: nextcloud (hosts: nextcloud)
-      -> roles/nextcloud/tasks/configure/nextcloudoffice.yml
+  -> role: nextcloud_app (hosts: nextcloud)
+      -> roles/nextcloud_app/tasks/configure/nextcloudoffice.yml
 ```
 
 ## Notes

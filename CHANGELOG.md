@@ -1,6 +1,36 @@
 # Changelog
 
-## v3.1 (unreleased)
+## v3.1 (April 2026)
+
+### New: Whiteboard Role
+
+- New `whiteboard` role for Excalidraw-based collaborative whiteboard with WebSocket server
+- Supports collocated deployment (on Nextcloud host) and dedicated server
+- Docker container with nginx/Apache reverse proxy integration
+- Controlled via `nextcloud_install.whiteboard` variable
+
+### New: Office Co-Hosting (Collocated & Dedicated Server)
+
+- Refactored `nextcloudoffice` and `onlyoffice` roles to support both collocated and dedicated server deployments
+- Both roles now auto-detect collocation via inventory group membership
+- Split tasks into `collocated.yml` and `dedicated.yml` with shared Docker Compose templates
+- Added `nextcloudoffice_fqdn` variable (mirrors `onlyoffice_fqdn` pattern)
+- TLS certificates now provisioned for `nextcloudoffice` and `whiteboard` hosts
+
+### New: Nextcloud Role Split
+
+- Monolithic `nextcloud` role split into three focused roles:
+  - `nextcloud_prepare` — OS prep, database creation, webserver config
+  - `nextcloud_install` — Nextcloud download, installation, upgrade
+  - `nextcloud_app` — App configuration (Talk, HPB, Office, Fulltextsearch, ExApps, etc.)
+
+### New: `reinernippes.nextcloud` Ansible Collection
+
+- All `occ` interactions replaced with custom Ansible modules from the `reinernippes.nextcloud` collection
+- Modules: `occ_app`, `occ_command`, `occ_config_app`, `occ_config_system`, `occ_group`, `occ_info`, `occ_maintenance`, `occ_user`
+- Replaces raw `command: php occ …` calls with idempotent, typed modules (proper changed/failed handling)
+- Collection lives in a separate repository (`ansible-collection-nextcloud-occ`)
+- Added `nextcloud_occ_env` environment for occ commands
 
 ### New: openSUSE Leap 16 Support
 
@@ -36,4 +66,8 @@
 - **PHP (RedHat):** task cleanup and restructuring
 - **Coturn:** systemd override and task improvements
 - **OS packages:** added `openssh-clients` on Suse for sftp transfer support
-- Removed leftover `roles/php/vars/main.yml-new`
+- **Firewall policy:** extended `RULE_PROFILES` for whiteboard and office dedicated servers
+- **TLS certificates:** acme.sh now provisions certs for `office` and `whiteboard` hosts; additional certificate FQDNs support
+- **Preview icons:** new `nextcloud_install.preview` toggle
+- **Inventory:** added `whiteboard` and `nextcloudoffice` groups to all example inventories
+

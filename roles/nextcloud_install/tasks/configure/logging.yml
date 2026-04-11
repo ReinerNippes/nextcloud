@@ -1,0 +1,30 @@
+---
+
+- name: Create nextcloud log directory
+  ansible.builtin.file:
+    name: "/var/log/nextcloud"
+    state: directory
+    owner: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+    group: "{{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+    mode: "0750"
+
+- name: Set nextcloud audit log file
+  reinernippes.nextcloud.occ_config_app:
+    state: present
+    app: admin_audit
+    key: logfile
+    value: /var/log/nextcloud/audit.log
+
+- name: Configure nextcloud logging
+  reinernippes.nextcloud.occ_config_system:
+    state: present
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    value_type: "{{ item.value_type | default(omit) }}"
+  loop:
+    - { key: log_type, value: file }
+    - { key: logfile, value: /var/log/nextcloud/nextcloud.log }
+    - { key: loglevel, value: "{{ nextcloud_logging_level | default(2) }}" }
+    - { key: log_rotate_size, value: "{{ nextcloud_logging_rotate_size | default(104857600) }}" }
+    - { key: log_rotate_keep, value: "{{ nextcloud_logging_rotate_keep | default(10) }}" }
+    - { key: log.condition, value: { apps: [ "admin_audit" ] }, value_type: json }

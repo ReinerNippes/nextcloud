@@ -1,0 +1,42 @@
+---
+
+- name: Install and enable notify_push app
+  reinernippes.nextcloud.occ_app:
+    name: "notify_push"
+    state: enabled
+
+- name: Copy notify_push service file
+  ansible.builtin.template:
+    src: notify_push.service.j2
+    dest: "{{ systemd_service_path[ansible_facts['os_family']] }}/notify_push.service"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start notify_push service
+  ansible.builtin.systemd:
+    name: notify_push.service
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Add server IP as trusted proxy for notify_push
+  reinernippes.nextcloud.occ_config_system:
+    key: trusted_proxies
+    indices: "0"
+    value: "{{ ansible_facts['default_ipv4']['address'] }}"
+    state: present
+
+- name: Run notify_push setup
+  reinernippes.nextcloud.occ_command:
+    command: "notify_push:setup https://{{ nextcloud_fqdn }}/push/"
+    changed_when: false
+
+- name: Run notify_push self-test
+  reinernippes.nextcloud.occ_command:
+    command: notify_push:self-test
+  register: notify_push_selftest
+
+- name: Show notify_push self-test result
+  ansible.builtin.debug:
+    msg: "{{ notify_push_selftest.stdout_lines }}"

@@ -3,17 +3,14 @@
 
 Pulumi Code and Ansible Playbook to deploy:
 
-* Nextcloud (Latest) - <https://nextcloud.com/>
-* nginx - <https://nginx.org/> or Apache <https://httpd.apache.org/>
-* PHP - <http://www.php.net/>
-* MariaDB - <https://mariadb.org/> or PostgreSQL <https://www.postgresql.org/>
-* redis - <https://redis.io/> (valkey on RedHat based Systems)
-* restic backup - <https://restic.readthedocs.io>
-* Nextcloud Talk with HPB
-* Nextcloud AppAPI Basis (HaPR Daemon)
-* Fulltextsearch / Elasticsearch
-* OnlyOffice <https://www.onlyoffice.com/>
-* Collabora Online <https://www.collaboraoffice.com/>
+<table>
+<tr><td><a href="https://nextcloud.com/">Nextcloud</a> (Latest)</td><td><a href="https://nginx.org/">nginx</a> or <a href="https://httpd.apache.org/">Apache</a></td></tr>
+<tr><td><a href="http://www.php.net/">PHP</a></td><td><a href="https://mariadb.org/">MariaDB</a> or <a href="https://www.postgresql.org/">PostgreSQL</a></td></tr>
+<tr><td><a href="https://redis.io/">redis</a> (valkey on RedHat based Systems)</td><td><a href="https://restic.readthedocs.io">restic backup</a></td></tr>
+<tr><td><a href="https://nextcloud.com/talk/">Nextcloud Talk</a> with HPB</td><td><a href="https://apps.nextcloud.com/apps/app_api">Nextcloud AppAPI</a> Basis (HaPR Daemon)</td></tr>
+<tr><td><a href="https://apps.nextcloud.com/apps/fulltextsearch">Fulltextsearch</a> / <a href="https://www.elastic.co/elasticsearch">Elasticsearch</a></td><td><a href="https://www.onlyoffice.com/">OnlyOffice</a></td></tr>
+<tr><td><a href="https://www.collaboraoffice.com/">Collabora Online</a></td><td><a href="https://apps.nextcloud.com/apps/whiteboard">Whiteboard App</a></td></tr>
+</table>
 
 Ready to login in less than 20 minutes.
 
@@ -46,12 +43,12 @@ Testet Linux Flavours:
 - For productive Talk deployments, you should additionally provide dedicated servers for:
   - `coturn`
   - `signal` (signaling/recording)
-- `onlyoffice` can be provided on an additional dedicated server (status: see table below).
+- `office` can be provided on an additional dedicated server (status: see table below).
 - Current limitation: no full HA setup (high-availability cluster) is supported/provisioned at this time.
 
 ### Tested Combinations
 
-✅ = works  &nbsp;&nbsp; 🟡 = not tested (yet) &nbsp;&nbsp; 🔒 = works only with LE certs &nbsp;&nbsp; ❌ = not working / not yet implemented
+✅ = works  &nbsp;&nbsp; 🟡 = not tested (should work) &nbsp;&nbsp; 🔒 = works only with LE certs &nbsp;&nbsp; ❌ = not working / not yet implemented
 
 | Feature | Ubuntu 24.04 | Debian 12 | Debian 13 | AlmaLinux 10 | Rocky 10 | CentOS10 | OpenSuse 16
 |---------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -60,11 +57,11 @@ Testet Linux Flavours:
 | nginx | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Apache | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | acme.sh (Let's Encrypt) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Self-signed Certificate | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 | ✅ |
-| Talk (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 | ✅ |
+| Self-signed Certificate | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Talk (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Talk (Apache) | 🟡 | 🟡 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Talk HPB (nginx) | 🔒 | 🔒 | 🔒 | 🔒 | 🔒 | 🟡 | 🔒 |
-| Talk HPB (Apache) | 🟡 | 🟡 | 🔒 | 🟡 | 🟡 | 🔒 | 🟡 |
+| Talk HPB (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Talk HPB (Apache) | 🟡 | 🟡 | ✅ | 🟡 | 🟡 | ✅ | 🟡 |
 | Nextcloud Office (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
 | Nextcloud Office (Apache) | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ | 🟡 |
 | OnlyOffice | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ | ✅ |
@@ -72,7 +69,7 @@ Testet Linux Flavours:
 | ExApps (HaPR) | 🔒 | 🔒 | 🔒 | 🟡 | 🔒 | 🔒 | 🟡 | 🔒 |
 | Notify Push | ✅ | ✅ | ✅ | 🟡 | ✅ | ✅ | ✅ |
 | S3 Primary Storage | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Whiteboard | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Whiteboard | 🟡 | 🟡 | ✅ | 🟡 | 🟡 | 🟡 | ✅ |
 | CrowdSec | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | SMTP Relayserver | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
@@ -82,10 +79,13 @@ Testet Linux Flavours:
 |-----------|:---:|:---:|-------|
 | Coturn | ✅ | ✅ | Recommended for external Talk participants behind restrictive firewalls |
 | Signaling / Recording | ❌ | ✅ | Recommended for HPB setups |
-| OnlyOffice | ✅ | ✅ | Technically possible, currently not fully tested in matrix |
+| OnlyOffice | ✅ | ✅ | Functional. |
+| NextcloudOffice | ✅ | ✅ | Functional. |
 | Database (PostgreSQL/MariaDB) | ✅ | 🟡 | Work in progress |
 | Redis | ✅ | 🟡 | Work in progress |
+| Whiteboard | ✅ | ✅ | Excalidraw-based collaborative whiteboard with WebSocket server |
 
+> 🔒 **Self-signed / test certificates:** When using self-signed or test certificates, you must visit the URL of each additional service (Office, Whiteboard, Signal) once in every browser you intend to use and accept the certificate. This does not work for ExApps (HaPR), because no browser is involved in those server-to-server connections.
 
 > **Note:** My personal setup and most of my testing is done with Debian/Ubuntu, nginx, and PostgreSQL. This does not mean these are the recommended choices — it simply means other combinations may receive less testing. This is a hobby project. I provide no guarantees of any kind. Use at your own risk.
 
@@ -131,6 +131,13 @@ ansible --version
 
 You must always activate the virtual environment (`source .venv/bin/activate`) before running Ansible commands.
 
+**Clone this repository:**
+
+```bash
+git clone https://github.com/ReinerNippes/nextcloud.git
+cd nextcloud
+```
+
 **Install required Ansible collections:**
 
 If a `requirements.yml` file is present (as in this repository), run:
@@ -138,6 +145,16 @@ If a `requirements.yml` file is present (as in this repository), run:
 ```bash
 ansible-galaxy collection install -r requirements.yml
 ```
+
+**Install required Python dependencies:**
+
+Some Ansible lookup plugins (e.g., `dig`) require additional Python packages. Install them with:
+
+```bash
+pip install -r requirements.txt
+```
+
+If you are using a virtual environment, make sure it is activated first. If Ansible was installed system-wide, you may need `sudo` or `--break-system-packages`.
 
 To list installed collections:
 
@@ -196,7 +213,7 @@ For cloud deployments provisioned with Pulumi, use dynamic inventories instead o
 Example:
 
 ```bash
-cp inventory-remote-single-server inventory
+cp inventory-remote-single-server.example inventory
 # Edit the 'inventory' file to match your server hostnames and configuration
 ```
 
@@ -293,7 +310,7 @@ ok: [nextcloud.example.com] => {
     "changed": false,
     "msg": [
         "Your Nextcloud 33.0.0.16 at https://nextcloud.example.com is ready.",
-        "Login with user: admin and password: G9u6dfTQCR2vvExZqSY80TX3xLJsG1he",
+        "Login with user: admin and password: <generated-random-password>",
         "Other secrets you'll find in the /opt/nextcloud/password_file.yml."
     ]
 }
@@ -383,9 +400,10 @@ For detailed information on how individual roles work and how to configure them:
 - [Docker Role](docs/DOCKER-README.md) — Docker installation, shared Compose file mechanism, Watchtower
 - [TLS Certificate Role](docs/TLS-CERT-README.md) — Certificate provisioning with acme.sh or self-signed, automatic renewal, platform differences
 - [PHP Role](docs/PHP-README.md) — PHP-FPM installation and configuration, drop-in INI strategy, pool management
-- [Nextcloud Role](docs/NEXTCLOUD_README.md) — Nextcloud installation, webserver, database, and optional components (Talk, Collabora, Fulltextsearch, ExApps)
-- [Nextcloud Office Role (Collabora)](docs/NEXTCLOUDOFFICE-README.md) — Collabora container deployment and richdocuments integration via nextcloud role
-- [OnlyOffice Role](docs/ONLYOFFICE-README.md) — OnlyOffice Document Server deployment and Nextcloud app integration (DocumentServerUrl/JWT)
+- [Nextcloud Roles](docs/NEXTCLOUD_README.md) — Nextcloud preparation, installation, and app configuration (split into nextcloud_prepare, nextcloud_install, nextcloud_app)
+- [Nextcloud Office Role (Collabora)](docs/NEXTCLOUDOFFICE-README.md) — Collabora container deployment (collocated/dedicated) and richdocuments integration
+- [OnlyOffice Role](docs/ONLYOFFICE-README.md) — OnlyOffice Document Server deployment (collocated/dedicated) and Nextcloud app integration
+- [OCC Ansible Collection](docs/OCC-MODULES-README.md) — `reinernippes.nextcloud` collection for idempotent Nextcloud management via occ
 
 ----------
 

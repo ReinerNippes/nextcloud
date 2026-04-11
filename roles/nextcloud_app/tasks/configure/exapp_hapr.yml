@@ -1,0 +1,30 @@
+---
+# Configure AppAPI with HaProxy Reverse Proxy (HARP)
+
+- name: Install and enable AppAPI app
+  reinernippes.nextcloud.occ_app:
+    name: "app_api"
+    state: enabled
+
+- name: Register HARP Deploy Daemon
+  reinernippes.nextcloud.occ_command:
+    command: >-
+      app_api:daemon:register
+      default-harp-deploy-daemon
+      "HaRP Proxy (Host)"
+      docker-install
+      http
+      127.0.0.1:8780
+      https://{{ nextcloud_fqdn }}
+      --set-default
+      --harp
+      --harp_frp_address=localhost:8782
+      --harp_shared_key={{ passwords.hp_shared_key }}
+    expected_rcs:
+      - 0
+      - 1
+    changed_when: false
+  register: register_daemon
+  failed_when:
+    - register_daemon.occ_rc != 0
+    - "'already registered' not in register_daemon.stderr"

@@ -12,7 +12,7 @@ Pulumi.*.yaml
 .logs/
 
 TODO.md
-vm/
+my-inventories/
 hetzner-*
 debug_*
 zzz_testsettings.yml

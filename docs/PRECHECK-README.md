@@ -34,10 +34,14 @@ Ensures that `nextcloud_install.nextcloudoffice` and `nextcloud_install.onlyoffi
 
 Ensures required inventory groups exist and are not empty.
 
-**Checked groups:**
-- `nextcloud` (required, must have ≥ 1 host)
-- `database` (required, must have ≥ 1 host)
-- `webserver` (required, must have ≥ 1 host)
+**Required groups:**
+- `nextcloud` (must have ≥ 1 host)
+- `database` (must have ≥ 1 host)
+- `webserver` (must have ≥ 1 host)
+
+**Optional groups** (used when corresponding features are enabled):
+- `redis`, `docker`, `elasticsearch`, `coturn`, `signal`, `hapr`
+- `onlyoffice`, `nextcloudoffice`, `whiteboard`
 
 **Failure message:** Explains which group is missing and shows correct inventory structure.
 

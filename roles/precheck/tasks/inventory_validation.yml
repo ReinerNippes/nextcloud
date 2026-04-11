@@ -147,6 +147,7 @@
     - { group: coturn, enabled: "{{ nextcloud_install.talk | default(false) | bool }}" }
     - { group: onlyoffice, enabled: "{{ nextcloud_install.onlyoffice | default(false) | bool }}" }
     - { group: nextcloudoffice, enabled: "{{ nextcloud_install.nextcloudoffice | default(false) | bool }}" }
+    - { group: whiteboard, enabled: "{{ nextcloud_install.whiteboard | default(false) | bool }}" }
     - { group: fulltextsearch, enabled: "{{ nextcloud_install.fulltextsearch | default(false) | bool }}" }
   when:
     - item.enabled | bool

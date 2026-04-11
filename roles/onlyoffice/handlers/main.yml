@@ -1,0 +1,6 @@
+---
+- name: Restart webserver
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  listen: "restart web services"

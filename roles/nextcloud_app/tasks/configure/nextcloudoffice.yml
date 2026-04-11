@@ -1,0 +1,37 @@
+---
+# tasks file for nextcloud office configuration
+
+- name: Enable nextcloud office app
+  reinernippes.nextcloud.occ_app:
+    name: richdocuments
+    state: enabled
+
+- name: Configure nextcloud office wopi_url
+  reinernippes.nextcloud.occ_config_app:
+    app: richdocuments
+    key: wopi_url
+    value: "https://{{ nextcloudoffice_fqdn }}:443"
+    state: present
+
+- name: Configure nextcloud office wopi_allowlist
+  vars:
+    _office_host: "{{ groups['nextcloudoffice'][0] }}"
+    _collocated_allowlist: "127.0.0.1/8,::1/128,{{ docker_network_nextcloud.network.IPAM.Config[0].Subnet }},fe80::/10"
+    _dedicated_host: "{{ hostvars[_office_host]['ansible_host'] | default(hostvars[_office_host]['inventory_hostname']) }}"
+    _dedicated_ip: "{{ lookup('dig', _dedicated_host) }}"
+    _dedicated_allowlist: "127.0.0.1/8,::1/128,{{ _dedicated_ip }},fe80::/10"
+  reinernippes.nextcloud.occ_config_app:
+    app: richdocuments
+    key: wopi_allowlist
+    value: "{{ _collocated_allowlist if (_office_host in groups.get('nextcloud', [])) else _dedicated_allowlist }}"
+    state: present
+- name: Disable certificate verification for nextcloud office
+  reinernippes.nextcloud.occ_config_app:
+    app: richdocuments
+    key: disable_certificate_verification
+    value: "yes"
+    state: present
+
+- name: Activate nextcloud office config
+  reinernippes.nextcloud.occ_command:
+    command: richdocuments:activate-config

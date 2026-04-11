@@ -1,0 +1,8 @@
+---
+skip_list:
+  - package-latest
+  - name[template]
+  - yaml[indentation]
+  - var-naming[no-role-prefix]
+  - no-handler
+  - no-changed-when

@@ -1,0 +1,134 @@
+---
+
+# configure nextcloud
+
+- name: Check nextcloud status
+  reinernippes.nextcloud.occ_info:
+    query: status
+  register: nextcloud_status
+
+- name: Define S3 as primary storage (only if config.php doesn't exist)
+  ansible.builtin.template:
+    src: "objectstore_s3_config.php.j2"
+    dest: "{{ nextcloud_www_dir }}/config/config.php"
+    owner: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+    group: "{{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}"
+    mode: "0640"
+    backup: true
+    force: false
+  when:
+    - ( objectstore_s3_key != '' )
+    - ( objectstore_s3_secret != '' )
+    - ( not nextcloud_status.installed )
+
+- name: First setup nextcloud
+  reinernippes.nextcloud.occ_command:
+    argv:
+      - maintenance:install
+      - "--database={{ nextcloud_db.type }}"
+      - "--database-host={{ nextcloud_db.host }}{{ (':' ~ nextcloud_db.port) if nextcloud_db.port | default('') | string | length > 0 else '' }}"
+      - "--database-name={{ nextcloud_db.name }}"
+      - "--database-user={{ nextcloud_db.user }}"
+      - "--database-pass={{ passwords.database }}"
+      - "--admin-user={{ nextcloud_admin }}"
+      - "--admin-pass={{ passwords.nextcloud_admin }}"
+      - "--data-dir={{ nextcloud_data_dir }}"
+  when: ( not nextcloud_status.installed )
+  register: first_setup_nextcloud
+
+- name: Show first setup nextcloud debug
+  ansible.builtin.debug:
+    var: first_setup_nextcloud
+    verbosity: 2
+
+- name: Set nextcloud domain and URL
+  reinernippes.nextcloud.occ_config_system:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    indices: "{{ item.indices | default(omit) }}"
+    value_type: "{{ item.type | default(omit) }}"
+    state: present
+  loop:
+    - { key: overwrite.cli.url, value: "https://{{ nextcloud_fqdn }}" }
+    - { key: serverid, value: "{{ groups['nextcloud'].index(inventory_hostname) + 1 }}" }
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config | default(false) )
+
+- name: Set trusted domains
+  reinernippes.nextcloud.occ_config_system:
+    key: trusted_domains
+    indices: "{{ idx }}"
+    value: "{{ item }}"
+    state: present
+  loop: "{{ nextcloud_trusted_domains }}"
+  loop_control:
+    index_var: idx
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config | default(false) )
+
+- name: Configure Redis connection
+  reinernippes.nextcloud.occ_config_system:
+    key: redis
+    indices: "{{ item.key }}"
+    value: "{{ item.value }}"
+    value_type: "{{ item.type | default(omit) }}"
+    state: present
+  loop:
+    - { key: host, value: "{{ nextcloud_redis.host }}" }
+    - { key: port, value: "{{ nextcloud_redis.port }}", type: integer }
+    - { key: timeout, value: "{{ nextcloud_redis.timeout }}", type: integer }
+    - { key: password, value: "{{ nextcloud_redis.password }}" }
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config | default(false) )
+
+- name: Configure memcache and locking
+  reinernippes.nextcloud.occ_config_system:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    value_type: "{{ item.type | default(omit) }}"
+    state: present
+  loop:
+    - { key: memcache.local, value: "{{ nextcloud_memcache.local }}" }
+    - { key: memcache.locking, value: "{{ nextcloud_memcache.locking }}" }
+    - { key: filelocking.enabled, value: "{{ nextcloud_memcache.filelocking_enabled }}", type: boolean }
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config | default(false) )
+
+- name: Configure security settings
+  reinernippes.nextcloud.occ_config_system:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    value_type: boolean
+    state: present
+  loop:
+    - { key: auth.bruteforce.protection.enabled, value: "{{ nextcloud_security.bruteforce_protection }}" }
+    - { key: integrity.check.disabled, value: "{{ nextcloud_security.integrity_check_disabled }}" }
+    - { key: maintenance, value: false }
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config | default(false) )
+
+- name: Configure general settings
+  reinernippes.nextcloud.occ_config_system:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    value_type: "{{ item.type | default(omit) }}"
+    state: present
+  loop:
+    - { key: default_phone_region, value: "{{ nextcloud_general.default_phone_region }}" }
+    - { key: defaultapp, value: "{{ nextcloud_general.defaultapp }}" }
+    - { key: skeletondirectory, value: "{{ nextcloud_general.skeletondirectory }}" }
+    - { key: theme, value: "{{ nextcloud_general.theme }}" }
+    - { key: trashbin_retention_obligation, value: "{{ nextcloud_general.trashbin_retention_obligation }}" }
+    - { key: activity_expire_days, value: "{{ nextcloud_general.activity_expire_days }}", type: integer }
+    - { key: updater.release.channel, value: "{{ nextcloud_general.updater_release_channel }}" }
+    - { key: maintenance_window_start, value: "{{ nextcloud_general.maintenance_window_start }}", type: integer }
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config | default(false) )
+
+- name: Backup jobs, upgrade apps and database tuning
+  reinernippes.nextcloud.occ_command:
+    command: "{{ item }}"
+  loop:
+    - background:cron
+    - upgrade
+    - db:add-missing-indices
+    - db:add-missing-columns
+    - db:convert-filecache-bigint
+    - app:update --all
+    - maintenance:mimetype:update-db
+    - maintenance:repair --include-expensive
+  when: ( first_setup_nextcloud is changed ) or ( force_nextcloud_config|default(false) )

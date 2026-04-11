@@ -6,25 +6,30 @@ Documentation for deploying OnlyOffice Document Server with this playbook via th
 
 This setup uses two layers:
 
-1. `roles/onlyoffice` adds the OnlyOffice Document Server container to the shared Docker Compose file.
-2. `roles/nextcloud/tasks/configure/onlyoffice.yml` installs and configures the Nextcloud `onlyoffice` app via `occ`.
+1. `roles/onlyoffice` deploys the OnlyOffice Document Server container — either collocated (appended to the shared Compose file) or on a dedicated server (standalone Compose + nginx reverse proxy).
+2. `roles/nextcloud_app/tasks/configure/onlyoffice.yml` installs and configures the Nextcloud `onlyoffice` app via the `reinernippes.nextcloud` collection modules.
 
 ## Role: `onlyoffice`
 
 ### What the role does
 
-- Creates persistent directories:
-  - `/opt/onlyoffice/DocumentServer/data`
-  - `/opt/onlyoffice/DocumentServer/logs`
-  - `/opt/onlyoffice/DocumentServer/lib`
-  - `/opt/onlyoffice/DocumentServer/db`
-- Appends an `onlyoffice` service block to `/opt/nextcloud/docker_compose/compose.yml`
-- Exposes container HTTPS as:
-  - `<onlyoffice_ssl_port>:443`
+- Creates persistent directories for OnlyOffice data, logs, lib, and db
+- Detects deployment mode automatically based on inventory group membership:
+  - **Collocated** (onlyoffice host == nextcloud host): appends service block to shared `/opt/nextcloud/docker_compose/compose.yml`
+  - **Dedicated server**: deploys a standalone Compose file with nginx reverse proxy (`onlyoffice-dedicated-nginx.conf.j2`)
 - Mounts TLS certificate files into the container
 - Enables JWT-based auth for Nextcloud integration:
   - `JWT_ENABLED=true`
   - `JWT_SECRET={{ passwords.onlyoffice_secret }}`
+
+### Role structure
+
+```
+roles/onlyoffice/tasks/
+  ├── main.yml           Determines collocated vs. dedicated
+  ├── collocated.yml     Appends to shared compose.yml
+  └── dedicated.yml      Standalone compose + nginx reverse proxy
+```
 
 ### Inventory requirement
 
@@ -48,22 +53,20 @@ onlyoffice:
     onlyoffice.example.com:
 ```
 
-## Nextcloud role integration
+## Nextcloud app integration
 
-When `nextcloud_install.onlyoffice` is enabled, the `nextcloud` role includes:
+When `nextcloud_install.onlyoffice` is enabled, the `nextcloud_app` role includes:
 
-- `roles/nextcloud/tasks/configure/onlyoffice.yml`
+- `roles/nextcloud_app/tasks/configure/onlyoffice.yml`
 
-This task file configures Nextcloud app integration using `occ`:
+This task file configures Nextcloud app integration using `reinernippes.nextcloud` collection modules:
 
-- Installs app `onlyoffice` when missing
-- Enables app `onlyoffice` when disabled
-- Sets server URL:
-  - `config:app:set onlyoffice DocumentServerUrl --value https://<onlyoffice_fqdn>:<onlyoffice_ssl_port>`
-- Sets JWT secret:
-  - `config:app:set onlyoffice jwt_secret --value <passwords.onlyoffice_secret>`
-- For self-signed/test certificates, disables TLS peer verification in Nextcloud:
-  - `config:system:set onlyoffice verify_peer_off --value=true --type=boolean`
+- Installs and enables the `onlyoffice` app via `reinernippes.nextcloud.occ_app`
+- Sets server URL via `reinernippes.nextcloud.occ_config_app`:
+  - `DocumentServerUrl` → `https://<onlyoffice_fqdn>:<onlyoffice_ssl_port>`
+- Sets JWT secret via `reinernippes.nextcloud.occ_config_app`
+- For self-signed/test certificates, disables TLS peer verification via `reinernippes.nextcloud.occ_config_system`:
+  - `onlyoffice verify_peer_off` → `true`
 
 ## Required and relevant variables
 
@@ -108,10 +111,12 @@ all:
 nextcloud.yml
   -> role: onlyoffice (hosts: onlyoffice)
       -> roles/onlyoffice/tasks/main.yml
+          -> collocated.yml (if same host as nextcloud)
+          -> dedicated.yml  (if separate host)
   -> role: docker (task_from: compose_up.yml)
       -> starts onlyoffice container
-  -> role: nextcloud (hosts: nextcloud)
-      -> roles/nextcloud/tasks/configure/onlyoffice.yml
+  -> role: nextcloud_app (hosts: nextcloud)
+      -> roles/nextcloud_app/tasks/configure/onlyoffice.yml
 ```
 
 ## Notes

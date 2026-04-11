@@ -12,25 +12,3 @@
     state: latest
     enablerepo: "remi-php{{ php_version | replace('.', '') }}"
   when: php_install_optional_packages|bool
-
-# - name: Correct ownership /var/lib/php
-#   ansible.builtin.file:
-#     name: "{{ item.name }}"
-#     owner: "{{ item.owner }}"
-#     group: "{{ item.group }}"
-#     mode: '0770'
-#   loop:
-#     - owner: "{{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }}"
-#       group: "{{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}"
-#       name: /var/lib/php/session
-#     - owner: root
-#       group: "{{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}"
-#       name: /var/lib/php/wsdlcache
-#     - owner: root
-#       group: "{{ web_group[nextcloud_webserver_type][ansible_facts['os_family']] }}"
-#       name: /var/lib/php/opcache
-
-# - name: Unmask tmp.mount
-#   ansible.builtin.systemd:
-#     name: tmp.mount
-#     masked: false

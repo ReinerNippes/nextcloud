@@ -1,0 +1,36 @@
+#!/usr/bin/env ansible-playbook
+
+
+- name: Install nextcloud
+  hosts: nextcloud
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Get passwords
+      ansible.builtin.include_tasks: roles/os/tasks/passwords.yml
+
+  roles:
+    - nextcloud_install
+    - nextcloud_app
+  environment: "{{ nextcloud_occ_env }}"
+
+  post_tasks:
+    - name: Check install status
+      ansible.builtin.uri:
+        url: https://{{ nextcloud_fqdn }}/status.php
+        return_content: true
+        validate_certs: "{% if (tls_certificate.type == 'selfsigned') or tls_certificate_test %}no{% else %}yes{% endif %}"
+      register: nextcloud_status
+
+    - name: We are ready
+      ansible.builtin.assert:
+        that: nextcloud_status.json.installed
+        fail_msg:
+          - "Upss. Something went wrong."
+          - "Your Nextcloud at https://{{ nextcloud_fqdn }} is down."
+        success_msg:
+          - "Your Nextcloud {{ nextcloud_status.json.version }} at https://{{ nextcloud_fqdn }} is ready."
+          - "Login with user: {{ nextcloud_admin }} and password: {{ passwords.nextcloud_admin }}"
+          - "Other secrets you'll find in the {{ password_file }}."
+

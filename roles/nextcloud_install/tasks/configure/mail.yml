@@ -1,0 +1,21 @@
+---
+# configure nextcloud mail settings
+
+- name: Set nextcloud mail config
+  reinernippes.nextcloud.occ_config_system:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    create_only: true
+  loop:
+    - { key: mail_smtppassword, value: "{{ nextcloud_mail.smtppwd }}" }
+    - { key: mail_smtphost, value: "{{ nextcloud_mail.smtphost }}" }
+    - { key: mail_smtpport, value: "{{ nextcloud_mail.smtpport }}" }
+    - { key: mail_smtpname, value: "{{ nextcloud_mail.smtpname }}" }
+    - { key: mail_smtpauth, value: "{{ nextcloud_mail.smtpauth }}" }
+    - { key: mail_smtpsecure, value: "{{ nextcloud_mail.smtpsecure }}" }
+    - { key: mail_domain, value: "{{ nextcloud_mail.domain }}" }
+    - { key: mail_smtpauthtype, value: "{{ nextcloud_mail.smtpauthtype }}" }
+    - { key: mail_smtpmode, value: "{{ nextcloud_mail.smtpmode }}" }
+    - { key: mail_from_address, value: "{{ nextcloud_mail.from }}" }
+  when: nextcloud_mail.configure|bool

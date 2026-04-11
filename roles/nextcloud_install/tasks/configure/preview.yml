@@ -1,0 +1,25 @@
+---
+
+- name: Enable nextcloud preview
+  reinernippes.nextcloud.occ_config_system:
+    key: enable_previews
+    value: "{{ nextcloud_install.preview | bool }}"
+    value_type: boolean
+    state: present
+
+- name: Set preview providers
+  reinernippes.nextcloud.occ_config_system:
+    key: enabledPreviewProviders
+    value: "{{ nextcloud_preview_providers }}"
+    state: present
+
+- name: Set preview scaling
+  reinernippes.nextcloud.occ_config_system:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    value_type: "{{ item.type | default(omit) }}"
+    state: present
+  loop:
+    - { key: preview_max_x, value: "{{ preview_max.x }}", type: integer }
+    - { key: preview_max_y, value: "{{ preview_max.y }}", type: integer }
+    - { key: preview_max_scale_factor, value: "{{ preview_max.scale_factor }}", type: integer }

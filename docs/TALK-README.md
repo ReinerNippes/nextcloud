@@ -147,7 +147,7 @@ Ensure DNS `A/AAAA` records for `rec.example.com` point to the signal/recording 
 roles/coturn/tasks/main.yml            TURN server installation and config
 roles/signal/tasks/main.yml            HPB signaling and Janus deployment
 roles/signal/tasks/config_nginx.yml    Signaling and recording vhost config
-roles/nextcloud/tasks/configure/talk.yml  Nextcloud Talk app + TURN/HPB registration
+roles/nextcloud_app/tasks/configure/talk.yml  Nextcloud Talk app + TURN/HPB registration
 ```
 
 ## Summary

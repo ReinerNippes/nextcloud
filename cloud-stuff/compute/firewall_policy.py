@@ -41,9 +41,23 @@ RULE_PROFILES: Dict[str, List[IngressRule]] = {
         {"protocol": "tcp", "port": "443"},
         {"protocol": "udp", "port": "20000-65535"},
     ],
-    # Collocated OnlyOffice runs on 8443 (443 is typically owned by webserver).
+    # Collocated OnlyOffice runs on localhost:8443 behind nginx —
+    # no public port needed.  Dedicated OnlyOffice is reverse-proxied on 443,
+    # so it reuses the ``nextcloud`` profile.
     "onlyoffice-collocated": [
         {"protocol": "tcp", "port": "8443"},
+    ],
+    # Collocated Nextcloud Office (Collabora) uses 9980 on localhost only —
+    # no public port needed.  Dedicated Collabora is reverse-proxied on 443,
+    # so it reuses the ``nextcloud`` profile (same as dedicated OnlyOffice).
+    "nextcloudoffice-collocated": [
+        {"protocol": "tcp", "port": "9980"},
+    ],
+    # Collocated Whiteboard uses 3002 on localhost only —
+    # no public port needed.  Dedicated Whiteboard is reverse-proxied on 443,
+    # so it reuses the ``nextcloud`` profile.
+    "whiteboard-collocated": [
+        {"protocol": "tcp", "port": "3002"},
     ],
 }
 
@@ -51,12 +65,36 @@ RULE_PROFILES: Dict[str, List[IngressRule]] = {
 def _resolve_onlyoffice_rule_name(groups: List[str]) -> str:
     """Return the concrete OnlyOffice profile for this host.
 
-    Dedicated OnlyOffice hosts use HTTPS on 443 and therefore reuse the
-    ``nextcloud`` profile. Collocated OnlyOffice hosts need the additional 8443
-    profile because 443 is already owned by the webserver.
+    Dedicated OnlyOffice hosts are reverse-proxied on 443, so they reuse the
+    ``nextcloud`` profile.  Collocated OnlyOffice binds 127.0.0.1:8443 only —
+    no extra public firewall rule is needed, but we track it for completeness.
     """
     if "nextcloud" in groups and "onlyoffice" in groups:
         return "onlyoffice-collocated"
+    return "nextcloud"
+
+
+def _resolve_nextcloudoffice_rule_name(groups: List[str]) -> str:
+    """Return the concrete Nextcloud Office (Collabora) profile for this host.
+
+    Dedicated Collabora hosts are reverse-proxied on 443, so they reuse the
+    ``nextcloud`` profile.  Collocated Collabora binds 127.0.0.1:9980 only —
+    no extra public firewall rule is needed, but we track it for completeness.
+    """
+    if "nextcloud" in groups and "nextcloudoffice" in groups:
+        return "nextcloudoffice-collocated"
+    return "nextcloud"
+
+
+def _resolve_whiteboard_rule_name(groups: List[str]) -> str:
+    """Return the concrete Whiteboard profile for this host.
+
+    Dedicated Whiteboard hosts are reverse-proxied on 443, so they reuse the
+    ``nextcloud`` profile.  Collocated Whiteboard binds 127.0.0.1:3002 only —
+    no extra public firewall rule is needed, but we track it for completeness.
+    """
+    if "nextcloud" in groups and "whiteboard" in groups:
+        return "whiteboard-collocated"
     return "nextcloud"
 
 
@@ -90,6 +128,10 @@ def resolve_rule_names(
     for name in raw_names:
         if name == "onlyoffice":
             names.append(_resolve_onlyoffice_rule_name(groups))
+        elif name == "nextcloudoffice":
+            names.append(_resolve_nextcloudoffice_rule_name(groups))
+        elif name == "whiteboard":
+            names.append(_resolve_whiteboard_rule_name(groups))
         elif name == "coturn":
             names.append(_resolve_coturn_rule_name(groups))
         else:
@@ -102,6 +144,22 @@ def resolve_rule_names(
         and "onlyoffice-collocated" not in names
     ):
         names.append("onlyoffice-collocated")
+
+    # Collocation inference: Nextcloud + Nextcloud Office on one host.
+    if (
+        "nextcloud" in groups
+        and "nextcloudoffice" in groups
+        and "nextcloudoffice-collocated" not in names
+    ):
+        names.append("nextcloudoffice-collocated")
+
+    # Collocation inference: Nextcloud + Whiteboard on one host.
+    if (
+        "nextcloud" in groups
+        and "whiteboard" in groups
+        and "whiteboard-collocated" not in names
+    ):
+        names.append("whiteboard-collocated")
 
     # Coturn inference: add the correct dedicated or collocated profile based
     # on where the coturn role runs.

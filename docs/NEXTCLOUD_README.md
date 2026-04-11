@@ -1,6 +1,16 @@
-# Nextcloud Role
+# Nextcloud Roles
 
-Ansible role to download, install, and configure Nextcloud including webserver, database, and optional components.
+Ansible roles to download, install, and configure Nextcloud including webserver, database, and optional components.
+
+The former monolithic `nextcloud` role has been split into three focused roles:
+
+| Role | Purpose |
+|------|---------|
+| `nextcloud_prepare` | OS preparation, database creation, webserver configuration, SELinux |
+| `nextcloud_install` | Nextcloud download, installation, core configuration (mail, logging, preview) |
+| `nextcloud_app` | App installation and add-on configuration (Talk, Office, Fulltextsearch, etc.) |
+
+All `occ` interactions now use the [`reinernippes.nextcloud` Ansible collection](OCC-MODULES-README.md) instead of raw `command: php occ` calls.
 
 ## Supported Platforms
 
@@ -8,35 +18,67 @@ Ansible role to download, install, and configure Nextcloud including webserver, 
 - RHEL / AlmaLinux / Rocky Linux
 - openSUSE Leap 16
 
-## What This Role Does
+## What These Roles Do
+
+### `nextcloud_prepare`
 
 1. **OS preparation** — Installs packages (ffmpeg, imagemagick, ghostscript, etc.) and configures ImageMagick policies
-2. **Docker containers** — Starts all containers defined in `/opt/nextcloud/docker_compose/compose.yml` (Collabora, Elasticsearch, etc.)
-3. **Database creation** — Creates the Nextcloud database and user (MySQL/MariaDB or PostgreSQL)
-4. **Webserver configuration** — Deploys nginx or Apache vhost with TLS, HTTP/2, and security headers
+2. **Database creation** — Creates the Nextcloud database and user (MySQL/MariaDB or PostgreSQL)
+3. **Webserver configuration** — Deploys nginx or Apache vhost with TLS, HTTP/2, and security headers
+4. **SELinux** — Configures contexts, booleans, and custom policy modules (RedHat only)
+
+### `nextcloud_install`
+
 5. **Nextcloud installation** — Downloads and extracts the Nextcloud archive, runs `occ maintenance:install`
-6. **SELinux** — Configures contexts, booleans, and custom policy modules (RedHat only)
-7. **Nextcloud configuration** — Sets `config.php` values via `occ`, configures mail, apps, cron, logging
-8. **Optional components** — Talk, HPB, Collabora Office, Fulltextsearch, ExApps/HaPR, Notify Push
+6. **Core configuration** — Sets `config.php` values via collection modules, configures mail, logging, preview providers
+7. **Cron** — Sets up the Nextcloud cron job
+
+### `nextcloud_app`
+
+8. **App management** — Installs and enables apps via `reinernippes.nextcloud.occ_app`
+9. **Optional components** — Talk, HPB, Collabora Office, OnlyOffice, Whiteboard, Fulltextsearch, ExApps/HaPR, Notify Push
 
 ## Task Flow
 
+### `nextcloud_prepare`
+
 ```
-tasks/main.yml
+roles/nextcloud_prepare/tasks/main.yml
   ├── os/main.yml                     OS packages, ImageMagick, data directories
   │   ├── os/Debian.yml               apt packages
-  │   └── os/RedHat.yml               dnf packages
-  ├── docker/main.yml                 Start Docker containers
+  │   ├── os/RedHat.yml               dnf packages
+  │   └── os/Suse.yml                 zypper packages
   ├── database/create_mysql.yml       Create MySQL/MariaDB database + user
   │   or database/create_pgsql.yml    Create PostgreSQL database + user
   ├── webserver/nginx.yml             nginx config (nginx.conf, http.conf, nextcloud.conf)
   │   or webserver/apache.yml         Apache config (vhosts, mods, security)
+  │       ├── apache_Debian.yml
+  │       ├── apache_RedHat.yml
+  │       └── apache_Suse.yml
+  └── selinux.yml                     SELinux contexts + booleans (RedHat only)
+```
+
+### `nextcloud_install`
+
+```
+roles/nextcloud_install/tasks/main.yml
   ├── [download + extract Nextcloud]
-  ├── selinux.yml                     SELinux contexts + booleans (RedHat only)
-  ├── configure/nextcloud.yml         First setup, config.php, mail, apps
+  ├── configure/nextcloud.yml         First setup, config.php, trusted domains
+  ├── configure/mail.yml              Mail/SMTP configuration
   ├── configure/logging.yml           Log file + audit log setup
+  ├── configure/preview.yml           Preview provider configuration
+  └── [cron job setup]
+```
+
+### `nextcloud_app`
+
+```
+roles/nextcloud_app/tasks/main.yml
+  ├── [Install apps via occ_app]      Bulk app install/enable
   ├── configure/fulltextsearch.yml    Elasticsearch integration (optional)
   ├── configure/nextcloudoffice.yml   Collabora Online / richdocuments (optional)
+  ├── configure/onlyoffice.yml        OnlyOffice integration (optional)
+  ├── configure/whiteboard.yml        Whiteboard WebSocket config (optional)
   ├── configure/talk.yml              Talk + HPB signaling (optional)
   ├── configure/exapp_hapr.yml        ExApps with HaPR daemon (optional)
   └── configure/notify_push.yml       Push notifications daemon (optional)
@@ -58,20 +100,22 @@ tasks/main.yml
 | `nextcloud_passwd` | `''` (auto-generated) | Admin password (leave empty for random) |
 | `nextcloud_archive` | `https://download.nextcloud.com/.../latest.tar.bz2` | Nextcloud download URL |
 | `nextcloud_default_phone_region` | `DE` | Default region for phone numbers (ISO 3166-1) |
+| `onlyoffice_fqdn` | First host in `onlyoffice` group | OnlyOffice server domain name |
+| `nextcloudoffice_fqdn` | First host in `nextcloudoffice` group | Collabora Online server domain name |
 
 ### Feature Toggles (`nextcloud_install`)
 
-All features are enabled by default:
-
 | Key | Default | Description |
 |-----|---------|-------------|
+| `nextcloud_install.preview` | `true` | Preview icon generation |
 | `nextcloud_install.notify_push` | `true` | Client push notification daemon |
-| `nextcloud_install.talk` | `true` | Nextcloud Talk (video/audio calls) |
-| `nextcloud_install.hpb` | `true` | High Performance Backend for Talk |
-| `nextcloud_install.hapr` | `true` | HaPR reverse proxy for ExApps |
-| `nextcloud_install.nextcloudoffice` | `true` | Collabora Online (richdocuments) |
-| `nextcloud_install.onlyoffice` | `true` | OnlyOffice document server |
-| `nextcloud_install.fulltextsearch` | `true` | Elasticsearch-based full text search |
+| `nextcloud_install.talk` | `false` | Nextcloud Talk (video/audio calls) |
+| `nextcloud_install.hpb` | `false` | High Performance Backend for Talk |
+| `nextcloud_install.hapr` | `false` | HaPR reverse proxy for ExApps |
+| `nextcloud_install.nextcloudoffice` | `false` | Collabora Online (richdocuments) |
+| `nextcloud_install.onlyoffice` | `false` | OnlyOffice document server |
+| `nextcloud_install.whiteboard` | `false` | Excalidraw-based collaborative whiteboard |
+| `nextcloud_install.fulltextsearch` | `false` | Elasticsearch-based full text search |
 
 ### S3 Backend (`group_vars/all/s3_backend.yml`)
 
@@ -205,6 +249,10 @@ Connects to a local Elasticsearch instance at `http://localhost:9200`.
 ### ExApps with HaPR
 
 Installs the `app_api` app and registers the HaPR (HaProxy Reverse Proxy) deploy daemon for Docker-based external applications.
+
+### Whiteboard
+
+Installs and configures the Excalidraw-based collaborative whiteboard app. The whiteboard WebSocket server runs as a Docker container and can be deployed collocated with Nextcloud or on a dedicated server. See [WHITEBOARD-README.md](WHITEBOARD-README.md) for details (if available).
 
 ### Notify Push
 

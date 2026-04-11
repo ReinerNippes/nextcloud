@@ -1,0 +1,65 @@
+---
+all:
+
+nextcloud:
+  hosts:
+    nextcloud.example.com:
+
+redis:
+  hosts:
+    nextcloud.example.com:
+
+database:
+  hosts:
+    nextcloud.example.com:
+
+elasticsearch:
+  hosts:
+    nextcloud.example.com:
+
+coturn:
+  hosts:
+    turn.example.com:
+
+signal:
+  vars:
+    additional_fqdns:
+      additional_fqdn_recording: rec.example.com
+  hosts:
+    signal.example.com:
+
+hapr:
+  hosts:
+    nextcloud.example.com:
+
+# nextcloudoffice and onlyoffice are mutual exclusive
+# choose one or the other
+nextcloudoffice:
+  hosts:
+    office.example.com:
+
+#onlyoffice:
+#  hosts:
+#    onlyoffice.example.com:
+
+whiteboard:
+  hosts:
+    whiteboard.example.com:
+
+# webserver and docker groups are managed automatically
+# do not edit them even if you don't install a particular service
+webserver:
+  hosts:
+    nextcloud.example.com:
+    signal.example.com:
+    onlyoffice.example.com:
+    office.example.com:
+    whiteboard.example.com:
+
+docker:
+  hosts:
+    nextcloud.example.com:
+    signal.example.com:
+    onlyoffice.example.com:
+    office.example.com:
+    whiteboard.example.com:

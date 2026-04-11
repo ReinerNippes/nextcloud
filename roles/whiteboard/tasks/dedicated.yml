@@ -1,0 +1,32 @@
+---
+# Dedicated Whiteboard — runs on its own server.
+# A local nginx reverse proxy terminates TLS on port 443
+# and forwards to the WebSocket server on localhost:3002.
+
+- name: Add whiteboard service to compose.yml
+  ansible.builtin.blockinfile:
+    path: /opt/nextcloud/docker_compose/compose.yml
+    marker: "# {mark} whiteboard service"
+    block: |
+      #
+        whiteboard:
+          image: ghcr.io/nextcloud-releases/whiteboard:stable
+          container_name: whiteboard
+          restart: unless-stopped
+          networks:
+            - nextcloud
+          ports:
+            - "127.0.0.1:3002:3002"
+          environment:
+            NEXTCLOUD_URL: "https://{{ nextcloud_fqdn }}"
+            JWT_SECRET_KEY: "{{ passwords.whiteboard_secret }}"
+            MAX_UPLOAD_FILE_SIZE: "{{ whiteboard_max_upload_file_size }}"
+          labels:
+            com.centurylinklabs.watchtower.enable: "true"
+
+- name: Deploy nginx reverse proxy for whiteboard
+  ansible.builtin.template:
+    src: whiteboard-dedicated-nginx.conf.j2
+    dest: /etc/nginx/conf.d/whiteboard.conf
+    mode: "0644"
+  notify: restart web services

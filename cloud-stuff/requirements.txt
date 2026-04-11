@@ -4,3 +4,4 @@ pulumiverse-scaleway>=1.40.0,<2.0.0
 pulumi-cloudflare>=5.0.0,<6.0.0
 requests>=2.31.0,<3.0.0
 pyyaml>=6.0,<7.0.0
+dnspython>=2.7.0,<3.0.0

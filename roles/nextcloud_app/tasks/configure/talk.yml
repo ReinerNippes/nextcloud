@@ -1,0 +1,61 @@
+---
+
+- name: Enable talk app
+  reinernippes.nextcloud.occ_app:
+    name: spreed
+    state: enabled
+
+- name: Configure talk STUN server
+  vars:
+    coturn_talk_host: "{{ hostvars[groups['coturn'][0]]['inventory_hostname'] }}"
+  reinernippes.nextcloud.occ_config_app:
+    app: spreed
+    key: stun_servers
+    value:
+      - "{{ coturn_talk_host }}:3478"
+    state: present
+
+- name: Configure talk TURN server
+  vars:
+    coturn_talk_host: "{{ hostvars[groups['coturn'][0]]['inventory_hostname'] }}"
+  reinernippes.nextcloud.occ_config_app:
+    app: spreed
+    key: turn_servers
+    value:
+      - schemes: "turn,turns"
+        server: "{{ coturn_talk_host }}:{{ coturn_tls_port }}"
+        secret: "{{ passwords.coturn }}"
+        protocols: "udp,tcp"
+    state: present
+- name: Configure HPB signaling server
+  reinernippes.nextcloud.occ_config_app:
+    app: spreed
+    key: signaling_servers
+    value:
+      servers:
+        - server: "https://{{ hostvars[groups['signal'][0]]['inventory_hostname'] }}/standalone-signaling/"
+          verify: "{{ ((tls_certificate.type != 'selfsigned') and (not tls_certificate_test)) | bool }}"
+      secret: "{{ passwords.signal_nextcloud_secret }}"
+    state: present
+  when: nextcloud_install.hpb | bool
+
+- name: Configure HPB recording server
+  vars:
+    signal_recording_host: >-
+      {{
+        hostvars[groups["signal"][0]]["additional_fqdns"]["additional_fqdn_recording"]
+        | default((hostvars[groups["signal"][0]]["additional_certificate_fqdns"] | default([]) | first), true)
+        | default('')
+      }}
+  reinernippes.nextcloud.occ_config_app:
+    app: spreed
+    key: recording_servers
+    value:
+      servers:
+        - server: "https://{{ signal_recording_host }}/"
+          verify: "{{ ((tls_certificate.type != 'selfsigned') and (not tls_certificate_test)) | bool }}"
+      secret: "{{ passwords.signal_recording_secret }}"
+    state: present
+  when:
+    - nextcloud_install.hpb | bool
+    - signal_recording_host | length > 0

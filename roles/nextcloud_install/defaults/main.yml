@@ -1,0 +1,25 @@
+---
+# defaults for nextcloud_install
+
+# --- User-configurable settings (override in group_vars/all or inventory) ---
+
+# Trusted domains (added to config.php trusted_domains array)
+nextcloud_trusted_domains:
+  - "{{ nextcloud_fqdn }}"
+  - "{{ ansible_facts['default_ipv4'].address }}"
+
+# Security & hardening
+nextcloud_security:
+  bruteforce_protection: true
+  integrity_check_disabled: false
+
+# General settings
+nextcloud_general:
+  default_phone_region: "{{ nextcloud_default_phone_region }}"
+  defaultapp: file
+  skeletondirectory: ""
+  theme: ""
+  trashbin_retention_obligation: "auto,7"
+  activity_expire_days: 14
+  updater_release_channel: stable
+  maintenance_window_start: 1

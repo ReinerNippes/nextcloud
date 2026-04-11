@@ -1,0 +1,37 @@
+---
+# tasks file for nextcloud_app
+# Install apps and configure add-on integrations
+
+- name: Install apps
+  reinernippes.nextcloud.occ_app:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+  loop: "{{ nextcloud_apps }}"
+
+- name: Configure fulltextsearch
+  ansible.builtin.include_tasks: configure/fulltextsearch.yml
+  when: nextcloud_install.fulltextsearch|bool
+
+- name: Configure nextcloudoffice
+  ansible.builtin.include_tasks: configure/nextcloudoffice.yml
+  when: nextcloud_install.nextcloudoffice|bool
+
+- name: Configure onlyoffice
+  ansible.builtin.include_tasks: configure/onlyoffice.yml
+  when: nextcloud_install.onlyoffice|bool
+
+- name: Configure whiteboard
+  ansible.builtin.include_tasks: configure/whiteboard.yml
+  when: nextcloud_install.whiteboard|bool
+
+- name: Configure talk
+  ansible.builtin.include_tasks: configure/talk.yml
+  when: nextcloud_install.talk|bool
+
+- name: Configure exAPPs HaPR
+  ansible.builtin.include_tasks: configure/exapp_hapr.yml
+  when: nextcloud_install.hapr|bool
+
+- name: Configure notify_push
+  ansible.builtin.include_tasks: configure/notify_push.yml
+  when: nextcloud_install.notify_push|bool
