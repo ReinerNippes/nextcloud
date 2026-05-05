@@ -11,3 +11,4 @@
     name: turnserver
     groups: "{{ tls_certificate_group | default('ssl-cert') }}"
     append: true
+  notify: restart coturn

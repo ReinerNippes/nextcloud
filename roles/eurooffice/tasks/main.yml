@@ -1,0 +1,25 @@
+---
+# tasks file for euro-office installation
+
+- name: Create euro-office data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /opt/eurooffice/DocumentServer/data
+    - /opt/eurooffice/DocumentServer/logs
+    - /opt/eurooffice/DocumentServer/lib
+    - /opt/eurooffice/DocumentServer/db
+
+- name: Determine if euro-office is collocated with nextcloud
+  ansible.builtin.set_fact:
+    _eurooffice_collocated: >-
+      {{ inventory_hostname in groups.get('nextcloud', []) }}
+
+- name: Include collocated tasks
+  ansible.builtin.include_tasks: collocated.yml
+  when: _eurooffice_collocated | bool
+
+- name: Include dedicated server tasks
+  ansible.builtin.include_tasks: dedicated.yml
+  when: not (_eurooffice_collocated | bool)

@@ -1,5 +1,106 @@
 # Changelog
 
+## v3.2 (May 2026)
+
+### New: Euro-Office Document Server
+
+- New `eurooffice` role for Euro-Office Document Server (OnlyOffice-compatible)
+- Supports collocated and dedicated server deployment (mirrors `onlyoffice` architecture)
+- Reverse-proxied through nginx/Apache; reuses Nextcloud `onlyoffice` app on the integration side
+- New `nextcloud_install.eurooffice` toggle, `eurooffice_fqdn` variable, and `eurooffice_secret` JWT password
+- Webserver config combines OnlyOffice and Euro-Office vhost block (`/onlyoffice/` proxy to `127.0.0.1:8443`)
+- Added `eurooffice` group to all example inventories and dynamic inventories (Hetzner labels + Scaleway tags)
+- Tested on Debian 13, Rocky 10, CentOS 10, openSUSE Leap 16
+- New documentation: `docs/EUROOFFICE-README.md`
+
+### New: MariaDB Analyzer Role
+
+- New `mariadb_analyzer` role for live tuning analysis (mirrors `postgres_analyzer`)
+- Reads runtime variables via `community.mysql.mysql_variables` (no config file parsing)
+- Hardware-aware recommendations: `innodb_buffer_pool_size`, `innodb_log_buffer_size`,
+  `max_connections`, `thread_cache_size`, `tmp_table_size`, IO threads, and more
+- Handles three deployment scenarios: collocated, dedicated server (delegated), managed service
+- Added to `nextcloud.yml` and `nextcloud-performance-tuning.yml` (runs when `nextcloud_db.type == 'mysql'`)
+- New `mariadb_tuning_parameters` user variable (rendered into `90-nextcloud.cnf`)
+- New documentation: `docs/MariaDB_Analyzer.md`
+
+### New: Dedicated Database / Redis Servers (Functional)
+
+- Database (PostgreSQL / MariaDB) and Redis on separate hosts now fully supported
+- PostgreSQL on dedicated host:
+  - `listen_addresses = *`, `scram-sha-256` auth (replaces md5)
+  - Source IP for `pg_hba.conf` is detected dynamically via `ip route get` (delegated to Nextcloud host) — no static `postgres_allowed_ipv4` needed
+  - Stale `pg_hba.conf` TCP entries for previous source IPs are removed automatically
+  - Handlers flushed before dependent plays run
+- MariaDB on dedicated host:
+  - `bind-address = 0.0.0.0` + `port = 3306`; collocated mode uses `skip-networking`
+- Redis on dedicated host:
+  - TCP mode bound to `127.0.0.1` + `ansible_host` (private IP) — collocated mode keeps Unix socket
+  - `redis_tcp.address` resolves from `ansible_host` (with `default_ipv4` fallback)
+- Database creation tasks (`create_pgsql.yml`, `create_mysql.yml`) refactored to delegate to the DB host and use peer auth — no admin TCP credentials required for the playbook-managed scenarios
+
+### New: Managed Database / Redis Support
+
+- New `nextcloud_db.managed` flag for external managed database services (e.g. AWS RDS, Scaleway Managed PostgreSQL/MySQL)
+- New `nextcloud_db.admin_user` / `nextcloud_db.admin_password` variables for managed/dedicated admin access
+- New `database_admin` entry in `password_vars`
+- `postgres_analyzer` and `mariadb_analyzer` understand managed services (no process stats, TCP admin login)
+- New `redis_password` user variable (`group_vars/all/redis.yml`) for fixed Redis passwords (e.g. for restore from backup)
+
+### New: Pulumi Stack Examples (Split)
+
+- `Pulumi.nextcloud.yaml.example` replaced by three focused examples:
+  - `Pulumi.hetzner-single.yaml.example` — Hetzner all-in-one
+  - `Pulumi.hetzner-multitier.yaml.example` — Hetzner with intern-only DB and Redis behind a private network
+  - `Pulumi.scaleway-managed.yaml.example` — Scaleway compute + Cloudflare DNS + managed PostgreSQL + managed Redis
+- `cloud-stuff/README.md` Quick Start rewritten with explicit 7-step procedure that preserves the generated `encryptionsalt`
+
+### New: Internal-Only Servers (Hetzner)
+
+- Servers with `public_firewall_rules: []` are labelled `intern_only=true` (Hetzner)
+- Dynamic Hetzner inventory exposes a new `intern_only` group and supports a jump-host `ProxyCommand` configuration (template lines included)
+- Pulumi exports `<name>_private_ipv4` for servers attached to the private network
+- `ServerResult` carries the `private_ip` from `hcloud.ServerNetwork`
+
+### New: Per-Server Hetzner Firewalls
+
+- Hetzner compute now creates **one merged firewall per server** instead of one per rule profile
+- Removes the 5-firewalls-per-server limit, regardless of how many profiles a host needs
+- `collect_required_rule_names()` is no longer used by the Hetzner provider
+- SSH waiter is only invoked when the `ssh` rule is part of the firewall (skipped for intern-only hosts)
+
+### Changed
+
+- **Default database type:** `group_vars/all/database.yml` now defaults to `pgsql` (was `mysql`)
+- **PostgreSQL version:** default bumped to 18 across all OS families (Debian/Ubuntu, RedHat/Alma/Rocky, openSUSE)
+- **Postgres packages:** Python client packages split into `postgresql_python_packages` (per OS family)
+- **APCu PHP tuning:** `apc.shm_size = 128M` and `apc.serializer = igbinary` added to both `nextcloud-cli.ini` and `nextcloud-fpm.ini` drop-ins
+- **Common vars consolidation:** `onlyoffice_fqdn`, `nextcloudoffice_fqdn`, `eurooffice_fqdn` moved from `group_vars/all/nextcloud.yml` into `group_vars/all/common.yml`
+- **Documentation:** `docs/DATABASE-README.md` and `docs/REDIS-README.md` updated for PostgreSQL 18, dedicated/managed scenarios, openSUSE, and the new connection logic
+- **README:** EuroOffice added to the tested combinations matrix; database/Redis dedicated rows updated to "Functional"; MariaDB Analyzer linked from the tuning section; inventory links fixed to point to `.example` files
+- **EuroOffice preview note** added to the README and the `Dynamic Cloud Inventories` example
+
+### Fixed
+
+- **MariaDB drop-in extension:** `90-nextcloud.cfg` renamed to `90-nextcloud.cnf` so MariaDB actually picks it up
+- **Default app bug:** `nextcloud_general.defaultapp` corrected from `file` to `files`
+- **Restic backup/restore scripts:** use `passwords.database` instead of the (often empty) `nextcloud_db.password`
+- **Coturn (Debian):** group membership change now notifies a coturn restart (TLS group access takes effect immediately)
+- **Nextcloud nginx vhost:** OnlyOffice/EuroOffice block guarded against missing groups; combined into a single `/onlyoffice/` location
+
+### Removed
+
+- `Pulumi.nextcloud.yaml.example` (replaced by the three split stack examples)
+- Static `postgres_allowed_ipv4` and `postgresql_hba_entries` defaults (auto-detected now)
+- `nextcloud_db.migration` field from defaults (was unused)
+- Legacy single-firewall set creation in Hetzner compute (replaced by per-server merged firewall)
+
+### Known Outstanding (Tracked TODOs)
+
+- Private-network policies (`network_policies`) are defined in stack examples but not yet enforced; planned as OS-level nftables rules via Ansible (Hetzner has no private-network firewalls)
+- Wiring the Pulumi private network into Scaleway managed services (`__main__.py` lines 181, 194)
+- Firewall role: actual rule management for Debian (`ufw`/`nftables`) and RedHat (`firewalld`) — only placeholders today
+
 ## v3.1 (April 2026)
 
 ### New: Whiteboard Role

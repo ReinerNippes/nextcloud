@@ -11,16 +11,13 @@ Ansible role to install and configure Redis (Debian/Ubuntu) or Valkey (RedHat) a
 ## What This Role Does
 
 1. **Installs Redis/Valkey** packages
-2. **Configures the server** via in-place edits of the stock configuration file:
-   - Disables TCP listening (`port 0`)
-   - Enables a unix socket for local communication
-   - Sets `maxclients 10240`
-   - Sets a random password (from the central password store)
-3. **Adds the webserver user** to the Redis group (when Redis and Nextcloud run on the same host) so PHP-FPM can access the unix socket
-4. **Applies system tuning** for Redis:
+2. **Detects deployment mode** automatically — collocated (same host as Nextcloud) or dedicated (separate host)
+3. **Configures the server** via in-place edits of the stock configuration file — configuration differs by deployment mode (see [Configuration](#configuration) below)
+4. **Adds the webserver user** to the Redis group (collocated only) so PHP-FPM can access the unix socket
+5. **Applies system tuning** for Redis:
    - `vm.overcommit_memory = 1` (required for reliable BGSAVE via fork + copy-on-write)
    - Disables Transparent Hugepages (THP) via a oneshot systemd service to avoid latency issues
-5. **Starts and enables** the Redis/Valkey service
+6. **Starts and enables** the Redis/Valkey service
 
 ## Task Flow
 
@@ -28,8 +25,10 @@ Ansible role to install and configure Redis (Debian/Ubuntu) or Valkey (RedHat) a
 tasks/main.yml
   ├── Debian.yml                      Install packages (apt)
   │   or RedHat.yml                   Install packages (dnf, from EPEL)
-  ├── Configure redis/valkey.conf     In-place lineinfile edits
-  ├── Add webserver user to redis group (if co-located)
+  │   or Suse.yml                     Install packages (zypper)
+  ├── Detect collocated vs. dedicated (compare redis and nextcloud group hosts)
+  ├── Configure redis/valkey.conf     In-place lineinfile edits (mode-specific)
+  ├── Add webserver user to redis group (collocated only)
   ├── sysctl vm.overcommit_memory=1
   ├── Disable transparent hugepages   Check + deploy systemd service
   └── Start and enable service
@@ -37,15 +36,30 @@ tasks/main.yml
 
 ## Configuration
 
-The role modifies the stock configuration file using `lineinfile` (no template is deployed):
+The role modifies the stock configuration file using `lineinfile` (no template is deployed). The exact settings depend on the deployment mode:
+
+### Collocated mode (Redis and Nextcloud on the same host)
 
 | Setting | Value | Purpose |
-|---------|-------|---------|
-| `port` | `0` | Disable TCP — communication via unix socket only |
+|---------|-------|--------|
+| `port` | `0` | Disable TCP — unix socket only |
 | `unixsocket` | `/run/<service>/<service>.sock` | Unix socket path |
 | `unixsocketperm` | `770` | Socket accessible by owner + group |
+| `bind` | *(commented out)* | Not needed for unix socket |
 | `maxclients` | `10240` | Maximum concurrent client connections |
 | `requirepass` | `{{ passwords.redis }}` | Authentication password (auto-generated) |
+
+### Dedicated mode (Redis on a separate host)
+
+| Setting | Value | Purpose |
+|---------|-------|--------|
+| `port` | `6379` | Enable TCP on the standard Redis port |
+| `bind` | `127.0.0.1 {{ ansible_host }}` | Listen on loopback and the private network IP |
+| `unixsocket` | *(commented out)* | Not used in dedicated mode |
+| `maxclients` | `10240` | Maximum concurrent client connections |
+| `requirepass` | `{{ passwords.redis }}` | Authentication password (auto-generated) |
+
+`ansible_host` is the address the dynamic inventory assigns to the Redis server — typically the private network IP for `intern_only` servers, falling back to `default_ipv4` otherwise.
 
 ### Configuration file path
 
@@ -53,6 +67,7 @@ The role modifies the stock configuration file using `lineinfile` (no template i
 |----------|------|
 | Debian / Ubuntu | `/etc/redis/redis.conf` |
 | RedHat / Alma / Rocky | `/etc/valkey/valkey.conf` |
+| openSUSE / SLES | `/etc/valkey/valkey.conf` |
 
 ## System Tuning
 
@@ -80,14 +95,20 @@ The service is installed to `systemd_service_path[os_family]` and enabled at boo
 | `redis_systemd_unit` | `redis.service` | `valkey.service` | `valkey.target` |
 | `redis_user_name` | `redis` | `valkey` | `valkey` |
 
-### Connection variables
+### User-defined variables (`group_vars/all/redis.yml`)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `redis_socket.path` | `/run/{{ redis_service_name[ansible_facts['os_family']] }}/{{ redis_service_name[ansible_facts['os_family']] }}.sock` | Unix socket path (used by Nextcloud PHP config; resolves to `redis.sock` on Debian and `valkey.sock` on RedHat/Suse) |
+| `redis_password` | *(empty → auto-generated)* | Set a fixed Redis password, e.g. when restoring from backup. If empty, a random password is generated and stored in the password file. |
+
+### Connection variables (`group_vars/all/redis/main.yml`)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `redis_socket.path` | `/run/<service>/<service>.sock` | Unix socket path — resolves to `redis.sock` on Debian, `valkey.sock` on RedHat/SUSE. Used by the Nextcloud PHP config in collocated mode. |
 | `redis_socket.perm` | `770` | Socket file permissions |
-| `redis_tcp.address` | *(auto-detected from inventory)* | TCP address (for remote Redis setups) |
-| `redis_tcp.port` | `6379` | TCP port (not used when `port 0` is set) |
+| `redis_tcp.address` | `hostvars[groups['redis'][0]].ansible_host` (falls back to `default_ipv4`) | TCP address used by Nextcloud to reach a dedicated Redis server. Prefers `ansible_host` to correctly pick up private network IPs for `intern_only` servers. |
+| `redis_tcp.port` | `6379` | TCP port for dedicated Redis. Not active in collocated mode (`port 0`). |
 
 ### YUM/DNF repository mapping (`redis_yum_repo`)
 

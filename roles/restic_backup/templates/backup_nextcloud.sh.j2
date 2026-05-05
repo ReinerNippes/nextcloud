@@ -17,7 +17,7 @@ sudo -u {{ web_user[nextcloud_webserver_type][ansible_facts['os_family']] }} php
 
 # create a temporary database dump
 {% if nextcloud_db.type == 'mysql' %}
-/usr/bin/mysqldump --single-transaction -h {{ nextcloud_db.host }} -u {{ nextcloud_db.user }} -p{{ nextcloud_db.password }} {{ nextcloud_db.name }} > /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
+/usr/bin/mysqldump --single-transaction -h {{ nextcloud_db.host }} -u {{ nextcloud_db.user }} -p{{ passwords.database }} {{ nextcloud_db.name }} > /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
 {% elif nextcloud_db.type == 'pgsql' %}
 sudo -u postgres /usr/bin/pg_dump -c -U postgres {{ nextcloud_db.name }} > /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
 {% endif %}

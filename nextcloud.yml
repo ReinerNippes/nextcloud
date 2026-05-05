@@ -33,7 +33,7 @@
     - webserver
 
 - name: Install tls certificates
-  hosts: nextcloud, coturn, signal, onlyoffice, nextcloudoffice, whiteboard
+  hosts: nextcloud, coturn, signal, onlyoffice, eurooffice, nextcloudoffice, whiteboard
   become: true
   gather_facts: false
 
@@ -95,6 +95,15 @@
     - role: onlyoffice
       when: nextcloud_install.onlyoffice|bool
 
+- name: Install Euro-Office
+  hosts: eurooffice
+  become: true
+  gather_facts: false
+
+  roles:
+    - role: eurooffice
+      when: nextcloud_install.eurooffice|bool
+
 - name: Install Whiteboard
   hosts: whiteboard
   become: true
@@ -145,6 +154,8 @@
     - nextcloud_app
     - role: postgres_analyzer
       when: nextcloud_db.type == 'pgsql'
+    - role: mariadb_analyzer
+      when: nextcloud_db.type == 'mysql'
     - php_fpm_analyser
   environment: "{{ nextcloud_occ_env }}"
 

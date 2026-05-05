@@ -1,0 +1,129 @@
+# ╔════════════════════════════════════════════════════════════════════════╗
+# ║  Nextcloud Wizard — Hetzner, Multi-Tier with Internal DB + Redis       ║
+# ║                                                                        ║
+# ║  Nextcloud runs on a public server.                                    ║
+# ║  PostgreSQL and Redis run on internal-only servers (no public          ║
+# ║  inbound). They are reachable only via the Nextcloud server as SSH     ║
+# ║  jump host. Requires a Hetzner private network.                        ║
+# ║                                                                        ║
+# ║  Copy this file:                                                       ║
+# ║    cp Pulumi.hetzner-multitier.yaml.example Pulumi.<stackname>.yaml    ║
+# ╚════════════════════════════════════════════════════════════════════════╝
+config:
+  # ── Provider selection ──────────────────────────────────────────────
+  nextcloud-wizard:computeProvider: hetzner
+  nextcloud-wizard:dnsProvider: hetzner
+
+  # ── Hetzner Cloud credentials ──────────────────────────────────────
+  hetzner:token:
+    secure: v1:<your-hcloud-token>
+  hetzner:sshKeyName: my-ssh-key         # existing key in Hetzner console
+  hetzner:location: fsn1                 # fsn1 | nbg1 | hel1 | ash | hil
+
+  # ── Hetzner DNS credentials ───────────────────────────────────────
+  hetznerDns:token:
+    secure: v1:<your-hetzner-dns-token>
+  # hetznerDns:zoneId: abc123            # optional — auto-detected from zoneName
+
+  # ── Common settings ───────────────────────────────────────────────
+  nextcloud-wizard:sshPubKey: ssh-ed25519 AAAA... you@host
+  nextcloud-wizard:zoneName: example.com
+  nextcloud-wizard:environment: production
+  nextcloud-wizard:image: debian-13
+
+  # ── Private network ───────────────────────────────────────────────
+  # Required for internal server communication.
+  nextcloud-wizard:network:
+    name: nextcloud-net
+    ip_range: 10.0.0.0/16
+    subnet: 10.0.1.0/24
+
+  # ── Servers ────────────────────────────────────────────────────────
+  nextcloud-wizard:servers:
+    - name: nextcloud
+      server_type: cx32                  # cx22 | cx32 | cx42 | cx52 …
+      networks:
+        - public
+        - private
+      server_groups:
+        - nextcloud
+        - webserver
+        - docker
+      public_firewall_rules:
+        - ssh
+        - letsencrypt
+        - nextcloud
+
+    # Dedicated PostgreSQL server — internal only, no public inbound.
+    # public_firewall_rules: [] triggers the intern_only label in the
+    # dynamic inventory. SSH access via Nextcloud server as jump host.
+    - name: db
+      server_type: cx22
+      networks:
+        - public
+        - private
+      server_groups:
+        - database
+      public_firewall_rules: []          # intern_only — no inbound from internet
+
+    # Dedicated Redis/Valkey server — internal only, no public inbound.
+    - name: redis
+      server_type: cx22
+      networks:
+        - public
+        - private
+      server_groups:
+        - redis
+      public_firewall_rules: []          # intern_only — no inbound from internet
+
+    # Optional: dedicated Coturn (TURN/STUN) server for Talk
+    # - name: turn
+    #   server_type: cx22
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - coturn
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - coturn
+
+    # Optional: dedicated Signal (HPB + recording) server for Talk
+    # - name: signal
+    #   server_type: cx22
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - signal
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - signal
+    #   additional_fqdn_recording: rec
+
+    # Optional: dedicated Nextcloud Office (Collabora) server
+    # - name: office
+    #   server_type: cx32
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - nextcloudoffice
+    #     - webserver
+    #     - docker
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - nextcloudoffice
+
+  # ── Network policies (TODO — not yet implemented) ─────────────────
+  # Private-network access control is planned but not yet implemented.
+  # Hetzner has no private-network firewalls — these will become OS-level
+  # nftables rules via Ansible once implemented.
+  #
+  # nextcloud-wizard:network_policies:
+  #   - rule: database
+  #     allow_from: [nextcloud]
+  #     interface: private
+  #   - rule: redis
+  #     allow_from: [nextcloud]
+  #     interface: private

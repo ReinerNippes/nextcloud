@@ -156,8 +156,16 @@ flowchart TB
   NC --- OO
 ```
 
-> **Note:** Deploying database and Redis on separate servers in a private
-> network is work in progress.
+## Stack Configuration Examples
+
+Three ready-to-use example files cover the most common setups. Pick the one
+that matches your infrastructure, copy and rename it, then fill in credentials.
+
+| File | Provider | Setup |
+|------|----------|-------|
+| [Pulumi.hetzner-single.yaml.example](Pulumi.hetzner-single.yaml.example) | Hetzner Compute + Hetzner DNS | All-in-one: Nextcloud, Redis, PostgreSQL on one server |
+| [Pulumi.hetzner-multitier.yaml.example](Pulumi.hetzner-multitier.yaml.example) | Hetzner Compute + Hetzner DNS + private network | Separate internal servers for DB and Redis (intern-only, SSH jump host) |
+| [Pulumi.scaleway-managed.yaml.example](Pulumi.scaleway-managed.yaml.example) | Scaleway Compute + Cloudflare DNS | Scaleway managed PostgreSQL + managed Redis |
 
 ## Quick Start
 
@@ -168,19 +176,22 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# Initialise (first time only):
+# Step 1 — create the stack (generates a unique encryptionsalt):
 pulumi login --local
 pulumi stack init production
+# This creates Pulumi.production.yaml with an encryptionsalt at the top.
 
-# IMPORTANT: Copy the encryptionsalt line from the stack file that
-# "pulumi stack init" just created into your copied config file.
-# It is at the very top and is required to decrypt secrets:
-#   encryptionsalt: v1:xxxxxxxx:v1:...
+# Step 2 — save the generated encryptionsalt:
+SALT=$(grep '^encryptionsalt:' Pulumi.production.yaml)
 
-# Copy the example config:
-cp Pulumi.nextcloud.yaml.example Pulumi.production.yaml
+# Step 3 — copy the matching example over the stack file
+#          (see "Stack Configuration Examples" above):
+cp Pulumi.hetzner-single.yaml.example Pulumi.production.yaml
 
-# Set secrets (stored encrypted in the stack file):
+# Step 4 — put the real encryptionsalt back (cp would have overwritten it):
+sed -i "s|^encryptionsalt:.*|$SALT|" Pulumi.production.yaml
+
+# Step 5 — set secrets (stored encrypted in the stack file):
 pulumi config set hetzner:token <HCLOUD-COMPUTE-TOKEN> --secret
 pulumi config set hetznerDns:token <HCLOUD-DNS-TOKEN> --secret
 
@@ -189,10 +200,10 @@ pulumi config set hetznerDns:token <HCLOUD-DNS-TOKEN> --secret
 # pulumi config set scaleway:secretKey <SECRET-KEY> --secret
 # pulumi config set cloudflare:apiToken <CF-TOKEN> --secret
 
-# Edit Pulumi.production.yaml to set remaining config
-# (provider, servers, zoneName, sshPubKey, etc.)
+# Step 6 — edit remaining non-secret config
+#          (servers, zoneName, sshPubKey, etc.) in Pulumi.production.yaml
 
-# Deploy:
+# Step 7 — deploy:
 pulumi up
 ```
 

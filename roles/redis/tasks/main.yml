@@ -4,13 +4,20 @@
 - name: Include os specific tasks
   ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: Configure {{ redis_service_name[ansible_facts['os_family']] }}
+- name: Determine if Redis is collocated with Nextcloud
+  ansible.builtin.set_fact:
+    _redis_is_local: >-
+      {{
+        (groups['redis'] | default([]) | first | default(''))
+        == (groups['nextcloud'] | default([]) | first | default(''))
+      }}
+
+# Collocated: TCP disabled, Unix socket used by the local webserver process.
+- name: Configure {{ redis_service_name[ansible_facts['os_family']] }} (collocated — unix socket)
   ansible.builtin.lineinfile:
     path: "{{ redis_conf_path[ansible_facts['os_family']] }}/{{ redis_service_name[ansible_facts['os_family']] }}.conf"
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
-    # backrefs: true
-    # backup: true
   loop:
     - regexp: "^port .*$"
       line: "port 0"
@@ -18,10 +25,35 @@
       line: "unixsocket {{ redis_socket.path }}"
     - regexp: "^#?\\s*unixsocketperm .*$"
       line: "unixsocketperm {{ redis_socket.perm }}"
+    - regexp: "^#?\\s*bind .*$"
+      line: "# bind — managed by playbook (collocated)"
     - regexp: "^#?\\s*maxclients .*$"
       line: "maxclients 10240"
     - regexp: "^#?\\s*requirepass .*$"
       line: "requirepass {{ passwords.redis }}"
+  when: _redis_is_local
+  notify: Restart redis-server
+
+# Dedicated: TCP on the private IP, no Unix socket.
+- name: Configure {{ redis_service_name[ansible_facts['os_family']] }} (dedicated — TCP)
+  ansible.builtin.lineinfile:
+    path: "{{ redis_conf_path[ansible_facts['os_family']] }}/{{ redis_service_name[ansible_facts['os_family']] }}.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  loop:
+    - regexp: "^port .*$"
+      line: "port {{ redis_tcp.port }}"
+    - regexp: "^#?\\s*bind .*$"
+      line: "bind 127.0.0.1 {{ ansible_host }}"
+    - regexp: "^#?\\s*unixsocket .*$"
+      line: "# unixsocket — disabled on dedicated server"
+    - regexp: "^#?\\s*unixsocketperm .*$"
+      line: "# unixsocketperm — disabled on dedicated server"
+    - regexp: "^#?\\s*maxclients .*$"
+      line: "maxclients 10240"
+    - regexp: "^#?\\s*requirepass .*$"
+      line: "requirepass {{ passwords.redis }}"
+  when: not _redis_is_local
   notify: Restart redis-server
 
 - name: Add webserver user to Redis/Valkey group on shared hosts

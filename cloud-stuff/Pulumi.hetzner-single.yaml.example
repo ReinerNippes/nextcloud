@@ -1,0 +1,106 @@
+# ╔════════════════════════════════════════════════════════════════════════╗
+# ║  Nextcloud Wizard — Hetzner, Single Server (all-in-one)                ║
+# ║                                                                        ║
+# ║  Everything runs on one server: Nextcloud, Redis, PostgreSQL,          ║
+# ║  webserver, and Docker. Simplest setup — good for small instances      ║
+# ║  and testing.                                                          ║
+# ║                                                                        ║
+# ║  Copy this file:                                                       ║
+# ║    cp Pulumi.hetzner-single.yaml.example Pulumi.<stackname>.yaml       ║
+# ╚════════════════════════════════════════════════════════════════════════╝
+config:
+  # ── Provider selection ──────────────────────────────────────────────
+  nextcloud-wizard:computeProvider: hetzner
+  nextcloud-wizard:dnsProvider: hetzner
+
+  # ── Hetzner Cloud credentials ──────────────────────────────────────
+  hetzner:token:
+    secure: v1:<your-hcloud-token>
+  hetzner:sshKeyName: my-ssh-key         # existing key in Hetzner console
+  hetzner:location: fsn1                 # fsn1 | nbg1 | hel1 | ash | hil
+
+  # ── Hetzner DNS credentials ───────────────────────────────────────
+  hetznerDns:token:
+    secure: v1:<your-hetzner-dns-token>
+  # hetznerDns:zoneId: abc123            # optional — auto-detected from zoneName
+
+  # ── Common settings ───────────────────────────────────────────────
+  nextcloud-wizard:sshPubKey: ssh-ed25519 AAAA... you@host
+  nextcloud-wizard:zoneName: example.com
+  nextcloud-wizard:environment: production
+  nextcloud-wizard:image: debian-13            # default OS for all servers
+
+  # ── Servers ────────────────────────────────────────────────────────
+  nextcloud-wizard:servers:
+    - name: nextcloud
+      server_type: cx32                  # cx22 | cx32 | cx42 | cx52 …
+      networks:
+        - public
+      server_groups:
+        - nextcloud
+        - redis                          # collocated Redis (unix socket)
+        - database                       # collocated PostgreSQL
+        - webserver
+        - docker
+      public_firewall_rules:
+        - ssh
+        - letsencrypt
+        - nextcloud
+
+    # Optional: dedicated Coturn (TURN/STUN) server for Talk
+    # - name: turn
+    #   server_type: cx22
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - coturn
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - coturn
+
+    # Optional: dedicated Signal (HPB + recording) server for Talk
+    # - name: signal
+    #   server_type: cx22
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - signal
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - signal
+    #   # Additional named FQDNs for virtual hosts / extra certs.
+    #   # Short names automatically get ".<zoneName>" appended.
+    #   additional_fqdn_recording: rec
+    #   # Alternative map syntax (equivalent):
+    #   # additional_fqdns:
+    #   #   recording: rec
+
+    # Optional: dedicated Nextcloud Office (Collabora) server
+    # - name: office
+    #   server_type: cx32
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - nextcloudoffice
+    #     - webserver
+    #     - docker
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - nextcloudoffice
+
+    # Optional: dedicated OnlyOffice / EuroOffice server
+    # - name: office
+    #   server_type: cx32
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - onlyoffice                   # or: eurooffice
+    #     - webserver
+    #     - docker
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - nextcloud                    # reuses port 443 reverse proxy profile

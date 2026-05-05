@@ -1,0 +1,34 @@
+---
+
+# Scenario 1 – collocated (nextcloud_db.host = localhost):
+#   delegate_host = inventory_hostname, connect via unix socket
+# Scenario 2 – dedicated DB server managed by this playbook:
+#   delegate_host = groups['database'][0], connect via unix socket
+# Scenario 3 – managed DB service (nextcloud_db.managed = true):
+#   connect via TCP with admin credentials, no process access
+
+- name: Determine MariaDB deployment scenario
+  ansible.builtin.set_fact:
+    _mariadb_is_local: "{{ nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] }}"
+    _mariadb_is_managed: "{{ nextcloud_db.managed | default(false) | bool }}"
+
+- name: Set database delegate host
+  ansible.builtin.set_fact:
+    _mariadb_delegate_host: >-
+      {{
+        groups['database'][0]
+        if ('database' in groups
+            and groups['database'] | length > 0
+            and not _mariadb_is_local
+            and not _mariadb_is_managed)
+        else inventory_hostname
+      }}
+
+- name: Include config reader
+  ansible.builtin.include_tasks: read_config.yml
+
+- name: Include process analyzer
+  ansible.builtin.include_tasks: analyze_processes.yml
+
+- name: Include recommendation engine
+  ansible.builtin.include_tasks: recommend.yml

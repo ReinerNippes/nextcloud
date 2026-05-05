@@ -38,6 +38,7 @@ groups:
   hapr:            "'group_hapr'            in tags"
   nextcloudoffice: "'group_nextcloudoffice' in tags"
   onlyoffice:      "'group_onlyoffice'      in tags"
+  eurooffice:      "'group_eurooffice'      in tags"
   whiteboard:      "'group_whiteboard'      in tags"
 
 # Compose host variables

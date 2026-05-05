@@ -164,9 +164,8 @@ server {
     }
     ### End Whiteboard WebSocket ###
 {% endif %}
-
-{% if nextcloud_install.onlyoffice|bool and (groups['onlyoffice'][0] in groups.get('nextcloud', [])) %}
-    ### Start OnlyOffice ###
+{% if (nextcloud_install.onlyoffice|bool and (groups['onlyoffice'][0] in groups.get('nextcloud', []))) or (nextcloud_install.eurooffice|bool and (groups['eurooffice'][0] in groups.get('nextcloud', []))) %}
+    ### Start Euro- or OnlyOffice ###
     location /onlyoffice/ {
         proxy_pass http://127.0.0.1:8443/;
         proxy_http_version 1.1;
@@ -178,7 +177,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 36000s;
     }
-    ### End OnlyOffice ###
+    ### End Euro- or OnlyOffice ###
 {% endif %}
 
     # Ensure this block, which passes PHP files to the PHP process, is above the blocks

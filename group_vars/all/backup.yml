@@ -5,12 +5,27 @@
 # to use a local directory as a restic repository (not a good idea anyway)
 # restic_repo: []
 
-# use rclone to backup a cloud storage, see https://rclone.org for more details
-# configure also rclone_remote in group_vars/all.yml
-# restic_repo: "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"
 
 # crontab setings for the backup script - default daily at 3pm
 restic_backup:
   day: "*"
   minute: "0"
   hour: "3"
+
+# use rclone to backup a cloud storage, see https://rclone.org for more details
+# configure also rclone_remote in group_vars/all.yml
+# restic_repo: "rclone:backup-selfhosted:selfhosted-{{ lookup('password', '{{ credential_store }}/restic_backup_s3_bucket_uid chars=ascii_lowercase,digits length=12') }}/backup"
+
+# example of rclone config to backup to a s3 bucket
+
+# rclone_remote: |
+#      [backup-selfhosted]
+#      type = s3
+#      provider = AWS
+#      env_auth = false
+#      access_key_id = AKIxxxxx
+#      secret_access_key = QMpoxxxx
+#      region = us-east-1
+#      acl = private
+#      server_side_encryption = AES256
+#      storage_class = STANDARD_IA

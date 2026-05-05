@@ -6,23 +6,21 @@ default-character-set = utf8mb4
 [mysqld]
 skip-name-resolve
 {% if groups['database'][0] != groups['nextcloud'][0] %}
+# Dedicated DB server: listen on all interfaces so Nextcloud can connect via TCP
 bind-address              = 0.0.0.0
+port                      = 3306
+{% else %}
+# Collocated DB server: disable TCP, Nextcloud connects via Unix socket only
+skip-networking
 {% endif %}
 
-max_connections           = 200
 # connect_timeout         = 5
 # wait_timeout            = 600
 # max_allowed_packet      = 16M
-# thread_cache_size       = 128
-# sort_buffer_size        = 4M
 # bulk_insert_buffer_size = 16M
-tmp_table_size            = 64M
-max_heap_table_size       = 64M
 
 # myisam_recover_options  = BACKUP
-# key_buffer_size         = 128M
 # open-files-limit        = 2000
-# table_open_cache        = 400
 # myisam_sort_buffer_size = 512M
 # concurrent_insert       = 2
 # read_buffer_size        = 2M
@@ -46,17 +44,14 @@ long_query_time           = 1
 # max_binlog_size         = 100M
 
 default_storage_engine         = InnoDB
-innodb_buffer_pool_size        = 256M
-innodb_buffer_pool_instances   = 1
-innodb_flush_log_at_trx_commit = 2
-innodb_log_buffer_size         = 32M
-innodb_max_dirty_pages_pct     = 90
 innodb_large_prefix            = true
 innodb_file_format             = barracuda
 innodb_file_per_table          = 1
-innodb_open_files              = 400
-innodb_io_capacity             = 400
-innodb_flush_method            = O_DIRECT
+
+# Tuning parameters from group_vars/all/database.yml (mariadb_tuning_parameters)
+{% for key, value in (mariadb_tuning_parameters | default({})).items() %}
+{{ '%-30s' | format(key) }} = {{ value }}
+{% endfor %}
 
 character-set-server           = utf8mb4
 collation-server               = utf8mb4_general_ci

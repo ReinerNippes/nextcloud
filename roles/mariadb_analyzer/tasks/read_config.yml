@@ -1,0 +1,78 @@
+---
+
+# Scenarios 1+2: read settings via unix socket on the DB server
+- name: Collect MariaDB version and settings (local/dedicated)
+  community.mysql.mysql_variables:
+    variable: "{{ item }}"
+    login_unix_socket: "{{ mariadb_socket[hostvars[_mariadb_delegate_host]['ansible_facts']['os_family']] }}"
+  register: _mariadb_vars_local
+  failed_when: false
+  loop:
+    - version
+    - innodb_buffer_pool_size
+    - innodb_log_buffer_size
+    - innodb_flush_log_at_trx_commit
+    - innodb_io_capacity
+    - innodb_read_io_threads
+    - innodb_write_io_threads
+    - max_connections
+    - thread_cache_size
+    - tmp_table_size
+    - max_heap_table_size
+    - query_cache_type
+    - query_cache_size
+    - join_buffer_size
+    - sort_buffer_size
+    - read_buffer_size
+    - read_rnd_buffer_size
+    - key_buffer_size
+    - table_open_cache
+  delegate_to: "{{ _mariadb_delegate_host }}"
+  become: true
+  when: not _mariadb_is_managed
+
+# Scenario 3: connect via TCP with admin credentials
+- name: Collect MariaDB version and settings (managed)
+  community.mysql.mysql_variables:
+    variable: "{{ item }}"
+    login_host: "{{ nextcloud_db.host }}"
+    login_port: "{{ nextcloud_db.port | default(3306) }}"
+    login_user: "{{ nextcloud_db.admin_user | default('root') }}"
+    login_password: "{{ nextcloud_db.admin_password }}"
+  register: _mariadb_vars_managed
+  failed_when: false
+  loop:
+    - version
+    - innodb_buffer_pool_size
+    - innodb_log_buffer_size
+    - innodb_flush_log_at_trx_commit
+    - innodb_io_capacity
+    - innodb_read_io_threads
+    - innodb_write_io_threads
+    - max_connections
+    - thread_cache_size
+    - tmp_table_size
+    - max_heap_table_size
+    - query_cache_type
+    - query_cache_size
+    - join_buffer_size
+    - sort_buffer_size
+    - read_buffer_size
+    - read_rnd_buffer_size
+    - key_buffer_size
+    - table_open_cache
+  when: _mariadb_is_managed
+
+- name: Set mariadb_vars from whichever scenario ran
+  ansible.builtin.set_fact:
+    _mariadb_raw_vars: "{{ (_mariadb_vars_managed if _mariadb_is_managed else _mariadb_vars_local).results }}"
+
+- name: Build mariadb_settings dict from variable list
+  ansible.builtin.set_fact:
+    mariadb_settings: >-
+      {{
+        mariadb_settings | default({}) | combine({item.item: item.msg | default(item.Value | default('N/A'))})
+      }}
+  loop: "{{ _mariadb_raw_vars }}"
+  loop_control:
+    label: "{{ item.item }}"

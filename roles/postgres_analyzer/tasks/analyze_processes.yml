@@ -1,18 +1,34 @@
 ---
 
+# Scenario 3 (managed): no access to DB server processes
+- name: Set empty process stats for managed database
+  ansible.builtin.set_fact:
+    pg_rss: []
+    pg_stats:
+      count: 0
+      min: 0
+      max: 0
+      avg: 0
+  when: _pg_is_managed
+
+# Scenarios 1+2: collect process stats directly on the DB host
 - name: Collect PostgreSQL backend RSS sizes
   ansible.builtin.command: "ps -o rss= -C postgres"
   register: pg_rss_raw
   changed_when: false
+  delegate_to: "{{ _pg_delegate_host }}"
+  when: not _pg_is_managed
 
 - name: Convert RSS values to list
   ansible.builtin.set_fact:
     pg_rss: "{{ pg_rss_raw.stdout_lines | map('int') | list }}"
+  when: not _pg_is_managed
 
 - name: Calculate process statistics
   ansible.builtin.set_fact:
     pg_stats:
       count: "{{ pg_rss | length }}"
-      min: "{{ pg_rss | min }}"
-      max: "{{ pg_rss | max }}"
-      avg: "{{ (pg_rss | sum / (pg_rss | length)) | round(0) }}"
+      min: "{{ pg_rss | min if pg_rss | length > 0 else 0 }}"
+      max: "{{ pg_rss | max if pg_rss | length > 0 else 0 }}"
+      avg: "{{ (pg_rss | sum / pg_rss | length) | round(0) if pg_rss | length > 0 else 0 }}"
+  when: not _pg_is_managed

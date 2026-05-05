@@ -33,7 +33,10 @@ groups:
   hapr: "hcloud_labels.group_hapr | default('') == 'true'"
   nextcloudoffice: "hcloud_labels.group_nextcloudoffice | default('') == 'true'"
   onlyoffice: "hcloud_labels.group_onlyoffice | default('') == 'true'"
+  eurooffice: "hcloud_labels.group_eurooffice | default('') == 'true'"
   whiteboard: "hcloud_labels.group_whiteboard | default('') == 'true'"
+  # Servers with no public inbound rules — only reachable via jump host
+  intern_only: "hcloud_labels.intern_only | default('') == 'true'"
   all: true
 
 # Use the server name (FQDN) as inventory hostname
@@ -41,8 +44,8 @@ groups:
 compose:
   ansible_user: "'ansible'"
   ansible_ssh_private_key_file: "'~/.ssh/id_ed25519'"
+  # Intern-only servers (intern_only label) are only reachable via a jump host.
+  # Uncomment and adapt the lines below if you have internal-only servers.
+  # ansible_host: "hcloud_private_networks[0].ip if hcloud_labels.get('intern_only') == 'true' else (hcloud_ipv4 | default(''))"
+  # ansible_ssh_common_args: "'-o StrictHostKeyChecking=no -o ProxyCommand=\"ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -W %h:%p ansible@<jump-host-fqdn>\"' if hcloud_labels.get('intern_only') == 'true' else ''"
   additional_fqdns: "hcloud_labels | dict2items | selectattr('key', 'match', '^additional_fqdn_') | items2dict"
-
-# Connection settings for all hosts
-# Override per-host in host_vars/ if needed
-connect_with: public_ipv4

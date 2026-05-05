@@ -16,9 +16,12 @@ password_vars:
     password: "{{ nextcloud_passwd | default('') }}"
   - name: database
     password: "{{ nextcloud_db.password | default('') }}"
+  - name: database_admin
+    password: "{{ nextcloud_db.admin_password | default('') }}"
   - name: restic_backup_secret
     password: "{{ restic_backup_secret | default('') }}"
   - name: redis
+    password: "{{ redis_password | default('') }}"
   - name: coturn
   - name: signal_nextcloud_secret
   - name: signal_internal_secret
@@ -26,21 +29,25 @@ password_vars:
   - name: collabora_admin
   - name: hp_shared_key
   - name: onlyoffice_secret
+  - name: eurooffice_secret
   - name: whiteboard_secret
 
-# example of rclone config to backup to a s3 bucket
+# OnlyOffice Server Domain Name
+# Default is the fqdn of the first host in the onlyoffice group
+# For collocated setup this equals nextcloud_fqdn
+onlyoffice_fqdn: "{{ hostvars[groups['onlyoffice'][0]]['inventory_hostname'] }}"
 
-# rclone_remote: |
-#      [backup-selfhosted]
-#      type = s3
-#      provider = AWS
-#      env_auth = false
-#      access_key_id = AKIxxxxx
-#      secret_access_key = QMpoxxxx
-#      region = us-east-1
-#      acl = private
-#      server_side_encryption = AES256
-#      storage_class = STANDARD_IA
+# Euro-Office Server Domain Name
+# Default is the fqdn of the first host in the eurooffice group
+# For collocated setup this equals nextcloud_fqdn
+eurooffice_fqdn: "{{ hostvars[groups['eurooffice'][0]]['inventory_hostname'] }}"
+
+# Nextcloud Office (Collabora) Server Domain Name
+# Default is the fqdn of the first host in the nextcloudoffice group
+# For collocated setup this equals nextcloud_fqdn
+nextcloudoffice_fqdn: "{{ hostvars[groups['nextcloudoffice'][0]]['inventory_hostname'] }}"
+
+
 
 systemd_service_path:
   RedHat: '/usr/lib/systemd/system'

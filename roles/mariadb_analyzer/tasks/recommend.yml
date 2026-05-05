@@ -1,0 +1,119 @@
+---
+
+# Gather DB server facts if not yet available (e.g. when called from
+# nextcloud-performance-tuning.yml which only targets hosts: nextcloud)
+- name: Gather DB server facts if not yet available
+  ansible.builtin.setup:
+  delegate_to: "{{ _mariadb_delegate_host }}"
+  delegate_facts: true
+  when:
+    - not _mariadb_is_managed
+    - not _mariadb_is_local
+    - hostvars[_mariadb_delegate_host]['ansible_facts'] is not defined
+      or hostvars[_mariadb_delegate_host]['ansible_facts']['memtotal_mb'] is not defined
+
+- name: Set DB host type and resource facts
+  ansible.builtin.set_fact:
+    mariadb_shared_host: "{{ _mariadb_is_local }}"
+    _mariadb_db_memtotal_mb: "{{ hostvars[_mariadb_delegate_host]['ansible_facts']['memtotal_mb'] | default(ansible_facts['memtotal_mb']) }}"
+    _mariadb_db_vcpus: "{{ hostvars[_mariadb_delegate_host]['ansible_facts']['processor_vcpus'] | default(ansible_facts['processor_vcpus']) }}"
+    _mariadb_db_virt_type: "{{ hostvars[_mariadb_delegate_host]['ansible_facts']['virtualization_type'] | default('kvm') }}"
+  when: not _mariadb_is_managed
+
+- name: Set DB host type for managed database
+  ansible.builtin.set_fact:
+    mariadb_shared_host: false
+    _mariadb_db_memtotal_mb: "{{ ansible_facts['memtotal_mb'] }}"
+    _mariadb_db_vcpus: "{{ ansible_facts['processor_vcpus'] }}"
+    _mariadb_db_virt_type: "{{ ansible_facts['virtualization_type'] | default('kvm') }}"
+  when: _mariadb_is_managed
+
+# ------------------------------------------------------------------ #
+# RAM budget
+# Collocated: 20 % of total RAM, dedicated: 50 %
+# ------------------------------------------------------------------ #
+- name: Determine RAM budget for MariaDB
+  ansible.builtin.set_fact:
+    mariadb_reserved_ram_mb: "{{ (_mariadb_db_memtotal_mb | int * (0.20 if mariadb_shared_host else 0.50)) | int }}"
+
+# ------------------------------------------------------------------ #
+# InnoDB buffer pool: 70 % of the reserved RAM budget.
+# ------------------------------------------------------------------ #
+- name: Calculate InnoDB buffer pool size
+  ansible.builtin.set_fact:
+    _mariadb_bp_mb: "{{ (mariadb_reserved_ram_mb | int * 0.70) | int }}"
+
+# ------------------------------------------------------------------ #
+# Recommended settings
+# ------------------------------------------------------------------ #
+- name: Calculate recommended MariaDB settings
+  ansible.builtin.set_fact:
+    mariadb_recommended:
+      max_connections: "{{ 50 if mariadb_shared_host else 150 }}"
+      innodb_buffer_pool_size: "{{ _mariadb_bp_mb | int }}M"
+      innodb_log_buffer_size: "{{ [64, (mariadb_reserved_ram_mb | int * 0.05) | int] | max }}M"
+      innodb_flush_log_at_trx_commit: 2
+      innodb_io_capacity: "{{ 400 if _mariadb_db_virt_type == 'lxc' else 1000 }}"
+      innodb_read_io_threads: "{{ [4, _mariadb_db_vcpus | int] | max }}"
+      innodb_write_io_threads: "{{ [4, _mariadb_db_vcpus | int] | max }}"
+      thread_cache_size: "{{ [8, (mariadb_reserved_ram_mb | int * 0.01) | int] | max }}"
+      tmp_table_size: "{{ [64, (mariadb_reserved_ram_mb | int * 0.05) | int] | min }}M"
+      max_heap_table_size: "{{ [64, (mariadb_reserved_ram_mb | int * 0.05) | int] | min }}M"
+      table_open_cache: "{{ [400, (_mariadb_db_vcpus | int * 100)] | max }}"
+      join_buffer_size: "4M"
+      sort_buffer_size: "4M"
+      read_buffer_size: "2M"
+      read_rnd_buffer_size: "2M"
+      key_buffer_size: "32M"
+
+# ------------------------------------------------------------------ #
+# Display report
+# ------------------------------------------------------------------ #
+- name: Display MariaDB analysis summary
+  ansible.builtin.debug:
+    msg:
+      - "MariaDB {{ mariadb_settings.version | default('N/A') }} Analysis Report"
+      - ""
+      - "Host type:"
+      - "  Deployment: {{ 'collocated' if mariadb_shared_host else ('managed service' if _mariadb_is_managed else 'dedicated server') }}"
+      - "  DB server total RAM: {{ _mariadb_db_memtotal_mb }} MB"
+      - "  Reserved for MariaDB: {{ mariadb_reserved_ram_mb }} MB"
+      - "  DB server CPU cores: {{ _mariadb_db_vcpus }}"
+      - ""
+      - "Process stats ({{ 'N/A – managed service' if _mariadb_is_managed else mariadb_proc_stats.count | string + ' processes' }}):"
+      - "  RSS min/avg/max: {{ mariadb_proc_stats.min }}/{{ mariadb_proc_stats.avg }}/{{ mariadb_proc_stats.max }} kB"
+      - ""
+      - "Current configuration:"
+      - "  max_connections         = {{ mariadb_settings.max_connections | default('N/A') }}"
+      - "  innodb_buffer_pool_size = {{ (mariadb_settings.innodb_buffer_pool_size | default(0) | int / 1048576) | round(0) | int }} MB"
+      - "  innodb_log_buffer_size  = {{ (mariadb_settings.innodb_log_buffer_size | default(0) | int / 1048576) | round(0) | int }} MB"
+      - "  innodb_flush_log_at_trx_commit = {{ mariadb_settings.innodb_flush_log_at_trx_commit | default('N/A') }}"
+      - "  innodb_io_capacity      = {{ mariadb_settings.innodb_io_capacity | default('N/A') }}"
+      - "  innodb_read_io_threads  = {{ mariadb_settings.innodb_read_io_threads | default('N/A') }}"
+      - "  innodb_write_io_threads = {{ mariadb_settings.innodb_write_io_threads | default('N/A') }}"
+      - "  thread_cache_size       = {{ mariadb_settings.thread_cache_size | default('N/A') }}"
+      - "  tmp_table_size          = {{ (mariadb_settings.tmp_table_size | default(0) | int / 1048576) | round(0) | int }} MB"
+      - "  max_heap_table_size     = {{ (mariadb_settings.max_heap_table_size | default(0) | int / 1048576) | round(0) | int }} MB"
+      - "  table_open_cache        = {{ mariadb_settings.table_open_cache | default('N/A') }}"
+      - "  join_buffer_size        = {{ (mariadb_settings.join_buffer_size | default(0) | int / 1048576) | round(0) | int }} MB"
+      - "  sort_buffer_size        = {{ (mariadb_settings.sort_buffer_size | default(0) | int / 1048576) | round(0) | int }} MB"
+      - "  key_buffer_size         = {{ (mariadb_settings.key_buffer_size | default(0) | int / 1048576) | round(0) | int }} MB"
+      - ""
+      - "Recommended settings:"
+      - "  max_connections         = {{ mariadb_recommended.max_connections }}"
+      - "  innodb_buffer_pool_size = {{ mariadb_recommended.innodb_buffer_pool_size }}"
+      - "  innodb_log_buffer_size  = {{ mariadb_recommended.innodb_log_buffer_size }}"
+      - "  innodb_flush_log_at_trx_commit = {{ mariadb_recommended.innodb_flush_log_at_trx_commit }}"
+      - "  innodb_io_capacity      = {{ mariadb_recommended.innodb_io_capacity }}"
+      - "  innodb_read_io_threads  = {{ mariadb_recommended.innodb_read_io_threads }}"
+      - "  innodb_write_io_threads = {{ mariadb_recommended.innodb_write_io_threads }}"
+      - "  thread_cache_size       = {{ mariadb_recommended.thread_cache_size }}"
+      - "  tmp_table_size          = {{ mariadb_recommended.tmp_table_size }}"
+      - "  max_heap_table_size     = {{ mariadb_recommended.max_heap_table_size }}"
+      - "  table_open_cache        = {{ mariadb_recommended.table_open_cache }}"
+      - "  join_buffer_size        = {{ mariadb_recommended.join_buffer_size }}"
+      - "  sort_buffer_size        = {{ mariadb_recommended.sort_buffer_size }}"
+      - "  key_buffer_size         = {{ mariadb_recommended.key_buffer_size }}"
+      - ""
+      - "To apply recommendations, set mariadb_tuning_parameters in group_vars/all/database.yml"
+      - "and rerun the playbook."

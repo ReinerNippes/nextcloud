@@ -8,6 +8,7 @@ Ansible roles to install and configure the database management system for Nextcl
 
 - Debian / Ubuntu
 - RHEL / AlmaLinux / Rocky Linux
+- openSUSE / SLES
 
 ## Role Selection
 
@@ -30,9 +31,9 @@ roles:
 3. **Initializes the data directory** (RedHat only — Debian handles this automatically)
 4. **Starts and enables** the PostgreSQL service
 5. **Applies tuning parameters** via `ALTER SYSTEM` (from `postgres_tuning_parameters`)
-6. **Configures `pg_hba.conf`** — allows the Nextcloud user to connect via unix socket with MD5 authentication
+6. **Configures `pg_hba.conf`** — allows the Nextcloud user to connect via unix socket with `scram-sha-256` authentication; configures TCP access from the Nextcloud host when running on a dedicated database server
 7. **Creates the Nextcloud database, user, and grants privileges** (schema `public`, default privileges on tables)
-8. **Sets environment variables** (`PGDATA`, `PATH`) via `/etc/profile.d/postgres.sh` (on older distributions)
+8. **Sets environment variables** (`PGDATA`, `PATH`) via `/etc/profile.d/postgres.sh` (on older distributions only)
 
 ### Task Flow
 
@@ -40,8 +41,9 @@ roles:
 tasks/main.yml
   ├── Debian.yml          Install packages, generate locales
   │   or RedHat.yml       Install packages (from PGDG repo)
+  │   or Suse.yml         Install packages (from PGDG repo via zypper)
   ├── initialize.yml      Set env vars, init data dir, start service
-  ├── configure.yml       ALTER SYSTEM tuning, pg_hba.conf, socket dirs
+  ├── configure.yml       ALTER SYSTEM tuning, pg_hba.conf (local + TCP for dedicated server)
   └── database.yml        Create database, user, and grant privileges
 ```
 
@@ -56,6 +58,9 @@ tasks/main.yml
 | `nextcloud_db.name` | `nextcloud` | Database name |
 | `nextcloud_db.user` | `nextcloud` | Database user |
 | `nextcloud_db.password` | *(empty → auto-generated)* | Database password |
+| `nextcloud_db.admin_user` | `postgres` | Admin user — required for managed DB or dedicated DB server when the admin is not `postgres` |
+| `nextcloud_db.admin_password` | *(empty)* | Admin password — required for managed DB or dedicated DB server |
+| `nextcloud_db.managed` | `false` | Set to `true` for external managed database services (e.g. AWS RDS) — skips installation, only creates the DB/user |
 | `postgresql_version` | `18` | PostgreSQL major version to install |
 | `postgres_tuning_parameters` | *(see below)* | List of PostgreSQL `ALTER SYSTEM` parameters |
 
@@ -87,22 +92,35 @@ For detailed analysis and tuning under real load, see the [PostgreSQL Analyzer](
 
 #### Internal variables (`group_vars/all/database/main.yml`)
 
-| Variable | Debian | RedHat |
-|----------|--------|--------|
-| `postgresql_packages` | `postgresql-17`, `python3-psycopg2` | `postgresql17-server`, `python3-psycopg2` |
-| `postgresql_data_dir` | `/var/lib/postgresql/17/main` | `/var/lib/pgsql/17/data` |
-| `postgresql_bin_path` | `/usr/lib/postgresql/17/bin` | `/usr/pgsql-17/bin` |
-| `postgresql_config_path` | `/etc/postgresql/17/main` | `/var/lib/pgsql/17/data` |
-| `postgresql_daemon_service_name` | `postgresql@17-main` | `postgresql-17` |
+| Variable | Debian | RedHat | SUSE |
+|----------|--------|--------|------|
+| `postgresql_packages` | `postgresql-18` | `postgresql18-server` | `postgresql18-server` |
+| `postgresql_python_packages` | `python3-psycopg2` | `python3-psycopg2` | `python313-psycopg2` |
+| `postgresql_data_dir` | `/var/lib/postgresql/18/main` | `/var/lib/pgsql/18/data` | `/var/lib/pgsql/18/data` |
+| `postgresql_bin_path` | `/usr/lib/postgresql/18/bin` | `/usr/pgsql-18/bin` | `/usr/pgsql-18/bin` |
+| `postgresql_config_path` | `/etc/postgresql/18/main` | `/var/lib/pgsql/18/data` | `/var/lib/pgsql/18/data` |
+| `postgresql_daemon_service_name` | `postgresql@18-main` | `postgresql-18` | `postgresql-18` |
 
 ### Platform Differences
 
-| Aspect | Debian / Ubuntu | RedHat / Alma / Rocky |
-|--------|-----------------|----------------------|
-| Locale generation | `locale_gen` module | Not needed |
-| Data directory init | Automatic at install | Manual via `postgresql-setup initdb` |
-| Config path | `/etc/postgresql/17/main` | `/var/lib/pgsql/17/data` |
-| Environment profile | Not deployed (modern systems) | Not deployed (modern systems) |
+| Aspect | Debian / Ubuntu | RedHat / Alma / Rocky | SUSE / openSUSE |
+|--------|-----------------|----------------------|------------------|
+| Package manager | `apt` | `dnf` | `zypper` |
+| Locale generation | `locale_gen` module | Not needed | Not needed |
+| Data directory init | Automatic at install | Manual via `postgresql-setup initdb` | Manual via `postgresql-setup initdb` |
+| Config path | `/etc/postgresql/18/main` | `/var/lib/pgsql/18/data` | `/var/lib/pgsql/18/data` |
+| Environment profile | Not deployed (modern systems) | Not deployed (modern systems) | Not deployed (modern systems) |
+
+### Dedicated Database Server
+
+When the `database` inventory group contains a host different from the `nextcloud` host, the postgres role automatically:
+
+- Configures PostgreSQL to **listen on all interfaces** (`listen_addresses = *`)
+- Determines the **source IP** the Nextcloud host uses to reach the DB server via `ip route get` (delegated to the Nextcloud host)
+- Adds a `pg_hba.conf` entry allowing **TCP access from that IP** with `scram-sha-256`
+- Cleans up **stale TCP access entries** for previously used source IPs
+
+No additional variables are required — the role detects the topology from the inventory groups.
 
 ### Unused Artifacts
 
@@ -118,7 +136,7 @@ For detailed analysis and tuning under real load, see the [PostgreSQL Analyzer](
 ### What This Role Does
 
 1. **Installs MariaDB** packages (distribution packages on Debian, MariaDB repo on RedHat)
-2. **Deploys a custom configuration file** (`90-nextcloud.cfg`) via drop-in — stock config is not modified
+2. **Deploys a custom configuration file** (`90-nextcloud.cnf`) via drop-in — stock config is not modified
 3. **Starts and enables** the MariaDB service
 4. **Removes the anonymous user** and **test database** for security hardening
 
@@ -128,7 +146,7 @@ For detailed analysis and tuning under real load, see the [PostgreSQL Analyzer](
 tasks/main.yml
   ├── apt.yml             Install packages (Debian/Ubuntu)
   │   or dnf.yml          Add MariaDB repo, install packages, open firewall port (RedHat)
-  ├── Deploy 90-nextcloud.cfg (my.cnf.j2 template)
+  ├── Deploy 90-nextcloud.cnf (my.cnf.j2 template)
   ├── Start and enable MariaDB
   └── Remove anonymous user and test database
 ```
@@ -154,29 +172,58 @@ The template deploys a drop-in configuration file with Nextcloud-optimized setti
 | `nextcloud_db.name` | `nextcloud` | Database name |
 | `nextcloud_db.user` | `nextcloud` | Database user |
 | `nextcloud_db.password` | *(empty → auto-generated)* | Database password |
+| `nextcloud_db.admin_user` | `root` | Admin user — required for managed DB or dedicated DB server |
+| `nextcloud_db.admin_password` | *(empty)* | Admin password — required for managed DB or dedicated DB server |
+| `nextcloud_db.managed` | `false` | Set to `true` for external managed database services — skips installation |
+| `mariadb_tuning_parameters` | *(see below)* | Map of MariaDB configuration parameters — overrides `90-nextcloud.cnf` defaults |
 
-#### Internal variables (`roles/mariadb/vars/main.yml`)
+#### Tuning Parameters (`mariadb_tuning_parameters`)
 
-| Variable | Debian | RedHat |
-|----------|--------|--------|
-| `mariadb_conf_dir` | `/etc/mysql/mariadb.conf.d/` | `/etc/my.cnf.d` |
-| `mariadb_socket` | `/var/run/mysqld/mysqld.sock` | `/var/lib/mysql/mysql.sock` |
+When `mariadb_tuning_parameters` is defined, it overrides the static values in `90-nextcloud.cnf`. Use the `mariadb_analyzer` role to generate recommendations under real load:
+
+```yaml
+mariadb_tuning_parameters:
+  max_connections: 150
+  innodb_buffer_pool_size: "512M"
+  innodb_buffer_pool_instances: 1
+  innodb_log_buffer_size: "64M"
+  innodb_flush_log_at_trx_commit: 2
+  innodb_io_capacity: 1000
+  innodb_read_io_threads: 4
+  innodb_write_io_threads: 4
+  thread_cache_size: 16
+  tmp_table_size: "64M"
+  max_heap_table_size: "64M"
+  table_open_cache: 400
+  join_buffer_size: "4M"
+  sort_buffer_size: "4M"
+  key_buffer_size: "32M"
+```
+
+#### Internal variables (`group_vars/all/database/main.yml`)
+
+| Variable | Debian | RedHat | SUSE |
+|----------|--------|--------|------|
+| `mariadb_conf_dir` | `/etc/mysql/mariadb.conf.d/` | `/etc/my.cnf.d` | `/etc/my.cnf.d` |
+| `mariadb_socket` | `/var/run/mysqld/mysqld.sock` | `/var/lib/mysql/mysql.sock` | `/var/run/mysql/mysql.sock` |
 
 ### Installed Packages
 
-| Debian / Ubuntu | RedHat / Alma / Rocky |
-|-----------------|----------------------|
-| `mariadb-server` (distro) | `MariaDB-server` (MariaDB repo) |
-| `mariadb-client` | `MariaDB-client` |
-| `python3-pymysql` | `python3-PyMySQL` |
+| Debian / Ubuntu | RedHat / Alma / Rocky | SUSE / openSUSE |
+|-----------------|----------------------|------------------|
+| `mariadb-server` (distro) | `MariaDB-server` (MariaDB repo) | `mariadb` (distro) |
+| `mariadb-client` | `MariaDB-client` | `mariadb-client` |
+| `python3-pymysql` | `python3-PyMySQL` | `python3-PyMySQL` |
 
 ### Platform Differences
 
-| Aspect | Debian / Ubuntu | RedHat / Alma / Rocky |
-|--------|-----------------|----------------------|
-| Package source | Distribution packages | MariaDB YUM repository |
-| Firewall | Not managed | Opens port 3306 via firewalld (remote DB only) |
-| Config drop-in path | `/etc/mysql/mariadb.conf.d/90-nextcloud.cfg` | `/etc/my.cnf.d/90-nextcloud.cfg` |
+| Aspect | Debian / Ubuntu | RedHat / Alma / Rocky | SUSE / openSUSE |
+|--------|-----------------|----------------------|------------------|
+| Package source | Distribution packages | MariaDB YUM repository | Distribution packages |
+| Networking (collocated) | `skip-networking` (Unix socket only) | `skip-networking` (Unix socket only) | `skip-networking` (Unix socket only) |
+| Networking (dedicated) | `bind-address = 0.0.0.0` | `bind-address = 0.0.0.0` | `bind-address = 0.0.0.0` |
+| Firewall | Not managed | Opens port 3306 via firewalld (remote DB only) | Not managed |
+| Config drop-in path | `/etc/mysql/mariadb.conf.d/90-nextcloud.cnf` | `/etc/my.cnf.d/90-nextcloud.cnf` | `/etc/my.cnf.d/90-nextcloud.cnf` |
 
 ### Unused Artifacts
 
