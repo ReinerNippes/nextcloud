@@ -15,7 +15,7 @@
 - name: Configure mariadb
   ansible.builtin.template:
     src: my.cnf.j2
-    dest: "{{ mariadb_conf_dir[ansible_facts['os_family']] }}/90-nextcloud.cfg"
+    dest: "{{ mariadb_conf_dir[ansible_facts['os_family']] }}/90-nextcloud.cnf"
     owner: root
     group: root
     mode: "0644"

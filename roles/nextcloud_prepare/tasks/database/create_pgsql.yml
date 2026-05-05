@@ -1,27 +1,54 @@
 ---
 # create nextcloud database
 #
-# Local (host=localhost): connect via unix socket as postgres (peer auth)
-# Remote (host!=localhost): connect via TCP with admin credentials
+# Scenario 1 – Collocated (nextcloud_db.host = localhost):
+#   PostgreSQL runs on the same server as Nextcloud.
+#   Tasks delegate to self and connect via unix socket (postgres peer auth).
+#   The nextcloud user connects via unix socket with password (scram-sha-256).
+#
+# Scenario 2 – Dedicated server (nextcloud_db.managed = false, host != localhost):
+#   PostgreSQL runs on a separate server that is set up by this playbook.
+#   DB setup (CREATE DATABASE / CREATE USER / GRANT) is delegated to the database
+#   server and runs there locally via peer auth — no TCP admin access needed.
+#   The nextcloud application connects to the DB via the private network.
+#   nextcloud_db.host must be set to the private IP of the database server.
+#
+# Scenario 3 – Managed DB (nextcloud_db.managed = true):
+#   External managed database service (e.g. AWS RDS, managed PostgreSQL).
+#   Tasks run on the nextcloud host and connect via TCP using admin credentials.
+#   No postgres role is executed for this scenario.
 
-- name: Set PostgreSQL login parameters
+- name: Determine PostgreSQL deployment scenario
   ansible.builtin.set_fact:
     _pg_is_local: "{{ nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] }}"
-    _pg_login_host: "{{ none if nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] else nextcloud_db.host }}"
-    _pg_login_port: "{{ none if nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] else (nextcloud_db.port | default(5432)) }}"
+    _pg_is_managed: "{{ nextcloud_db.managed | default(false) | bool }}"
 
-- name: Create {{ nextcloud_db.name }} db
+- name: Set target host for local/dedicated database tasks
+  ansible.builtin.set_fact:
+    _pg_setup_delegate: >-
+      {{
+        groups['database'][0]
+        if ('database' in groups
+            and groups['database'] | length > 0
+            and not _pg_is_local
+            and not _pg_is_managed)
+        else inventory_hostname
+      }}
+
+# --- Scenarios 1 + 2: DB managed by this playbook ---
+# Delegated to the DB server and executed locally there via peer auth.
+# No TCP admin access or postgres superuser password needed.
+
+- name: Create {{ nextcloud_db.name }} database
   community.postgresql.postgresql_db:
     name: "{{ nextcloud_db.name }}"
     state: present
     encoding: UTF-8
     template: template0
-    login_host: "{{ _pg_login_host | default(omit, true) }}"
-    login_port: "{{ _pg_login_port | default(omit, true) }}"
-    login_user: "{{ omit if _pg_is_local else nextcloud_db.admin_user | default('postgres') }}"
-    login_password: "{{ omit if _pg_is_local else nextcloud_db.admin_password | default(omit) }}"
-  become: "{{ _pg_is_local }}"
-  become_user: "{{ 'postgres' if _pg_is_local else omit }}"
+  become: true
+  become_user: postgres
+  delegate_to: "{{ _pg_setup_delegate }}"
+  when: not _pg_is_managed
 
 - name: Create {{ nextcloud_db.user }} account
   community.postgresql.postgresql_user:
@@ -29,12 +56,10 @@
     login_db: "{{ nextcloud_db.name }}"
     name: "{{ nextcloud_db.user }}"
     password: "{{ passwords.database }}"
-    login_host: "{{ _pg_login_host | default(omit, true) }}"
-    login_port: "{{ _pg_login_port | default(omit, true) }}"
-    login_user: "{{ omit if _pg_is_local else nextcloud_db.admin_user | default('postgres') }}"
-    login_password: "{{ omit if _pg_is_local else nextcloud_db.admin_password | default(omit) }}"
-  become: "{{ _pg_is_local }}"
-  become_user: "{{ 'postgres' if _pg_is_local else omit }}"
+  become: true
+  become_user: postgres
+  delegate_to: "{{ _pg_setup_delegate }}"
+  when: not _pg_is_managed
 
 - name: Grant all privileges on schema public to {{ nextcloud_db.user }}
   community.postgresql.postgresql_privs:
@@ -43,12 +68,10 @@
     type: schema
     obj: public
     role: "{{ nextcloud_db.user }}"
-    login_host: "{{ _pg_login_host | default(omit, true) }}"
-    login_port: "{{ _pg_login_port | default(omit, true) }}"
-    login_user: "{{ omit if _pg_is_local else nextcloud_db.admin_user | default('postgres') }}"
-    login_password: "{{ omit if _pg_is_local else nextcloud_db.admin_password | default(omit) }}"
-  become: "{{ _pg_is_local }}"
-  become_user: "{{ 'postgres' if _pg_is_local else omit }}"
+  become: true
+  become_user: postgres
+  delegate_to: "{{ _pg_setup_delegate }}"
+  when: not _pg_is_managed
 
 - name: Grant default privileges on tables to {{ nextcloud_db.user }}
   community.postgresql.postgresql_privs:
@@ -58,9 +81,67 @@
     obj: TABLES
     schema: public
     role: "{{ nextcloud_db.user }}"
-    login_host: "{{ _pg_login_host | default(omit, true) }}"
-    login_port: "{{ _pg_login_port | default(omit, true) }}"
-    login_user: "{{ omit if _pg_is_local else nextcloud_db.admin_user | default('postgres') }}"
-    login_password: "{{ omit if _pg_is_local else nextcloud_db.admin_password | default(omit) }}"
-  become: "{{ _pg_is_local }}"
-  become_user: "{{ 'postgres' if _pg_is_local else omit }}"
+  become: true
+  become_user: postgres
+  delegate_to: "{{ _pg_setup_delegate }}"
+  when: not _pg_is_managed
+
+# --- Scenario 3: Managed DB service ---
+# Connect via TCP from the nextcloud host using admin credentials.
+
+- name: Install PostgreSQL client packages for managed database setup
+  ansible.builtin.package:
+    name: "{{ postgresql_python_packages[ansible_facts['os_family']] }}"
+    state: present
+  when: _pg_is_managed
+
+- name: Create {{ nextcloud_db.name }} database (managed)
+  community.postgresql.postgresql_db:
+    name: "{{ nextcloud_db.name }}"
+    state: present
+    encoding: UTF-8
+    template: template0
+    login_host: "{{ nextcloud_db.host }}"
+    login_port: "{{ nextcloud_db.port | default(5432) }}"
+    login_user: "{{ nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ passwords.database_admin }}"
+  when: _pg_is_managed
+
+- name: Create {{ nextcloud_db.user }} account (managed)
+  community.postgresql.postgresql_user:
+    encrypted: true
+    login_db: "{{ nextcloud_db.name }}"
+    name: "{{ nextcloud_db.user }}"
+    password: "{{ passwords.database }}"
+    login_host: "{{ nextcloud_db.host }}"
+    login_port: "{{ nextcloud_db.port | default(5432) }}"
+    login_user: "{{ nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ passwords.database_admin }}"
+  when: _pg_is_managed
+
+- name: Grant all privileges on schema public to {{ nextcloud_db.user }} (managed)
+  community.postgresql.postgresql_privs:
+    login_db: "{{ nextcloud_db.name }}"
+    privs: ALL
+    type: schema
+    obj: public
+    role: "{{ nextcloud_db.user }}"
+    login_host: "{{ nextcloud_db.host }}"
+    login_port: "{{ nextcloud_db.port | default(5432) }}"
+    login_user: "{{ nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ passwords.database_admin }}"
+  when: _pg_is_managed
+
+- name: Grant default privileges on tables to {{ nextcloud_db.user }} (managed)
+  community.postgresql.postgresql_privs:
+    login_db: "{{ nextcloud_db.name }}"
+    privs: ALL
+    type: default_privs
+    obj: TABLES
+    schema: public
+    role: "{{ nextcloud_db.user }}"
+    login_host: "{{ nextcloud_db.host }}"
+    login_port: "{{ nextcloud_db.port | default(5432) }}"
+    login_user: "{{ nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ passwords.database_admin }}"
+  when: _pg_is_managed

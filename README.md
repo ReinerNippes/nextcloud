@@ -64,6 +64,7 @@ Testet Linux Flavours:
 | Talk HPB (Apache) | 🟡 | 🟡 | ✅ | 🟡 | 🟡 | ✅ | 🟡 |
 | Nextcloud Office (nginx) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 🟡 |
 | Nextcloud Office (Apache) | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ | 🟡 |
+| EuroOffice | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ | ✅ |
 | OnlyOffice | 🟡 | 🟡 | ✅ | 🟡 | ✅ | ✅ | ✅ |
 | Fulltextsearch | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | ExApps (HaPR) | 🔒 | 🔒 | 🔒 | 🟡 | 🔒 | 🔒 | 🟡 | 🔒 |
@@ -73,6 +74,8 @@ Testet Linux Flavours:
 | CrowdSec | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | SMTP Relayserver | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
+> **Note:** EuroOffice is currently only a preview. For more information, see the [Nextcloud Blog](https://nextcloud.com/de/blog/press_releases/industry-initiative-launches-euro-office-as-true-sovereign-office-suite/).
+
 ### Dedicated Server Offloading Status
 
 | Component | Collocation | Dedicated Server | Notes |
@@ -81,8 +84,8 @@ Testet Linux Flavours:
 | Signaling / Recording | ❌ | ✅ | Recommended for HPB setups |
 | OnlyOffice | ✅ | ✅ | Functional. |
 | NextcloudOffice | ✅ | ✅ | Functional. |
-| Database (PostgreSQL/MariaDB) | ✅ | 🟡 | Work in progress |
-| Redis | ✅ | 🟡 | Work in progress |
+| Database (PostgreSQL/MariaDB) | ✅ | ✅ | Functional. |
+| Redis | ✅ | ✅ | Functional. |
 | Whiteboard | ✅ | ✅ | Excalidraw-based collaborative whiteboard with WebSocket server |
 
 > 🔒 **Self-signed / test certificates:** When using self-signed or test certificates, you must visit the URL of each additional service (Office, Whiteboard, Signal) once in every browser you intend to use and accept the certificate. This does not work for ExApps (HaPR), because no browser is involved in those server-to-server connections.
@@ -200,9 +203,10 @@ https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/ssh
 
 To get started, copy one of the example inventory files to a new file named `inventory` in the project root and adapt it to your environment:
 
-- [inventory-localhost](inventory-localhost) (for local installations)
-- [inventory-remote-single-server](inventory-remote-single-server) (for single remote server)
-- [inventory-remote-multi-server](inventory-remote-multi-server) (for multi-tier setups)
+- [inventory-localhost.example](inventory-localhost.example) (for local installations)
+- [inventory-remote-single-server.example](inventory-remote-single-server.example) (for single remote server)
+- [inventory-remote-multi-server.example](inventory-remote-multi-server.example) (for multi-tier setups)
+- [inventory-remote-multi-server-shared-office.example](inventory-remote-multi-server-shared-office.example) (for multi-tier setups where Nextcloud Office and Whiteboard share one host)
 
 For cloud deployments provisioned with Pulumi, use dynamic inventories instead of static files. See [Dynamic Cloud Inventories](docs/DYNAMIC-INVENTORY-README.md) for details on Hetzner and Scaleway.
 
@@ -325,7 +329,7 @@ Users and passwords have been set according to the entries in the inventory if d
 
 ### Nextcloud Talk and High Performance Backend (HPB)
 
-For detailed instructions on how to install and configure Nextcloud Talk and the High Performance Backend (HPB) with this playbook using the  [inventory-remote-multi-server](inventory-remote-multi-server), see:
+For detailed instructions on how to install and configure Nextcloud Talk and the High Performance Backend (HPB) with this playbook using the [inventory-remote-multi-server.example](inventory-remote-multi-server.example), see:
 
 When HPB is enabled, the `signal` role must run on a dedicated second server (separate from the main Nextcloud host).
 
@@ -368,10 +372,11 @@ You can find full explanations of how each analyzer works, what the output means
 
 - 	[PHP‑FPM Analyzer README](docs/PHP‑FPM_Analyzer.md)
 - 	[PostgreSQL Analyzer README](docs/PostgreSQL_Analyzer.md)
+- 	[MariaDB Analyzer README](docs/MariaDB_Analyzer.md)
 
 Together, these tools provide a comprehensive tuning workflow: baseline analysis after installation, followed by performance‑driven tuning under real load.
 
-> **Note:** The tuning recommendations are based on publicly available best practices and internet research. They are not guaranteed to be optimal for every environment. Suggestions and contributions are welcome — feel free to open an issue or pull request. A MySQL/MariaDB tuning analyzer is planned but not yet implemented.
+> **Note:** The tuning recommendations are based on publicly available best practices and internet research. They are not guaranteed to be optimal for every environment. Suggestions and contributions are welcome — feel free to open an issue or pull request.
 
 ----------
 
@@ -403,6 +408,7 @@ For detailed information on how individual roles work and how to configure them:
 - [Nextcloud Roles](docs/NEXTCLOUD_README.md) — Nextcloud preparation, installation, and app configuration (split into nextcloud_prepare, nextcloud_install, nextcloud_app)
 - [Nextcloud Office Role (Collabora)](docs/NEXTCLOUDOFFICE-README.md) — Collabora container deployment (collocated/dedicated) and richdocuments integration
 - [OnlyOffice Role](docs/ONLYOFFICE-README.md) — OnlyOffice Document Server deployment (collocated/dedicated) and Nextcloud app integration
+- [EuroOffice Role](docs/EUROOFFICE-README.md) — Euro-Office Document Server deployment (collocated/dedicated) and Nextcloud app integration *(preview)*
 - [OCC Ansible Collection](docs/OCC-MODULES-README.md) — `reinernippes.nextcloud` collection for idempotent Nextcloud management via occ
 
 ----------

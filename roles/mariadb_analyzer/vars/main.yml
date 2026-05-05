@@ -1,0 +1,3 @@
+---
+# no role-internal vars needed — mariadb_socket and mariadb_conf_dir
+# are defined in group_vars/all/database/main.yml

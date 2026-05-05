@@ -3,7 +3,7 @@
 
 - name: Install postgres server
   ansible.builtin.dnf:
-    name: "{{ postgresql_packages[ansible_facts['os_family']] }}"
+    name: "{{ postgresql_packages[ansible_facts['os_family']] + postgresql_python_packages[ansible_facts['os_family']] }}"
     state: latest
     exclude: python-unversioned-command
     disablerepo: '*'

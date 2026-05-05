@@ -16,11 +16,35 @@
     contype: local
     databases: nextcloud
     users: nextcloud
-    method: md5
+    method: scram-sha-256
   notify: Restart postgresql
 
 # When the database server is separate from the nextcloud server,
-# PostgreSQL must listen on the network and allow TCP connections.
+# PostgreSQL must listen on the network and allow TCP connections
+# from the nextcloud host via the private network.
+
+# Ask the nextcloud host which source IP it would use to reach the DB server.
+# This is more reliable than any range-based heuristic (avoids Docker bridges etc.).
+- name: Determine source IP nextcloud host uses to reach the database server
+  ansible.builtin.command:
+    cmd: "ip route get {{ nextcloud_db.host }}"
+  register: _ip_route_to_db
+  delegate_to: "{{ groups['nextcloud'][0] }}"
+  changed_when: false
+  when:
+    - "'database' in groups"
+    - "groups['database'] | length > 0"
+    - "'nextcloud' in groups"
+    - "groups['nextcloud'] | length > 0"
+    - "groups['database'][0] != groups['nextcloud'][0]"
+
+- name: Parse source IP from routing output
+  ansible.builtin.set_fact:
+    _postgres_allowed_ipv4_effective: "{{ _ip_route_to_db.stdout | regex_search('src (\\S+)', '\\1') | first }}"
+  when:
+    - _ip_route_to_db is not skipped
+    - _ip_route_to_db.stdout is defined
+
 - name: Listen on all interfaces for remote access
   become: true
   become_user: postgres
@@ -28,18 +52,44 @@
     param: listen_addresses
     value: "*"
   notify: Restart postgresql
-  when: groups['database'][0] != groups['nextcloud'][0]
+  when:
+    - "'database' in groups"
+    - "groups['database'] | length > 0"
+    - "'nextcloud' in groups"
+    - "groups['nextcloud'] | length > 0"
+    - "groups['database'][0] != groups['nextcloud'][0]"
 
-- name: Allow nextcloud server to connect via TCP
+- name: Remove stale TCP access entries for nextcloud from pg_hba.conf
+  ansible.builtin.lineinfile:
+    path: "{{ postgresql_config_path[ansible_facts['os_family']] }}/pg_hba.conf"
+    regexp: '^host\s+{{ nextcloud_db.name | regex_escape }}\s+{{ nextcloud_db.user | regex_escape }}\s+(?!{{ _postgres_allowed_ipv4_effective | regex_escape }}/).*'
+    state: absent
+  notify: Restart postgresql
+  when:
+    - "'database' in groups"
+    - "groups['database'] | length > 0"
+    - "'nextcloud' in groups"
+    - "groups['nextcloud'] | length > 0"
+    - "groups['database'][0] != groups['nextcloud'][0]"
+
+- name: Allow nextcloud server to connect via TCP (private network)
   community.postgresql.postgresql_pg_hba:
     dest: "{{ postgresql_config_path[ansible_facts['os_family']] }}/pg_hba.conf"
     contype: host
     databases: "{{ nextcloud_db.name }}"
     users: "{{ nextcloud_db.user }}"
-    source: "{{ postgres_allowed_ipv4 }}/32"
-    method: md5
+    source: "{{ _postgres_allowed_ipv4_effective }}/32"
+    method: scram-sha-256
   notify: Restart postgresql
-  when: groups['database'][0] != groups['nextcloud'][0]
+  when:
+    - "'database' in groups"
+    - "groups['database'] | length > 0"
+    - "'nextcloud' in groups"
+    - "groups['nextcloud'] | length > 0"
+    - "groups['database'][0] != groups['nextcloud'][0]"
+
+- name: Flush handlers to restart postgresql before dependent plays run
+  ansible.builtin.meta: flush_handlers
 
 - name: Ensure postgresql unix socket dirs exist
   ansible.builtin.file:

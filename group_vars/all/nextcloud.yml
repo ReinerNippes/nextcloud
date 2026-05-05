@@ -36,16 +36,6 @@ nextcloud_archive: https://download.nextcloud.com/server/releases/latest.tar.bz2
 # using ISO 3166-1 country codes such as DE for Germany, FR for France,
 nextcloud_default_phone_region: DE
 
-# OnlyOffice Server Domain Name
-# Default is the fqdn of the first host in the onlyoffice group
-# For collocated setup this equals nextcloud_fqdn
-onlyoffice_fqdn: "{{ hostvars[groups['onlyoffice'][0]]['inventory_hostname'] }}"
-
-# Nextcloud Office (Collabora) Server Domain Name
-# Default is the fqdn of the first host in the nextcloudoffice group
-# For collocated setup this equals nextcloud_fqdn
-nextcloudoffice_fqdn: "{{ hostvars[groups['nextcloudoffice'][0]]['inventory_hostname'] }}"
-
 nextcloud_install:
   # Preview Icons
   preview: true
@@ -71,6 +61,10 @@ nextcloud_install:
   # OnlyOffice runs behind nginx/apache reverse proxy (same architecture as NextcloudOffice)
   # Can run collocated with Nextcloud or on a dedicated server
   onlyoffice: false
+  # Install Euro-Office Document Server (OnlyOffice-compatible)
+  # Euro-Office runs behind nginx/apache reverse proxy (same architecture as OnlyOffice)
+  # Can run collocated with Nextcloud or on a dedicated server
+  eurooffice: false
   # Install Whiteboard (Excalidraw-based collaborative whiteboard)
   # Requires a WebSocket server (Docker container)
   # Can run collocated with Nextcloud or on a dedicated server

@@ -1,0 +1,4 @@
+# Optional: set a fixed Redis password (e.g. when restoring from backup).
+# If left empty, a random password is generated and stored in the password_file.
+
+redis_password: ""

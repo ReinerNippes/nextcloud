@@ -1,8 +1,26 @@
 ---
 
-- name: Collect PostgreSQL version and extensions
+# Scenarios 1+2: run on the DB server via peer auth
+- name: Collect PostgreSQL version and settings (local/dedicated)
   become: true
   become_user: postgres
   community.postgresql.postgresql_info:
     filter: settings,version
-  register: pg_info
+  register: _pg_info_local
+  delegate_to: "{{ _pg_delegate_host }}"
+  when: not _pg_is_managed
+
+# Scenario 3: connect via TCP with admin credentials
+- name: Collect PostgreSQL version and settings (managed)
+  community.postgresql.postgresql_info:
+    filter: settings,version
+    login_host: "{{ nextcloud_db.host }}"
+    login_port: "{{ nextcloud_db.port | default(5432) }}"
+    login_user: "{{ nextcloud_db.admin_user | default('postgres') }}"
+    login_password: "{{ passwords.database_admin }}"
+  register: _pg_info_managed
+  when: _pg_is_managed
+
+- name: Set pg_info from whichever scenario ran
+  ansible.builtin.set_fact:
+    pg_info: "{{ _pg_info_managed if _pg_is_managed else _pg_info_local }}"

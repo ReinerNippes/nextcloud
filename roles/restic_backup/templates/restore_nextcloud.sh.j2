@@ -43,7 +43,7 @@ rm -rf {{ nextcloud_www_dir }}/*
 
 # Restore database
 {% if nextcloud_db.type == 'mysql' %}
-mysql -h {{ nextcloud_db.host }} -u {{ nextcloud_db.user }} -p{{ nextcloud_db.password }} {{ nextcloud_db.name }} < /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
+mysql -h {{ nextcloud_db.host }} -u {{ nextcloud_db.user }} -p{{ passwords.database }} {{ nextcloud_db.name }} < /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
 {% elif nextcloud_db.type == 'pgsql' %}
 sudo -u postgres psql {{ nextcloud_db.name }} < /tmp/db_{{ nextcloud_db.type }}_nextcloud.sql
 {% endif %}

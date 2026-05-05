@@ -1,33 +1,84 @@
 ---
 # create nextcloud database
 #
-# Local (host=localhost): connect via unix socket
-# Remote (host!=localhost): connect via TCP with admin credentials
+# Scenario 1 – Collocated (nextcloud_db.host = localhost):
+#   MariaDB runs on the same server as Nextcloud.
+#   Connect via unix socket as root (no password needed).
+#
+# Scenario 2 – Dedicated server (nextcloud_db.managed = false, host != localhost):
+#   MariaDB runs on a separate server set up by this playbook.
+#   Tasks delegate to the database server and connect locally via unix socket.
+#   nextcloud_db.host must be the private IP used by Nextcloud to reach the DB.
+#
+# Scenario 3 – Managed DB (nextcloud_db.managed = true):
+#   External managed MariaDB/MySQL service.
+#   Connect via TCP from the nextcloud host using admin credentials.
 
-- name: Set MariaDB login parameters
+- name: Determine MariaDB deployment scenario
   ansible.builtin.set_fact:
     _mysql_is_local: "{{ nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] }}"
+    _mysql_is_managed: "{{ nextcloud_db.managed | default(false) | bool }}"
 
-- name: Create nextcloud db
+- name: Set target host for local/dedicated database tasks
+  ansible.builtin.set_fact:
+    _mysql_setup_delegate: >-
+      {{
+        groups['database'][0]
+        if ('database' in groups
+            and groups['database'] | length > 0
+            and not _mysql_is_local
+            and not _mysql_is_managed)
+        else inventory_hostname
+      }}
+
+# --- Scenarios 1 + 2: DB managed by this playbook ---
+# Delegated to the DB server, connected via unix socket.
+
+- name: Create {{ nextcloud_db.name }} database
   community.mysql.mysql_db:
     name: "{{ nextcloud_db.name }}"
     collation: utf8mb4_general_ci
     encoding: utf8mb4
-    login_unix_socket: "{{ mariadb_socket[ansible_facts['os_family']] if _mysql_is_local else omit }}"
-    login_host: "{{ omit if _mysql_is_local else nextcloud_db.host }}"
-    login_port: "{{ omit if _mysql_is_local else (nextcloud_db.port | default(3306)) }}"
-    login_user: "{{ omit if _mysql_is_local else nextcloud_db.admin_user | default('root') }}"
-    login_password: "{{ omit if _mysql_is_local else nextcloud_db.admin_password | default(omit) }}"
+    login_unix_socket: "{{ mariadb_socket[hostvars[_mysql_setup_delegate]['ansible_facts']['os_family']] }}"
+  delegate_to: "{{ _mysql_setup_delegate }}"
+  become: true
+  when: not _mysql_is_managed
 
-- name: Create nextcloud user
+- name: Create {{ nextcloud_db.user }} account
   community.mysql.mysql_user:
     name: "{{ nextcloud_db.user }}"
     password: "{{ passwords.database }}"
     priv: "{{ nextcloud_db.name }}.*:ALL"
     host: "%"
     state: present
-    login_unix_socket: "{{ mariadb_socket[ansible_facts['os_family']] if _mysql_is_local else omit }}"
-    login_host: "{{ omit if _mysql_is_local else nextcloud_db.host }}"
-    login_port: "{{ omit if _mysql_is_local else (nextcloud_db.port | default(3306)) }}"
-    login_user: "{{ omit if _mysql_is_local else nextcloud_db.admin_user | default('root') }}"
-    login_password: "{{ omit if _mysql_is_local else nextcloud_db.admin_password | default(omit) }}"
+    login_unix_socket: "{{ mariadb_socket[hostvars[_mysql_setup_delegate]['ansible_facts']['os_family']] }}"
+  delegate_to: "{{ _mysql_setup_delegate }}"
+  become: true
+  when: not _mysql_is_managed
+
+# --- Scenario 3: Managed DB service ---
+# Connect via TCP from the nextcloud host using admin credentials.
+
+- name: Create {{ nextcloud_db.name }} database (managed)
+  community.mysql.mysql_db:
+    name: "{{ nextcloud_db.name }}"
+    collation: utf8mb4_general_ci
+    encoding: utf8mb4
+    login_host: "{{ nextcloud_db.host }}"
+    login_port: "{{ nextcloud_db.port | default(3306, true) | int }}"
+    login_user: "{{ nextcloud_db.admin_user | default('root') }}"
+    login_password: "{{ passwords.database_admin }}"
+  when: _mysql_is_managed
+
+- name: Create {{ nextcloud_db.user }} account (managed)
+  community.mysql.mysql_user:
+    name: "{{ nextcloud_db.user }}"
+    password: "{{ passwords.database }}"
+    priv: "{{ nextcloud_db.name }}.*:ALL"
+    host: "%"
+    state: present
+    login_host: "{{ nextcloud_db.host }}"
+    login_port: "{{ nextcloud_db.port | default(3306, true) | int }}"
+    login_user: "{{ nextcloud_db.admin_user | default('root') }}"
+    login_password: "{{ passwords.database_admin }}"
+  when: _mysql_is_managed

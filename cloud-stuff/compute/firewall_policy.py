@@ -47,6 +47,12 @@ RULE_PROFILES: Dict[str, List[IngressRule]] = {
     "onlyoffice-collocated": [
         {"protocol": "tcp", "port": "8443"},
     ],
+    # Collocated Euro-Office runs on localhost:8444 behind nginx —
+    # no public port needed.  Dedicated Euro-Office is reverse-proxied on 443,
+    # so it reuses the ``nextcloud`` profile.
+    "eurooffice-collocated": [
+        {"protocol": "tcp", "port": "8444"},
+    ],
     # Collocated Nextcloud Office (Collabora) uses 9980 on localhost only —
     # no public port needed.  Dedicated Collabora is reverse-proxied on 443,
     # so it reuses the ``nextcloud`` profile (same as dedicated OnlyOffice).
@@ -71,6 +77,18 @@ def _resolve_onlyoffice_rule_name(groups: List[str]) -> str:
     """
     if "nextcloud" in groups and "onlyoffice" in groups:
         return "onlyoffice-collocated"
+    return "nextcloud"
+
+
+def _resolve_eurooffice_rule_name(groups: List[str]) -> str:
+    """Return the concrete Euro-Office profile for this host.
+
+    Dedicated Euro-Office hosts are reverse-proxied on 443, so they reuse the
+    ``nextcloud`` profile.  Collocated Euro-Office binds 127.0.0.1:8444 only —
+    no extra public firewall rule is needed, but we track it for completeness.
+    """
+    if "nextcloud" in groups and "eurooffice" in groups:
+        return "eurooffice-collocated"
     return "nextcloud"
 
 
@@ -128,6 +146,8 @@ def resolve_rule_names(
     for name in raw_names:
         if name == "onlyoffice":
             names.append(_resolve_onlyoffice_rule_name(groups))
+        elif name == "eurooffice":
+            names.append(_resolve_eurooffice_rule_name(groups))
         elif name == "nextcloudoffice":
             names.append(_resolve_nextcloudoffice_rule_name(groups))
         elif name == "whiteboard":
@@ -144,6 +164,14 @@ def resolve_rule_names(
         and "onlyoffice-collocated" not in names
     ):
         names.append("onlyoffice-collocated")
+
+    # Collocation inference: Nextcloud + Euro-Office on one host needs 8444.
+    if (
+        "nextcloud" in groups
+        and "eurooffice" in groups
+        and "eurooffice-collocated" not in names
+    ):
+        names.append("eurooffice-collocated")
 
     # Collocation inference: Nextcloud + Nextcloud Office on one host.
     if (

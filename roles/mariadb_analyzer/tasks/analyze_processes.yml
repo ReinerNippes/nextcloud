@@ -1,0 +1,56 @@
+---
+
+# Scenario 3 (managed): no access to DB server processes
+- name: Set empty process stats for managed database
+  ansible.builtin.set_fact:
+    mariadb_rss: []
+    mariadb_proc_stats:
+      count: 0
+      min: 0
+      max: 0
+      avg: 0
+  when: _mariadb_is_managed
+
+# Scenarios 1+2: collect process stats directly on the DB host
+- name: Collect MariaDB process RSS sizes
+  ansible.builtin.command: "ps -o rss= -C mariadbd"
+  register: _mariadb_rss_raw
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ _mariadb_delegate_host }}"
+  when: not _mariadb_is_managed
+
+# Fallback: older MariaDB versions use 'mysqld' as process name
+- name: Collect MariaDB process RSS sizes (mysqld fallback)
+  ansible.builtin.command: "ps -o rss= -C mysqld"
+  register: _mariadb_rss_fallback
+  changed_when: false
+  failed_when: false
+  delegate_to: "{{ _mariadb_delegate_host }}"
+  when:
+    - not _mariadb_is_managed
+    - _mariadb_rss_raw.stdout_lines | length == 0
+
+- name: Set rss raw result
+  ansible.builtin.set_fact:
+    _mariadb_rss_result: >-
+      {{
+        _mariadb_rss_fallback
+        if (not _mariadb_is_managed and _mariadb_rss_raw.stdout_lines | length == 0)
+        else _mariadb_rss_raw
+      }}
+  when: not _mariadb_is_managed
+
+- name: Convert RSS values to list
+  ansible.builtin.set_fact:
+    mariadb_rss: "{{ _mariadb_rss_result.stdout_lines | map('int') | list }}"
+  when: not _mariadb_is_managed
+
+- name: Calculate process statistics
+  ansible.builtin.set_fact:
+    mariadb_proc_stats:
+      count: "{{ mariadb_rss | length }}"
+      min: "{{ mariadb_rss | min if mariadb_rss | length > 0 else 0 }}"
+      max: "{{ mariadb_rss | max if mariadb_rss | length > 0 else 0 }}"
+      avg: "{{ (mariadb_rss | sum / mariadb_rss | length) | round(0) if mariadb_rss | length > 0 else 0 }}"
+  when: not _mariadb_is_managed

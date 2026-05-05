@@ -8,7 +8,6 @@ from pulumi import InvokeOptions, ResourceOptions
 from compute import ComputeProvider, ServerResult, parse_server_spec
 from compute.firewall_policy import (
     RULE_PROFILES,
-    collect_required_rule_names,
     resolve_rule_names,
 )
 from ssh_waiter import SshWaiter
@@ -61,6 +60,36 @@ class HetznerCompute(ComputeProvider):
             )
         return firewalls
 
+    def _create_server_firewall(
+        self,
+        server_name: str,
+        environment: str,
+        fw_names: List[str],
+    ) -> hcloud.Firewall:
+        """Create one merged firewall for a single server.
+
+        Hetzner limits each server to 5 attached firewalls.  Merging all
+        required rule profiles into a single Firewall resource avoids that
+        limit regardless of how many profiles a server needs.
+        """
+        env_prefix = environment.replace("_", "-")
+        all_rules: List[dict] = []
+        seen: set = set()
+        for profile_name in fw_names:
+            for rule in _FIREWALL_DEFS.get(profile_name, []):
+                key = (rule["direction"], rule["protocol"], rule["port"])
+                if key not in seen:
+                    seen.add(key)
+                    all_rules.append(rule)
+        rules = [hcloud.FirewallRuleArgs(**r) for r in all_rules]
+        safe_name = server_name.replace(".", "-")
+        return hcloud.Firewall(
+            f"{safe_name}-firewall",
+            name=f"{env_prefix}-{safe_name}",
+            rules=rules,
+            opts=self._opts,
+        )
+
     def _create_network(
         self, config: Dict[str, Any]
     ) -> hcloud.Network:
@@ -91,14 +120,6 @@ class HetznerCompute(ComputeProvider):
         zone_name=None,
         network_config=None,
     ):
-        required_firewall_names = sorted(
-            collect_required_rule_names(
-                server_specs,
-                rules_key="public_firewall_rules",
-                default_rules=["ssh", "letsencrypt", "nextcloud"],
-            )
-        )
-        firewalls = self._create_firewalls(environment, required_firewall_names)
         network = self._create_network(network_config) if network_config else None
 
         servers: Dict[str, ServerResult] = {}
@@ -117,13 +138,18 @@ class HetznerCompute(ComputeProvider):
                 labels["zone"] = zone_name
             for k, v in additional_fqdn_map.items():
                 labels[k] = v
+            # Mark servers that have no public inbound rules as intern-only.
+            # These servers are only reachable via a jump host (ProxyCommand).
+            if spec.get("public_firewall_rules") == []:
+                labels["intern_only"] = "true"
 
             fw_names = resolve_rule_names(
                 spec,
                 rules_key="public_firewall_rules",
                 default_rules=["ssh", "letsencrypt", "nextcloud"],
             )
-            fw_ids = [firewalls[fw].id for fw in fw_names if fw in firewalls]
+            server_firewall = self._create_server_firewall(name, environment, fw_names)
+            fw_ids = [server_firewall.id]
 
             has_public = "public" in nets
             has_private = "private" in nets
@@ -146,15 +172,17 @@ class HetznerCompute(ComputeProvider):
                 ),
             )
 
+            private_ip = None
             if has_private and network is not None:
-                hcloud.ServerNetwork(
+                server_net = hcloud.ServerNetwork(
                     f"{name}-net",
                     server_id=server.id,
                     network_id=network.id,
                     opts=self._opts,
                 )
+                private_ip = server_net.ip
 
-            if has_public:
+            if has_public and "ssh" in fw_names:
                 SshWaiter(
                     f"{name}-ssh-wait",
                     ip=server.ipv4_address,
@@ -164,6 +192,7 @@ class HetznerCompute(ComputeProvider):
 
             servers[name] = ServerResult(
                 public_ip=server.ipv4_address if has_public else None,
+                private_ip=private_ip,
             )
 
         return servers

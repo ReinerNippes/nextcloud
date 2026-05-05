@@ -1,0 +1,109 @@
+# ╔════════════════════════════════════════════════════════════════════════╗
+# ║  Nextcloud Wizard — Scaleway + Cloudflare DNS + Managed Services       ║
+# ║                                                                        ║
+# ║  Single Nextcloud server; database and Redis are Scaleway managed      ║
+# ║  services — no self-managed DB or Redis server required.               ║
+# ║  Connection details are written to managed_services.yml (gitignored)   ║
+# ║  and injected into the Ansible inventory automatically.                ║
+# ║                                                                        ║
+# ║  Copy this file:                                                       ║
+# ║    cp Pulumi.scaleway-managed.yaml.example Pulumi.<stackname>.yaml     ║
+# ╚════════════════════════════════════════════════════════════════════════╝
+config:
+  # ── Provider selection ──────────────────────────────────────────────
+  nextcloud-wizard:computeProvider: scaleway
+  nextcloud-wizard:dnsProvider: cloudflare
+
+  # ── Scaleway credentials ──────────────────────────────────────────
+  scaleway:accessKey:
+    secure: v1:<your-access-key>
+  scaleway:secretKey:
+    secure: v1:<your-secret-key>
+  scaleway:projectId: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  scaleway:region: fr-par                # fr-par | nl-ams | pl-waw
+  scaleway:zone: fr-par-1               # fr-par-1 | fr-par-2 | nl-ams-1 …
+
+  # ── Cloudflare DNS credentials ───────────────────────────────────
+  cloudflare:apiToken:
+    secure: v1:<your-cloudflare-api-token>
+  # cloudflare:zoneId: abc123            # optional — auto-detected from zoneName
+
+  # ── Common settings ───────────────────────────────────────────────
+  nextcloud-wizard:sshPubKey: ssh-ed25519 AAAA... you@host
+  nextcloud-wizard:zoneName: example.com
+  nextcloud-wizard:environment: production
+  nextcloud-wizard:image: debian_bookworm      # default OS for all servers
+
+  # ── Private network ───────────────────────────────────────────────
+  # Required so the Nextcloud server can reach the managed services
+  # via the private network.
+  nextcloud-wizard:network:
+    name: nextcloud-net
+
+  # ── Servers ────────────────────────────────────────────────────────
+  nextcloud-wizard:servers:
+    - name: nextcloud
+      commercial_type: DEV1-L            # DEV1-S | DEV1-M | DEV1-L | GP1-XS …
+      networks:
+        - public
+        - private
+      server_groups:
+        - nextcloud
+        - webserver
+        - docker
+      public_firewall_rules:
+        - ssh
+        - letsencrypt
+        - nextcloud
+
+    # Optional: dedicated Coturn (TURN/STUN) server for Talk
+    # - name: turn
+    #   commercial_type: DEV1-S
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - coturn
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - coturn
+
+    # Optional: dedicated Signal (HPB + recording) server for Talk
+    # - name: signal
+    #   commercial_type: DEV1-S
+    #   networks:
+    #     - public
+    #   server_groups:
+    #     - signal
+    #   public_firewall_rules:
+    #     - ssh
+    #     - letsencrypt
+    #     - signal
+    #   additional_fqdn_recording: rec
+
+  # ── Managed Database (Scaleway) ───────────────────────────────────
+  # Provisions a Scaleway managed PostgreSQL instance.
+  # After 'pulumi up', set in group_vars:
+  #   nextcloud_db.managed: true
+  #   nextcloud_db.host: <output from managed_services.yml>
+  #   nextcloud_db.admin_user: <user_name>
+  nextcloud-wizard:managedDatabase:
+    engine: PostgreSQL-16                # PostgreSQL-15 | PostgreSQL-16
+    node_type: DB-DEV-S                  # DB-DEV-S | DB-DEV-M | DB-GP-XS …
+    name: nextcloud-db
+    db_name: nextcloud
+    user_name: nextcloud
+  nextcloud-wizard:dbPassword:
+    secure: v1:<your-db-password>
+
+  # ── Managed Redis (Scaleway) ──────────────────────────────────────
+  # Provisions a Scaleway managed Redis cache instance.
+  # After 'pulumi up', redis_tcp.address and redis_tcp.port are populated
+  # automatically from managed_services.yml.
+  nextcloud-wizard:managedRedis:
+    version: "7.2.7"
+    node_type: RED1-MICRO                # RED1-MICRO | RED1-SMALL | RED1-MEDIUM
+    name: nextcloud-redis
+    user_name: nextcloud
+  nextcloud-wizard:redisPassword:
+    secure: v1:<your-redis-password>

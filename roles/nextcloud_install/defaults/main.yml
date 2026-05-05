@@ -16,7 +16,7 @@ nextcloud_security:
 # General settings
 nextcloud_general:
   default_phone_region: "{{ nextcloud_default_phone_region }}"
-  defaultapp: file
+  defaultapp: files
   skeletondirectory: ""
   theme: ""
   trashbin_retention_obligation: "auto,7"

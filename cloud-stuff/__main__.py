@@ -199,6 +199,8 @@ if db_config or redis_config:
 for name, result in servers.items():
     if result.public_ip:
         pulumi.export(f"{name}_ipv4", result.public_ip)
+    if result.private_ip:
+        pulumi.export(f"{name}_private_ipv4", result.private_ip)
 
 if managed_db:
     pulumi.export("database_endpoint_ip", managed_db.endpoint_ip)

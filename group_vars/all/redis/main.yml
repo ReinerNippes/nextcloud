@@ -44,5 +44,12 @@ redis_socket:
   path: "/run/{{ redis_service_name[ansible_facts['os_family']] }}/{{ redis_service_name[ansible_facts['os_family']] }}.sock"
   perm: "770"
 redis_tcp:
-  address: "{{ hostvars[groups['redis'][0]].ansible_facts['default_ipv4']['address'] }}"
+  # Use the private IP for dedicated/internal Redis servers.
+  # ansible_host is already set to the private network IP by the dynamic
+  # inventory for intern_only servers; fall back to default_ipv4 otherwise.
+  address: >-
+    {{
+      hostvars[groups['redis'][0]].ansible_host
+      | default(hostvars[groups['redis'][0]].ansible_facts['default_ipv4']['address'])
+    }}
   port: "6379"

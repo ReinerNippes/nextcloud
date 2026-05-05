@@ -1,0 +1,44 @@
+---
+# tasks file for euro-office configuration
+
+- name: Install and enable euro-office app
+  reinernippes.nextcloud.occ_app:
+    name: onlyoffice
+    state: enabled
+
+- name: Determine euro-office backend URL
+  ansible.builtin.set_fact:
+    _eurooffice_host: "{{ groups['eurooffice'][0] }}"
+
+- name: Set euro-office collocated server URL
+  ansible.builtin.set_fact:
+    _eurooffice_url: "https://{{ nextcloud_fqdn }}/onlyoffice/"
+  when: _eurooffice_host in groups.get('nextcloud', [])
+
+- name: Set euro-office dedicated server URL
+  ansible.builtin.set_fact:
+    _eurooffice_url: "https://{{ eurooffice_fqdn }}"
+  when: _eurooffice_host not in groups.get('nextcloud', [])
+
+- name: Set euro-office server url
+  reinernippes.nextcloud.occ_config_app:
+    app: onlyoffice
+    key: DocumentServerUrl
+    value: "{{ _eurooffice_url }}"
+    state: present
+
+- name: Set euro-office server secret
+  reinernippes.nextcloud.occ_config_app:
+    app: onlyoffice
+    key: jwt_secret
+    value: "{{ passwords.eurooffice_secret }}"
+    state: present
+
+- name: Disable certificate verification for self-signed / test certs
+  reinernippes.nextcloud.occ_config_system:
+    key: onlyoffice
+    indices: verify_peer_off
+    value: true
+    value_type: boolean
+    state: present
+  when: (tls_certificate.type == 'selfsigned') or tls_certificate_test

@@ -1,0 +1,3 @@
+---
+# RAM budget override (MB). 0 = auto-calculate from total RAM.
+mariadb_reserved_ram_mb: 0

@@ -7,13 +7,15 @@
 # nextcloud_db.type: pgsql        # (PostgreSQL)
 
 nextcloud_db:
-  type: mysql
+  type: pgsql
   host: localhost
   port: ''                  # empty = default port (5432/3306). Set for non-standard ports.
   name: nextcloud
   user: nextcloud
   password: ''
-  migration: false
+  admin_user: postgres       # only required for managed db or separate db server when admin user is not 'postgres'
+  admin_password: ''         # only required for managed db or separate db server
+  managed: false             # set to true for external managed database services (e.g. AWS RDS, managed PostgreSQL)
 
 # determines the version of postgresql to install if postgresql is used as database for nextcloud
 postgresql_version: 18
@@ -39,3 +41,30 @@ postgres_tuning_parameters:
   - max_parallel_maintenance_workers: 2
 
 # mariadb version is determined by the distribution
+
+# mariadb tuning parameters, only applied if mariadb is used as database for nextcloud
+# These values are rendered into 90-nextcloud.cnf in the [mysqld] section.
+# Use the mariadb_analyzer role output to generate optimal values for your system.
+# All keys reported by the mariadb_analyzer role are listed here so its output
+# can be copy/pasted directly.
+mariadb_tuning_parameters:
+  max_connections: 200
+  innodb_buffer_pool_size: "256M"
+  innodb_buffer_pool_instances: 1
+  innodb_log_buffer_size: "32M"
+  innodb_flush_log_at_trx_commit: 2
+  innodb_max_dirty_pages_pct: 90
+  innodb_open_files: 400
+  innodb_io_capacity: 400
+  innodb_read_io_threads: 4
+  innodb_write_io_threads: 4
+  innodb_flush_method: O_DIRECT
+  thread_cache_size: 8
+  tmp_table_size: "64M"
+  max_heap_table_size: "64M"
+  table_open_cache: 400
+  join_buffer_size: "4M"
+  sort_buffer_size: "4M"
+  read_buffer_size: "2M"
+  read_rnd_buffer_size: "2M"
+  key_buffer_size: "32M"

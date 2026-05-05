@@ -1,40 +1,128 @@
 ---
 
-- name: Detect if DB and Nextcloud run on same host
+# Gather DB server facts if not yet available (e.g. when called from
+# nextcloud-performance-tuning.yml which only targets hosts: nextcloud)
+- name: Gather DB server facts if not yet available
+  ansible.builtin.setup:
+  delegate_to: "{{ _pg_delegate_host }}"
+  delegate_facts: true
+  when:
+    - not _pg_is_managed
+    - not _pg_is_local
+    - hostvars[_pg_delegate_host]['ansible_facts'] is not defined
+      or hostvars[_pg_delegate_host]['ansible_facts']['memtotal_mb'] is not defined
+
+- name: Set DB host type and resource facts
   ansible.builtin.set_fact:
-    pg_shared_host: "{{ 'nextcloud' in group_names and 'database' in group_names }}"
+    pg_shared_host: "{{ _pg_is_local }}"
+    _pg_db_memtotal_mb: "{{ hostvars[_pg_delegate_host]['ansible_facts']['memtotal_mb'] | default(ansible_facts['memtotal_mb']) }}"
+    _pg_db_vcpus: "{{ hostvars[_pg_delegate_host]['ansible_facts']['processor_vcpus'] | default(ansible_facts['processor_vcpus']) }}"
+    _pg_db_virt_type: "{{ hostvars[_pg_delegate_host]['ansible_facts']['virtualization_type'] | default('kvm') }}"
+  when: not _pg_is_managed
+
+- name: Set DB host type for managed database
+  ansible.builtin.set_fact:
+    pg_shared_host: false
+    _pg_db_memtotal_mb: "{{ ansible_facts['memtotal_mb'] }}"
+    _pg_db_vcpus: "{{ ansible_facts['processor_vcpus'] }}"
+    _pg_db_virt_type: "{{ ansible_facts['virtualization_type'] | default('kvm') }}"
+  when: _pg_is_managed
 
 - name: Determine RAM budget for PostgreSQL
   ansible.builtin.set_fact:
-    postgres_reserved_ram_mb: "{{ (ansible_facts['memtotal_mb'] * (0.20 if pg_shared_host else 0.50)) | int }}"
+    postgres_reserved_ram_mb: "{{ (_pg_db_memtotal_mb | int * (0.20 if pg_shared_host else 0.50)) | int }}"
 
 - name: Calculate recommended PostgreSQL settings
   ansible.builtin.set_fact:
     pg_recommended:
       max_connections: "{{ 50 if pg_shared_host else 100 }}"
-      shared_buffers: "{{ (postgres_reserved_ram_mb * 0.25) | int }}MB"
-      effective_cache_size: "{{ (postgres_reserved_ram_mb * 0.60) | int }}MB"
-      work_mem: "{{ ((postgres_reserved_ram_mb * 0.25) / (50 if pg_shared_host else 100 | int)) | int }}MB"
-      maintenance_work_mem: "{{ (postgres_reserved_ram_mb * 0.10) | int }}MB"
+      shared_buffers: "{{ (postgres_reserved_ram_mb | int * 0.25) | int }}MB"
+      effective_cache_size: "{{ (postgres_reserved_ram_mb | int * 0.60) | int }}MB"
+      work_mem: "{{ ((postgres_reserved_ram_mb | int * 0.25) / (50 if pg_shared_host else 100) | int) | int }}MB"
+      maintenance_work_mem: "{{ (postgres_reserved_ram_mb | int * 0.10) | int }}MB"
       wal_buffers: "-1"
       random_page_cost: "1.1"
-      effective_io_concurrency: "{{ 200 if ansible_facts['virtualization_type'] != 'lxc' else 0 }}"
+      effective_io_concurrency: "{{ 200 if _pg_db_virt_type != 'lxc' else 0 }}"
       huge_pages: "off"
       min_wal_size: "1GB"
-      max_wal_size: "{{ '4GB' if ansible_facts['memtotal_mb'] < 8192 else '8GB' }}"
-      max_worker_processes: "{{ ansible_facts['processor_vcpus'] }}"
-      max_parallel_workers: "{{ ansible_facts['processor_vcpus'] }}"
+      max_wal_size: "{{ '4GB' if _pg_db_memtotal_mb | int < 8192 else '8GB' }}"
+      max_worker_processes: "{{ _pg_db_vcpus }}"
+      max_parallel_workers: "{{ _pg_db_vcpus }}"
 
 - name: Display PostgreSQL analysis summary
   ansible.builtin.debug:
     msg:
-      - "📊 PostgreSQL {{ pg_info.version.full }} Analysis Report"
+      - "PostgreSQL {{ pg_info.version.major }}.{{ pg_info.version.minor }} Analysis Report"
       - ""
       - "Host type:"
-      - "  Shared host (DB + Nextcloud): {{ pg_shared_host }}"
-      - "  Total RAM: {{ ansible_facts['memtotal_mb'] }} MB"
+      - "  Deployment: {{ 'collocated' if pg_shared_host else ('managed service' if _pg_is_managed else 'dedicated server') }}"
+      - "  DB server total RAM: {{ _pg_db_memtotal_mb }} MB"
       - "  Reserved for PostgreSQL: {{ postgres_reserved_ram_mb }} MB"
-      - "  CPU cores: {{ ansible_facts['processor_vcpus'] }}"
+      - "  DB server CPU cores: {{ _pg_db_vcpus }}"
+      - ""
+      - "Current configuration:"
+      - "  max_connections = {{ pg_info.settings.max_connections.pretty_val | default('N/A') }}"
+      - "  shared_buffers = {{ pg_info.settings.shared_buffers.pretty_val | default('N/A') }}"
+      - "  effective_cache_size = {{ pg_info.settings.effective_cache_size.pretty_val | default('N/A') }}"
+      - "  work_mem = {{ pg_info.settings.work_mem.pretty_val | default('N/A') }}"
+      - "  maintenance_work_mem = {{ pg_info.settings.maintenance_work_mem.pretty_val | default('N/A') }}"
+      - "  random_page_cost = {{ pg_info.settings.random_page_cost.pretty_val | default('N/A') }}"
+      - "  effective_io_concurrency = {{ pg_info.settings.effective_io_concurrency.pretty_val | default('N/A') }}"
+      - "  huge_pages = {{ pg_info.settings.huge_pages.pretty_val | default('N/A') }}"
+      - "  min_wal_size = {{ pg_info.settings.min_wal_size.pretty_val | default('N/A') }}"
+      - "  max_wal_size = {{ pg_info.settings.max_wal_size.pretty_val | default('N/A') }}"
+      - "  max_worker_processes = {{ pg_info.settings.max_worker_processes.pretty_val | default('N/A') }}"
+      - "  max_parallel_workers = {{ pg_info.settings.max_parallel_workers.pretty_val | default('N/A') }}"
+      - ""
+      - "Recommended settings:"
+      - "  max_connections = {{ pg_recommended.max_connections }}"
+      - "  shared_buffers = {{ pg_recommended.shared_buffers }}"
+      - "  effective_cache_size = {{ pg_recommended.effective_cache_size }}"
+      - "  work_mem = {{ pg_recommended.work_mem }}"
+      - "  maintenance_work_mem = {{ pg_recommended.maintenance_work_mem }}"
+      - "  random_page_cost = {{ pg_recommended.random_page_cost }}"
+      - "  effective_io_concurrency = {{ pg_recommended.effective_io_concurrency }}"
+      - "  huge_pages = {{ pg_recommended.huge_pages }}"
+      - "  min_wal_size = {{ pg_recommended.min_wal_size }}"
+      - "  max_wal_size = {{ pg_recommended.max_wal_size }}"
+      - "  max_worker_processes = {{ pg_recommended.max_worker_processes }}"
+      - "  max_parallel_workers = {{ pg_recommended.max_parallel_workers }}"
+      - ""
+      - "To apply recommendations, set the variable postgres_tuning_parameters in group_vars/all/database.yml"
+      - "and rerun the playbook."
+
+
+- name: Determine RAM budget for PostgreSQL
+  ansible.builtin.set_fact:
+    postgres_reserved_ram_mb: "{{ (_pg_db_memtotal_mb | int * (0.20 if pg_shared_host else 0.50)) | int }}"
+
+- name: Calculate recommended PostgreSQL settings
+  ansible.builtin.set_fact:
+    pg_recommended:
+      max_connections: "{{ 50 if pg_shared_host else 100 }}"
+      shared_buffers: "{{ (postgres_reserved_ram_mb | int * 0.25) | int }}MB"
+      effective_cache_size: "{{ (postgres_reserved_ram_mb | int * 0.60) | int }}MB"
+      work_mem: "{{ ((postgres_reserved_ram_mb | int * 0.25) / (50 if pg_shared_host else 100) | int) | int }}MB"
+      maintenance_work_mem: "{{ (postgres_reserved_ram_mb | int * 0.10) | int }}MB"
+      wal_buffers: "-1"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "{{ 200 if _pg_db_virt_type != 'lxc' else 0 }}"
+      huge_pages: "off"
+      min_wal_size: "1GB"
+      max_wal_size: "{{ '4GB' if _pg_db_memtotal_mb | int < 8192 else '8GB' }}"
+      max_worker_processes: "{{ _pg_db_vcpus }}"
+      max_parallel_workers: "{{ _pg_db_vcpus }}"
+
+- name: Display PostgreSQL analysis summary
+  ansible.builtin.debug:
+    msg:
+      - "PostgreSQL {{ pg_info.version.full }} Analysis Report"
+      - ""
+      - "Host type:"
+      - "  Deployment: {{ 'collocated' if pg_shared_host else ('managed service' if _pg_is_managed else 'dedicated server') }}"
+      - "  DB server total RAM: {{ _pg_db_memtotal_mb }} MB"
+      - "  Reserved for PostgreSQL: {{ postgres_reserved_ram_mb }} MB"
+      - "  DB server CPU cores: {{ _pg_db_vcpus }}"
       - ""
       - "Current configuration:"
       - "  max_connections = {{ pg_info.settings.max_connections.pretty_val | default('N/A') }}"

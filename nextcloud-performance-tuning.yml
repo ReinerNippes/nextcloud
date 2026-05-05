@@ -13,4 +13,6 @@
   roles:
     - role: postgres_analyzer
       when: nextcloud_db.type == 'pgsql'
+    - role: mariadb_analyzer
+      when: nextcloud_db.type == 'mysql'
     - php_fpm_analyser

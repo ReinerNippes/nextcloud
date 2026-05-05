@@ -1,5 +1,29 @@
 ---
 
+# Scenario 1 – collocated (nextcloud_db.host = localhost):
+#   delegate_host = inventory_hostname, become postgres via peer auth
+# Scenario 2 – dedicated DB server managed by this playbook:
+#   delegate_host = groups['database'][0], become postgres via peer auth
+# Scenario 3 – managed DB service (nextcloud_db.managed = true):
+#   connect via TCP with admin credentials, no process access
+
+- name: Determine PostgreSQL deployment scenario
+  ansible.builtin.set_fact:
+    _pg_is_local: "{{ nextcloud_db.host in ['localhost', '127.0.0.1', '::1'] }}"
+    _pg_is_managed: "{{ nextcloud_db.managed | default(false) | bool }}"
+
+- name: Set database delegate host
+  ansible.builtin.set_fact:
+    _pg_delegate_host: >-
+      {{
+        groups['database'][0]
+        if ('database' in groups
+            and groups['database'] | length > 0
+            and not _pg_is_local
+            and not _pg_is_managed)
+        else inventory_hostname
+      }}
+
 - name: Include config reader
   ansible.builtin.include_tasks: read_config.yml
 

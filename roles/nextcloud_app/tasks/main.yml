@@ -20,6 +20,10 @@
   ansible.builtin.include_tasks: configure/onlyoffice.yml
   when: nextcloud_install.onlyoffice|bool
 
+- name: Configure eurooffice
+  ansible.builtin.include_tasks: configure/eurooffice.yml
+  when: nextcloud_install.eurooffice|bool
+
 - name: Configure whiteboard
   ansible.builtin.include_tasks: configure/whiteboard.yml
   when: nextcloud_install.whiteboard|bool
